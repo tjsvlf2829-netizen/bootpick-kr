@@ -48,7 +48,7 @@ fs.writeFileSync("dist/index.html",
 for (const m of M) {
   const r = REL[m.id];
   const gen = r ? `<tr><th>세대</th><td>${esc(r[0])} · ${esc(r[1])} 출시 · ${esc(STUD[r[2]]?.[r[3]]?.[0] || "")} 등급</td></tr>` : "";
-  const src = m.rev ? `<h2>점수 참고 출처</h2><ul>${m.rev.map((i) => `<li><a href="${SRC[i][1]}" rel="noopener nofollow" target="_blank">${esc(SRC[i][0])}</a></li>`).join("")}</ul>` : "";
+  const src = m.rev ? `<h2>리뷰 요약</h2><p>${esc(m.rsum || "")}</p><h2>점수 참고 출처</h2><ul>${m.rev.map((i) => `<li><a href="${SRC[i][1]}" rel="noopener nofollow" target="_blank">${esc(SRC[i][0])}</a></li>`).join("")}</ul>` : "";
   const same = M.filter((x) => x.b === m.b && x.id !== m.id).slice(0, 8);
   const similar = M.filter((x) => x.cat === m.cat && x.id !== m.id && Math.abs(x.width - m.width) <= 0.5).sort((a, b) => b.sc - a.sc).slice(0, 6);
   const title = `${m.b} ${m.n} 리뷰 · 발볼 ${wtxt(m.width)} · ${m.tier}티어 | ${NAME}`;
