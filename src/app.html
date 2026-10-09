@@ -196,7 +196,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
           <tr><td>내구성</td><td>12%</td><td>밑창·어퍼가 버티는 기간</td></tr>
         </tbody></table>
         <p>위 비중은 풋살화 기준이에요. <b>축구화</b>는 넓은 구장에서 스피드 비중이 커서 터치 35% · 가벼움 35% · 발 편안함 18% · 내구성 12%로 계산해요.</p>
-        <p><b>가성비 좋음</b> 표시는 같은 종류·같은 가격대(10만 원 이하, 10~15만 원, 15~22만 원) 안에서 성능 점수가 상위 20%이고, 전체 중간 이상인 모델에 붙어요. 티어(성능)와는 따로 계산해요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
+        <p><b>가성비 좋음</b> 표시는 <b>12만 원 이하</b> 모델 중에서 성능 점수가 상위 4분의 1이면서 같은 종류 전체에서 중간보다 높은 모델에 붙어요. 티어(성능)와는 따로 계산해요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
         <p><b>S</b> 78점 이상 · <b>A</b> 72점 이상 · <b>B</b> 62점 이상 · <b>C</b> 62점 미만</p>
         <p><b>점수가 바뀌는 방식</b>: 처음 점수는 공개 리뷰·가이드·커뮤니티 글을 종합한 값이고, <b>유저 리뷰 10명분</b>의 무게로 시작해요. 유저가 발볼·가벼움·쿠션·터치·내구성을 각각 1~5점으로 매기면 항목마다 유저 평균 쪽으로 옮겨가고(10명이면 반반), 위 공식으로 총점과 티어가 자동으로 다시 계산돼요. 모델 카드의 "리뷰 남기기"에서 한줄평과 함께 남길 수 있어요.</p>
         <p class="k">비중은 운영자 판단이에요. 모든 모델은 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요. 모델당 2~4곳의 자료를 참고했어요.</p>
@@ -1338,7 +1338,7 @@ const WC={tf:{touch:.41,comfort:.29,light:.18,dur:.12},fg:{touch:.35,light:.35,c
 const SEED_W=10;
 // 유저는 항목별(발볼·가벼움·쿠션·터치·내구성) 1~5점을 매기고, 항목마다 시드와 섞은 뒤 같은 공식으로 총점·티어를 다시 계산
 const RK=["width","light","cushion","touch","dur"];
-const BANDS=["10만 원 이하","10~15만 원","15~22만 원","22만 원 초과"],bandOf=w=>w<=100000?0:w<=150000?1:w<=220000?2:3;
+const VMAX=120000;
 // 평가 신뢰도: 성능 점수엔 영향 없음. 참고 자료 수와 유저 리뷰 수로만 표시
 const confOf=m=>{const r=m.rev?m.rev.length:0,u=m.un||0;return r>=7||u>=20?"높음":r>=4||u>=5?"보통":"낮음"};
 const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
@@ -1353,9 +1353,9 @@ function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m
  // 자료 종합 점수(운영자 평가)와 유저 평균 점수를 따로 보관해 화면에서 구분해 보여줌
  m.seedPt=Math.round(scOf(m.base,m.cat)*20);m.userPt=u.n?Math.round(scOf(Object.fromEntries(RK.map(k=>[k,(u.sum[k]||0)/u.n])),m.cat)*20):null;
  m.vs=Math.round((m.sc+valueOf(m))/2*20)});
- // 가성비 배지: 같은 종류·같은 가격대 안에서 성능 상위 20%이고, 종류 전체 중간 이상(22만 원 넘는 최상위 가격대는 제외)
- ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c),med=L.map(m=>m.pt).sort((a,b)=>a-b)[L.length>>1];
-  L.forEach(m=>{m.band=bandOf(m.won);const B=L.filter(x=>x.band===m.band),hi=B.filter(x=>x.pt>m.pt).length;m.vgood=m.band<3&&m.pt>=med&&hi<Math.max(1,Math.round(B.length/5))})});
+ // 가성비 배지: 12만 원 이하 모델만. 같은 종류(풋살화/축구화)의 12만 원 이하 모델 중 성능 상위 4분의 1이면서 종류 전체 중간 점수보다 높을 때
+ ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c),med=L.map(m=>m.pt).sort((a,b)=>a-b)[L.length>>1],P=L.filter(m=>m.won<=VMAX);
+  L.forEach(m=>{const hi=P.filter(x=>x.pt>m.pt).length;m.vgood=m.won<=VMAX&&m.pt>med&&hi<Math.max(1,Math.round(P.length/4))})});
  ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c).sort((a,b)=>b.sc-a.sc);L.forEach((m,i)=>{m.rank=i+1;m.of=L.length})})}
 rescore();
 const TIERS=["S","A","B","C"], TORD={S:0,A:1,B:2,C:3};
@@ -1563,7 +1563,7 @@ function whyOf(m,cap){const why=[],k=upKind(m.up),u=ans.width,sz=SIZE[m.id];
  if(why2&&tv>=3)why.push(why2+(tv<4?" (보통 수준)":"")+".");
  // 3) 가장 중요하다고 고른 느낌: 같은 종류 안 순위
  const pv=attr(m,ans.pref); if(pv>=3.5&&ans.pref!=="value")why.push(`중요하게 고른 ${en(NAME[ans.pref])} ${({tf:"풋살화",fg:"축구화"})[m.cat]} 중 상위 ${pctOf(m,ans.pref)}%예요.`);
- if(ans.pref==="value")why.push(m.vgood?`${BANDS[m.band]} 모델 중 성능(${m.pt}점)이 상위권이라 가성비가 좋아요.`:`가성비보다는 성능(${m.pt}점) 위주 모델이에요.`);
+ if(ans.pref==="value")why.push(m.vgood?`12만 원 이하 모델 중 성능(${m.pt}점)이 상위권이라 가성비가 좋아요.`:`가성비보다는 성능(${m.pt}점) 위주 모델이에요.`);
  // 구장 밑창
  if(ans.venue==="indoor"&&isIC(m))why.push("실내 코트용 IC 밑창이라 마루·우레탄에서 잘 잡혀요.");
  else if(ans.venue!=="indoor"&&isIC(m))why.push("실내용 밑창이라 인조잔디에서는 덜 잡힐 수 있어요.");
