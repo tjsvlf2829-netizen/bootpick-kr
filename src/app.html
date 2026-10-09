@@ -100,6 +100,11 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line
 .q{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px}
 .q p{margin:0 0 8px;font-weight:700}
 .opts{display:flex;flex-wrap:wrap;gap:6px}
+.tool label{flex:1 1 200px;min-width:0}.tool select{width:100%}
+.szbig{font-family:var(--display);font-size:1.5rem;color:var(--turf);margin:4px 0}
+.vst{width:100%;border-collapse:collapse;font-size:.9rem}.vst th,.vst td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}.vst th:first-child{text-align:left;font-weight:500;color:var(--muted)}
+.vst td.win{font-weight:700;color:var(--turf)}.vst td.win::after{content:" ✓"}
+.fitb{display:inline-flex;gap:4px}.fitb button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:3px 8px;cursor:pointer}.fitb button.on{background:var(--turf);border-color:var(--turf);color:var(--bg)}
 .opts button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 12px;cursor:pointer}
 .opts button[aria-pressed="true"]{background:var(--turf);border-color:var(--turf);color:var(--bg);font-weight:700}
 .res{display:grid;gap:10px;margin-top:16px}
@@ -173,6 +178,8 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
     <button role="tab" id="t-tier" aria-selected="true" data-tab="tier">티어리스트</button>
     <button role="tab" id="t-db" aria-selected="false" data-tab="db">모델별 특징</button>
     <button role="tab" id="t-quiz" aria-selected="false" data-tab="quiz">내 스타일 추천</button>
+    <button role="tab" id="t-size" aria-selected="false" data-tab="size">사이즈 환승</button>
+    <button role="tab" id="t-vs" aria-selected="false" data-tab="vs">VS 비교</button>
   </nav>
   <div class="cat" role="radiogroup" aria-label="신발 종류"><button role="radio" aria-checked="true" data-cat="tf">풋살화 <small>TF · IC</small></button><button role="radio" aria-checked="false" data-cat="fg">축구화 <small>FG · AG · MG</small></button></div>
 
@@ -222,6 +229,28 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
     <p class="sub">구장, 발볼, 플레이스타일, 중요한 느낌을 고르고 예산 바를 움직이면 상위 3개 모델과 추천 이유가 바로 바뀌어요.</p>
     <div id="qs"></div>
     <div class="res" id="res" aria-live="polite"></div>
+  </section>
+
+  <section id="size" class="hidden-tab">
+    <h2>사이즈 환승기</h2>
+    <p class="sub">지금 잘 맞게 신는 신발과 사이즈를 고르면, 사려는 모델은 몇 mm가 좋을지 알려 드려요.</p>
+    <div class="filters tool">
+      <label for="sz-from">지금 신는 신발<select id="sz-from"></select></label>
+      <label for="sz-mm">그 신발 사이즈<select id="sz-mm"></select></label>
+      <label for="sz-to">사려는 신발<select id="sz-to"></select></label>
+    </div>
+    <div class="res" id="szRes" aria-live="polite"></div>
+    <p class="k">브랜드 실측 데이터가 아니라 판매처·제조사 사이즈 안내, 발볼 점수, 갑피 소재, 유저 사이즈 리뷰를 합친 참고값이에요. 가능하면 매장에서 신어 보세요.</p>
+  </section>
+
+  <section id="vs" class="hidden-tab">
+    <h2>VS 비교</h2>
+    <p class="sub">고민 중인 두 모델을 고르면 항목별로 어느 쪽이 나은지, 누구에게 맞는지 정리해 드려요.</p>
+    <div class="filters tool">
+      <label for="vs-a">모델 A<select id="vs-a"></select></label>
+      <label for="vs-b">모델 B<select id="vs-b"></select></label>
+    </div>
+    <div class="res" id="vsRes" aria-live="polite"></div>
   </section>
 
   <footer>제휴 링크가 붙으면 이 사이트는 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 받을 수 있다는 고지가 모든 페이지에 들어갑니다.</footer>
@@ -709,7 +738,7 @@ const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
 // 100점 환산(5점 만점 × 20) 기준
 const tierOf=p=>p>=78?"S":p>=72?"A":p>=62?"B":"C";
 M.forEach(m=>{m.base={};RK.forEach(k=>m.base[k]=m[k])});
-function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m.cm=u.cm;
+function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m.cm=u.cm;m.fit=u.fit||[0,0,0];
  RK.forEach(k=>m[k]=(m.base[k]*SEED_W+(u.sum[k]||0))/(SEED_W+u.n));
  const W=WC[m.cat];m.sc=m.touch*W.touch+comfortOf(m)*W.comfort+m.light*W.light+m.dur*W.dur;m.pt=Math.round(m.sc*20);m.tier=tierOf(m.pt);
  m.vs=Math.round((m.sc+valueOf(m))/2*20);m.vgood=m.pt>=72&&valueOf(m)>=3.4});
@@ -817,10 +846,11 @@ const dtxt=d=>!d?"출시 연도 확인 중":d.length>4?d.replace("-",".")+"월":
 function ladder(t,cur){return `<ol class="ladder">${STUD[t].map(([n,st],i)=>`<li class="${i===cur?"cur":""}"><b>${n}</b><span>${st}</span></li>`).join("")}</ol>`}
 const MY={}; let rateOK=false;
 const RLAB={width:["발볼","좁음","넓음"],light:["가벼움","무거움","가벼움"],cushion:["쿠션","얇음","푹신"],touch:["터치","둔함","부드러움"],dur:["내구성","약함","튼튼"]};
+const fitTxt=m=>{const [a,b,c]=m.fit||[0,0,0],n=a+b+c;if(n<3)return"";const P=x=>Math.round(x/n*100);return `사이즈 리뷰 ${n}명: 맞음 ${P(b)}% · 작게 나옴 ${P(a)}% · 크게 나옴 ${P(c)}%`};
 function rateBlock(m){const src=m.rev?`<details class="rv"><summary>리뷰 ${m.rev.length}곳 종합 점수</summary>${m.rsum?`<p style="margin:4px 0 0">${esc(m.rsum)}</p>`:""}<ul>${m.rev.map(i=>`<li><a href="${SRC[i][1]}" target="_blank" rel="noopener">${esc(SRC[i][0])}</a></li>`).join("")}</ul></details>`:`<p class="rv k">시작 점수는 예시 값 (리뷰 종합 전)</p>`;
  const cm=(m.cm||[]).slice(0,3).map(c=>`<li>“${esc(c.c)}”${c.mine?' <span class="k">(내 리뷰)</span>':""}</li>`).join("");
  const btn=rateOK?`<button type="button" class="rvbtn" data-id="${m.id}">${MY[m.id]?"내 리뷰 수정":"리뷰 남기기"}</button>`:"";
- return `<div class="rate"><div class="rline"><b>${m.pt}점</b><span class="k">${({tf:"풋살화",fg:"축구화"})[m.cat]} ${m.of}개 중 ${m.rank}위</span><span class="k">${m.un?`유저 리뷰 ${m.un}명 반영`:"아직 유저 리뷰 없음"}</span>${btn}</div>${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
+ return `<div class="rate"><div class="rline"><b>${m.pt}점</b><span class="k">${({tf:"풋살화",fg:"축구화"})[m.cat]} ${m.of}개 중 ${m.rank}위</span><span class="k">${m.un?`유저 리뷰 ${m.un}명 반영`:"아직 유저 리뷰 없음"}</span>${btn}</div>${fitTxt(m)?`<p class="k" style="margin:4px 0 0">${fitTxt(m)}</p>`:""}${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
 function relBlock(m){const r=REL[m.id];if(!r)return"";const [gen,d,t,ti,next]=r;
  return `<div class="rel"><p><span class="k">세대</span> ${gen} · <span class="k">출시</span> ${dtxt(d)}${next?` · <span class="k">후속</span> ${next}`:""}</p>
  <p class="k">등급 (상위 → 하위)</p>${ladder(t,ti)}</div>`}
@@ -835,7 +865,7 @@ function renderLines(){const sel=document.getElementById("l-brand"),V=LINES.filt
 
 // tabs
 function show(tab){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
- ["tier","db","quiz"].forEach(id=>document.getElementById(id).classList.toggle("hidden-tab",id!==tab));
+ ["tier","db","quiz","size","vs"].forEach(id=>document.getElementById(id).classList.toggle("hidden-tab",id!==tab));
  try{localStorage.setItem("tab",tab)}catch(e){}}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 
@@ -941,22 +971,25 @@ buildQuiz();recommend();
 const NAMEC={tf:"풋살화",fg:"축구화"};
 function setCat(c){CAT=c;document.querySelectorAll(".cat button").forEach(b=>b.setAttribute("aria-checked",b.dataset.cat===c));
  document.getElementById("tierTitle").textContent=`2026 하반기 ${NAMEC[c]} 티어리스트`;document.getElementById("dbTitle").textContent=`주요 ${NAMEC[c]} 상세`;document.getElementById("quizTitle").textContent=`나에게 맞는 ${NAMEC[c]}`;
- renderTier();renderDB();renderLines();buildQuiz();recommend();try{localStorage.setItem("cat",c)}catch(e){}}
+ renderTier();renderDB();renderLines();buildQuiz();recommend();if(typeof initVS==="function")initVS();try{localStorage.setItem("cat",c)}catch(e){}}
 document.querySelectorAll(".cat button").forEach(b=>b.addEventListener("click",()=>setCat(b.dataset.cat)));
 function toast(t){let e=document.getElementById("toast");if(!e){e=document.createElement("div");e.id="toast";e.setAttribute("role","status");document.body.appendChild(e)}
  e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),3500)}
-function rerender(){rescore();renderTier();renderDB();recommend()}
+function rerender(){rescore();renderTier();renderDB();recommend();if(typeof renderSize==="function"){renderSize();renderVS()}}
 document.body.insertAdjacentHTML("beforeend",`<dialog id="rvd"><form method="dialog" id="rvf"><h3 id="rvt"></h3>
  ${RK.map(k=>`<div class="rrow"><b>${RLAB[k][0]}</b><span class="stars" data-k="${k}">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" aria-label="${RLAB[k][0]} ${i}점">★</button>`).join("")}</span><small>1 ${RLAB[k][1]} · 5 ${RLAB[k][2]}</small></div>`).join("")}
- <p class="k" style="margin:6px 0 0;font-size:.76rem">남긴 점수는 바로 티어 계산에 반영돼요.</p>
+ <div class="rrow"><b>사이즈</b><span class="fitb">${[[-1,"작게 나옴"],[0,"맞음"],[1,"크게 나옴"]].map(([v,t])=>`<button type="button" data-fit="${v}">${t}</button>`).join("")}</span><small>평소 신는 사이즈 기준 (선택)</small></div>
+ <p class="k" style="margin:6px 0 0;font-size:.76rem">남긴 점수는 바로 티어 계산에, 사이즈는 사이즈 환승기에 반영돼요.</p>
  <input type="text" id="rvc" maxlength="60" placeholder="한줄평 (선택, 60자)">
  <div class="dact"><button type="button" class="del" id="rvdel">삭제</button><button type="button" id="rvx">닫기</button><button type="button" class="pri" id="rvs">저장</button></div></form></dialog>`);
 const dlg=document.getElementById("rvd");let cur=null,draft={};
 function paintD(){dlg.querySelectorAll(".stars").forEach(g=>g.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.v<=(draft[g.dataset.k]||0))));
+ dlg.querySelectorAll(".fitb button").forEach(b=>b.classList.toggle("on",+b.dataset.fit===draft.fit));
  document.getElementById("rvs").disabled=!RK.every(k=>draft[k]);document.getElementById("rvdel").style.visibility=MY[cur]?"visible":"hidden"}
-function openD(id){cur=id;const m=M.find(x=>x.id===id),o=MY[id]||{};draft={};RK.forEach(k=>{if(o[k])draft[k]=o[k]});
+function openD(id){cur=id;const m=M.find(x=>x.id===id),o=MY[id]||{};draft={};RK.forEach(k=>{if(o[k])draft[k]=o[k]});if(o.fit!=null)draft.fit=o.fit;
  document.getElementById("rvt").textContent=m.b+" "+m.n;document.getElementById("rvc").value=o.c||"";paintD();dlg.showModal()}
-dlg.addEventListener("click",e=>{const b=e.target.closest(".stars button");if(b){draft[b.closest(".stars").dataset.k]=+b.dataset.v;paintD()}});
+dlg.addEventListener("click",e=>{const b=e.target.closest(".stars button");if(b){draft[b.closest(".stars").dataset.k]=+b.dataset.v;paintD()}
+ const f=e.target.closest(".fitb button");if(f){const v=+f.dataset.fit;draft.fit=draft.fit===v?undefined:v;paintD()}});
 document.getElementById("rvx").onclick=()=>dlg.close();
 document.addEventListener("click",e=>{const b=e.target.closest(".rvbtn");if(b)openD(b.dataset.id)});
 // 리뷰 저장소: Cloudflare Pages Functions(/api/ratings) + D1. 로그인 없이 브라우저마다 임의 id(vid)로 모델당 1개
@@ -975,7 +1008,7 @@ document.getElementById("rvdel").onclick=()=>save(null,()=>"리뷰를 삭제했�
 loadReviews();
 try{const sc=localStorage.getItem("cat");if(sc==="fg")setCat("fg")}catch(e){}
 let saved=null;try{saved=localStorage.getItem("tab")}catch(e){}
-if(["tier","db","quiz"].includes(saved))show(saved);
+if(["tier","db","quiz","size","vs"].includes(saved))show(saved);
 if(location.hash.startsWith("#m-")){const id=location.hash.slice(3),m=M.find(x=>x.id===id);if(m){setCat(m.cat);show("db");setTimeout(()=>document.getElementById("m-"+id)?.scrollIntoView(),50)}}
 const HOT=["salajp","morelia","g_ph6e","g_vap17e","predator","tiempo","monarcida","c3ff"];
 document.getElementById("hotList").innerHTML=HOT.map(id=>M.find(m=>m.id===id)).filter(Boolean).map(m=>`<a href="/products/${SLUG[m.id]}/">${esc(m.n.replace(/ (TF|FG|AS|MG|TT)$/,""))}</a>`).join("");
@@ -993,6 +1026,70 @@ document.addEventListener("click",async e=>{if(!e.target.closest("#shareRes"))re
  const text=`FootRank가 추천한 내 ${CAT==="fg"?"축구화":"풋살화"} 1위: ${top}`;
  try{if(navigator.share){await navigator.share({title:"FootRank",text,url:u.toString()});return}}catch(err){return}
  try{await navigator.clipboard.writeText(text+" "+u);toast("링크를 복사했어요. 친구에게 붙여 넣어 보내 보세요")}catch(err){toast(u.toString())}});
+// 사이즈 환승기: 사이즈 안내 문구를 반 치수 단위 보정값으로 바꾸고, 발볼·소재·유저 사이즈 리뷰로 조정
+const clauses=t=>(t||"").split(/[,(]/).map(x=>x.replace(")","").trim()).filter(Boolean);
+const COND=/발볼|넓은 발|좁게 느끼면|발등|발이 좁으면|발가락 긴|성장기/;
+function lenBias(t){let v=0;for(const c of clauses(t)){if(COND.test(c))continue;
+ if(/반~한 ?치수 다운/.test(c))v=-1.5;else if(/(반 ?치수|반)\s?다운|반다운/.test(c)&&!/가능|원하면/.test(c))v=-1;else if(/길게 나|길이가 (약간|살짝) 길/.test(c)&&!/가능|원하면/.test(c))v=-1;
+ else if(/한 ?(치수|사이즈) (업|크게)/.test(c))v=2;else if(/반 ?치수 업|반업|작게 나옴|짧게 나오/.test(c))v=1}return v}
+const wideUp=t=>clauses(t).some(c=>/발볼 (넓|매우 넓)|넓은 발|좁게 느끼면/.test(c)&&/업/.test(c));
+function userBias(m){const [a,b,c]=m.fit||[0,0,0],n=a+b+c;if(n<5)return null;const avg=(c-a)/n;return Math.abs(avg)<0.35?0:avg<0?1:-1}
+const stretch=m=>{const k=upKind(m.up);return k==="leather"||k==="knit"};
+function sizeConv(from,mm,to){const why=[];
+ const bf=userBias(from)??lenBias(SIZE[from.id]),bt=userBias(to)??lenBias(SIZE[to.id]);let d=bt-bf;
+ const sideTxt=(m,b,u)=>b===0?"정사이즈":b>0?`${b>1?"한":"반"} 치수 크게`:`${b<-1?"반~한":"반"} 치수 작게`;
+ why.push(`${to.n}: ${SIZE[to.id]||"정사이즈"}${userBias(to)!=null?" (유저 사이즈 리뷰 기준)":""}`);
+ if(bf!==0)why.push(`지금 신는 ${from.n} 쪽이 보통 ${sideTxt(from,bf)} 신는 모델이라, 그만큼 빼고 계산했어요.`);
+ const wd=from.width-to.width;
+ if(wd>=1.5){if(stretch(to))why.push(`사려는 모델이 발볼이 더 좁게 나오지만, ${upKind(to.up)==="leather"?"가죽":"니트"}라 신으면서 늘어나요. 처음 몇 번은 조일 수 있어요.`);
+  else{d+=1;why.push("사려는 모델이 발볼이 더 좁고 합성 갑피라 잘 늘어나지 않아서 반 치수 크게 잡았어요.")}}
+ else if(wd<=-1.5)why.push("사려는 모델이 발볼이 더 넓게 나와서 폭은 여유가 있을 거예요.");
+ if(stretch(to)&&d>0&&wd<1.5)why.push("가죽·니트는 늘어나니 딱 맞는 느낌이면 그 사이즈가 좋아요.");
+ d=Math.max(-2,Math.min(2,Math.round(d)));const rec=mm+d*5;
+ return {rec,d,why}}
+const optsOf=(sel,cats)=>cats.map(c=>`<optgroup label="${NAMEC[c]}">${M.filter(m=>m.cat===c).sort((a,b)=>(a.b+a.n).localeCompare(b.b+b.n)).map(m=>`<option value="${m.id}"${m.id===sel?" selected":""}>${esc(m.b+" "+m.n)}</option>`).join("")}</optgroup>`).join("");
+const szF=document.getElementById("sz-from"),szM=document.getElementById("sz-mm"),szT=document.getElementById("sz-to");
+szF.innerHTML=optsOf("tiempo",["tf","fg"]);szT.innerHTML=optsOf("salajp",["tf","fg"]);
+szM.innerHTML=Array.from({length:17},(_,i)=>220+i*5).map(v=>`<option${v===265?" selected":""}>${v}</option>`).join("");
+function renderSize(){const f=M.find(m=>m.id===szF.value),t=M.find(m=>m.id===szT.value),mm=+szM.value;if(!f||!t)return;
+ const r=sizeConv(f,mm,t);
+ document.getElementById("szRes").innerHTML=`<article class="card" style="display:block"><p class="k" style="margin:0">${esc(f.n)} ${mm}mm가 잘 맞는다면</p>
+ <p class="szbig">${esc(t.n)} ${r.rec}mm</p><p style="margin:0 0 6px">${r.d===0?"같은 사이즈를 추천해요.":r.d>0?`${r.d*5}mm 크게 신는 걸 추천해요.`:`${-r.d*5}mm 작게 신는 걸 추천해요.`}</p>
+ <ul class="why">${r.why.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>${fitTxt(t)?`<p class="k">${fitTxt(t)}</p>`:`<p class="k">아직 이 모델의 유저 사이즈 리뷰가 5개 미만이라 판매처 안내를 기준으로 했어요.</p>`}
+ <div class="links"><a href="/products/${SLUG[t.id]}/">자세히 보기</a><a href="${shop(t)}" target="_blank" rel="noopener sponsored" data-m="${t.id}">가격 보기</a></div></article>`}
+[szF,szM,szT].forEach(x=>x.addEventListener("change",()=>{renderSize();try{localStorage.setItem("sz",JSON.stringify([szF.value,szM.value]))}catch(e){}}));
+try{const v=JSON.parse(localStorage.getItem("sz")||"null");if(v){if(M.some(m=>m.id===v[0]))szF.value=v[0];szM.value=v[1]}}catch(e){}
+renderSize();
+// VS 비교: 항목별 승패(0.5점 이상 차이)와 추천 대상
+const vsA=document.getElementById("vs-a"),vsB=document.getElementById("vs-b");
+const VSK=[["touch","터치",1],["light","가벼움",1],["cushion","쿠션",1],["width","발볼 여유",1],["dur","내구성",1],["won","가격",-1]];
+const VSWHO={touch:"섬세한 볼 터치",light:"빠른 스피드",cushion:"푹신한 쿠션·관절 부담 감소",width:"넓은 발볼",dur:"오래 신기",won:"저렴한 가격"};
+function fillVS(a,b){vsA.innerHTML=optsOf(a,[CAT]);vsB.innerHTML=optsOf(b,[CAT])}
+function renderVS(){const a=M.find(m=>m.id===vsA.value),b=M.find(m=>m.id===vsB.value);if(!a||!b)return;
+ if(a===b){document.getElementById("vsRes").innerHTML='<p class="empty">서로 다른 두 모델을 골라 주세요.</p>';return}
+ const wa=[],wb=[];
+ const rows=VSK.map(([k,t,dir])=>{const x=a[k],y=b[k],th=k==="won"?10000:0.5,diff=(x-y)*dir;const A=diff>=th,B=-diff>=th;if(A)wa.push(k);if(B)wb.push(k);
+  const f=v=>k==="won"?`약 ${(v/10000).toFixed(1).replace(".0","")}만원`:k==="width"?wtxt(v):(Math.round(v*10)/10)+"/5";
+  return `<tr><th>${t}</th><td class="${A?"win":""}">${f(x)}</td><td class="${B?"win":""}">${f(y)}</td></tr>`}).join("");
+ const who=(m,w)=>{if(!w.length)return"";const t=w.map(k=>VSWHO[k]).join(", ");return `${t}${jong(t)?"을":"를"} 원하면 <b>${esc(m.n)}</b>`};
+ const concl=[who(a,wa),who(b,wb)].filter(Boolean);
+ document.getElementById("vsRes").innerHTML=`<article class="card" style="display:block"><table class="vst"><thead><tr><th></th><th>${esc(a.n)}</th><th>${esc(b.n)}</th></tr></thead><tbody>
+ <tr><th>티어 · 성능</th><td class="${a.pt>b.pt?"win":""}">${a.tier} · ${a.pt}점</td><td class="${b.pt>a.pt?"win":""}">${b.tier} · ${b.pt}점</td></tr>${rows}
+ <tr><th>갑피</th><td>${esc(a.up)}</td><td>${esc(b.up)}</td></tr><tr><th>사이즈</th><td>${esc(SIZE[a.id]||"정사이즈")}</td><td>${esc(SIZE[b.id]||"정사이즈")}</td></tr></tbody></table>
+ <h3 style="margin:12px 0 4px">결론</h3><ul class="why">${concl.length?concl.map(c=>`<li>${c}를 고르세요.</li>`).join(""):"<li>두 모델의 항목 점수가 거의 같아요. 디자인과 신어 본 느낌으로 고르셔도 돼요.</li>"}</ul>
+ <p class="k">0.5점(가격은 1만원) 이상 차이 나는 항목에만 ✓ 표시를 했어요. 점수는 리뷰 종합 시작 점수와 유저 리뷰를 합친 값이에요.</p>
+ <div class="links"><a href="/products/${SLUG[a.id]}/">A 자세히</a><a href="/products/${SLUG[b.id]}/">B 자세히</a><button type="button" class="rvbtn" id="shareVS" style="margin-left:0">비교 결과 공유</button></div></article>`}
+[vsA,vsB].forEach(x=>x.addEventListener("change",()=>{renderVS();track("vs",{q:vsA.value+","+vsB.value})}));
+function initVS(){const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc);fillVS(L[0].id,L[1].id);renderVS()}
+initVS();
+document.addEventListener("click",async e=>{if(!e.target.closest("#shareVS"))return;const u=new URL(location.origin+"/");u.search="vs="+vsA.value+","+vsB.value;
+ const a=M.find(m=>m.id===vsA.value),b=M.find(m=>m.id===vsB.value),text=`${a.n} vs ${b.n} 비교 · FootRank`;track("share",{q:"vs:"+vsA.value+","+vsB.value});
+ try{if(navigator.share){await navigator.share({title:"FootRank",text,url:u.toString()});return}}catch(err){return}
+ try{await navigator.clipboard.writeText(text+" "+u);toast("링크를 복사했어요")}catch(err){toast(u.toString())}});
+{const P=new URLSearchParams(location.search),v=(P.get("vs")||"").split(",");const a=M.find(m=>m.id===v[0]),b=M.find(m=>m.id===v[1]);
+ if(a&&b&&a.cat===b.cat){setCat(a.cat);fillVS(a.id,b.id);renderVS();show("vs")}}
+if(location.hash.startsWith("#size-")){const m=M.find(x=>x.id===location.hash.slice(6));if(m){szT.value=m.id;renderSize();show("size")}}
+if(location.hash.startsWith("#vs-")){const m=M.find(x=>x.id===location.hash.slice(4));if(m){setCat(m.cat);const o=M.filter(x=>x.cat===m.cat&&x.id!==m.id).sort((a,b)=>b.sc-a.sc)[0];fillVS(m.id,o.id);renderVS();show("vs")}}
 {const P=new URLSearchParams(location.search);if(P.get("v")){if(P.get("c")==="fg"||P.get("c")==="tf")setCat(P.get("c"));
  for(const [k,key] of [["v","venue"],["w","width"],["s","style"],["p","pref"]])if(P.get(k))ans[key]=P.get(k);
  const bd=+P.get("b");if(bd>0)ans.budget=bd;buildQuiz();recommend();show("quiz");setTimeout(()=>document.getElementById("res").scrollIntoView(),60)}}

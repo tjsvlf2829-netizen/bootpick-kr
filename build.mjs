@@ -86,12 +86,12 @@ for (const m of M) {
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
 <p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외. 유저 리뷰가 쌓이면 바뀌어요)</span></p>
 <p><b>${esc(m.note)}</b></p>
-<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기 · 다른 모델과 비교</a></div></div>
+<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("") || "<li>뚜렷한 약점이 적은 편이에요</li>"}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
 <table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원</td></tr>${gen}
-<tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")}</td></tr></tbody></table>
+<tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")} · <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산</a></td></tr></tbody></table>
 <div class="bars" style="margin-top:12px"><span>발볼</span>${bar(m.width)}<span>가벼움</span>${bar(m.light)}<span>쿠션</span>${bar(m.cushion)}<span>터치</span>${bar(m.touch)}<span>내구성</span>${bar(m.dur)}</div>
 <p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
 ${src}

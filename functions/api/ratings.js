@@ -1,5 +1,5 @@
 // GET  /api/ratings?vid=...  -> { agg: {모델: {n, sum:{항목:합}, cm:[{c,t,mine}]}}, mine: {모델: {항목..., c}} }
-// POST /api/ratings {vid, model, width, light, cushion, touch, dur, c}
+// POST /api/ratings {vid, model, width, light, cushion, touch, dur, c, fit}  fit: -1 작게 나옴, 0 맞음, 1 크게 나옴 (선택)
 // DELETE /api/ratings {vid, model}
 const RK = ["width", "light", "cushion", "touch", "dur"];
 const MAX_PER_HOUR = 20; // 같은 IP에서 한 시간에 저장할 수 있는 리뷰 수
@@ -10,6 +10,14 @@ const json = (body, status = 200) =>
 const okVid = (v) => typeof v === "string" && /^[A-Za-z0-9-]{8,64}$/.test(v);
 const okModel = (v) => typeof v === "string" && /^[a-z0-9_]{2,32}$/.test(v);
 
+// 2026-10 사이즈 체감(fit) 칸 추가. 예전 DB에는 칸이 없으니 처음 한 번 추가 시도(이미 있으면 오류 무시)
+let migrated = false;
+async function ensureFit(env) {
+  if (migrated) return;
+  try { await env.DB.prepare("ALTER TABLE reviews ADD COLUMN fit INTEGER").run(); } catch (e) {}
+  migrated = true;
+}
+
 async function ipHash(request, env) {
   const ip = request.headers.get("cf-connecting-ip") || "0";
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip + (env.IP_SALT || "bootpick")));
@@ -17,12 +25,13 @@ async function ipHash(request, env) {
 }
 
 export async function onRequestGet({ request, env }) {
+  await ensureFit(env);
   const vid = new URL(request.url).searchParams.get("vid") || "";
   const { results: sums } = await env.DB.prepare(
-    "SELECT model, COUNT(*) n, SUM(width) width, SUM(light) light, SUM(cushion) cushion, SUM(touch) touch, SUM(dur) dur FROM reviews GROUP BY model"
+    "SELECT model, COUNT(*) n, SUM(width) width, SUM(light) light, SUM(cushion) cushion, SUM(touch) touch, SUM(dur) dur, SUM(fit = -1) fs, SUM(fit = 0) fm, SUM(fit = 1) fl FROM reviews GROUP BY model"
   ).all();
   const agg = {};
-  for (const r of sums) agg[r.model] = { n: r.n, sum: Object.fromEntries(RK.map((k) => [k, r[k]])), cm: [] };
+  for (const r of sums) agg[r.model] = { n: r.n, sum: Object.fromEntries(RK.map((k) => [k, r[k]])), cm: [], fit: [r.fs || 0, r.fm || 0, r.fl || 0] };
   const { results: cms } = await env.DB.prepare("SELECT model, vid, c, t FROM reviews WHERE c <> '' ORDER BY t DESC LIMIT 1000").all();
   for (const r of cms) {
     const a = agg[r.model];
@@ -30,8 +39,8 @@ export async function onRequestGet({ request, env }) {
   }
   const mine = {};
   if (okVid(vid)) {
-    const { results } = await env.DB.prepare("SELECT model, width, light, cushion, touch, dur, c FROM reviews WHERE vid = ?").bind(vid).all();
-    for (const r of results) mine[r.model] = { width: r.width, light: r.light, cushion: r.cushion, touch: r.touch, dur: r.dur, c: r.c };
+    const { results } = await env.DB.prepare("SELECT model, width, light, cushion, touch, dur, c, fit FROM reviews WHERE vid = ?").bind(vid).all();
+    for (const r of results) mine[r.model] = { width: r.width, light: r.light, cushion: r.cushion, touch: r.touch, dur: r.dur, c: r.c, fit: r.fit };
   }
   return json({ agg, mine });
 }
@@ -40,6 +49,8 @@ export async function onRequestPost({ request, env }) {
   const b = await request.json().catch(() => null);
   if (!b || !okVid(b.vid) || !okModel(b.model) || !RK.every((k) => Number.isInteger(b[k]) && b[k] >= 1 && b[k] <= 5))
     return json({ error: "다섯 항목을 모두 1~5점으로 골라 주세요" }, 400);
+  await ensureFit(env);
+  const fit = [-1, 0, 1].includes(b.fit) ? b.fit : null;
   const c = typeof b.c === "string" ? b.c.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, 60) : "";
   const iph = await ipHash(request, env);
   const now = Date.now();
@@ -48,10 +59,10 @@ export async function onRequestPost({ request, env }) {
   const same = await env.DB.prepare("SELECT COUNT(*) n FROM reviews WHERE iph = ? AND model = ? AND vid <> ?").bind(iph, b.model, b.vid).first();
   if (same.n >= MAX_PER_MODEL) return json({ error: "이 모델에는 이미 리뷰를 남기셨어요" }, 409);
   await env.DB.prepare(
-    `INSERT INTO reviews (model, vid, width, light, cushion, touch, dur, c, t, iph) VALUES (?,?,?,?,?,?,?,?,?,?)
+    `INSERT INTO reviews (model, vid, width, light, cushion, touch, dur, c, t, iph, fit) VALUES (?,?,?,?,?,?,?,?,?,?,?)
      ON CONFLICT (model, vid) DO UPDATE SET width=excluded.width, light=excluded.light, cushion=excluded.cushion,
-     touch=excluded.touch, dur=excluded.dur, c=excluded.c, t=excluded.t, iph=excluded.iph`
-  ).bind(b.model, b.vid, b.width, b.light, b.cushion, b.touch, b.dur, c, now, iph).run();
+     touch=excluded.touch, dur=excluded.dur, c=excluded.c, t=excluded.t, iph=excluded.iph, fit=excluded.fit`
+  ).bind(b.model, b.vid, b.width, b.light, b.cushion, b.touch, b.dur, c, now, iph, fit).run();
   return json({ ok: true });
 }
 
