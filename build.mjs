@@ -1,10 +1,10 @@
 // 정적 사이트 생성: src/app.html -> dist/index.html, 모델마다 dist/m/<id>/index.html, sitemap.xml, robots.txt
-// 실행: node build.mjs   (SITE_URL 환경변수로 주소 지정, 기본 https://bootpick-kr.pages.dev)
+// 실행: node build.mjs   (SITE_URL 환경변수로 주소 지정, 기본 https://footpick.kr)
 import fs from "node:fs";
 import vm from "node:vm";
 import { COMPARE, BEST, GUIDES } from "./content.mjs";
 
-const SITE = (process.env.SITE_URL || "https://bootpick-kr.pages.dev").replace(/\/$/, "");
+const SITE = (process.env.SITE_URL || "https://footpick.kr").replace(/\/$/, "");
 const NAME = "FootPick";
 const DISCLOSURE = "이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
 const app = fs.readFileSync("src/app.html", "utf8");
