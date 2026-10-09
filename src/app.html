@@ -1000,7 +1000,7 @@ const LINES=[
  {b:"엄브로",s:"스페치알리",role:"클래식 캥거루 가죽",t:"one",m:/스페치알리/,g:[["스페치알리 프로 24 (1998년 모델 복각)","2024",0]]},
  {b:"스케쳐스",s:"SKX_01",role:"쿠션·넓은 발",t:"one",m:/SKX/,g:[["SKX_01","2023-08",1]]}
 ];
-const lineModels=l=>M.filter(m=>m.cat===CAT&&m.b===l.b&&l.m.test(m.n)).sort((a,b)=>b.sc-a.sc);
+const lineModels=(l,c=CAT)=>M.filter(m=>m.cat===c&&m.b===l.b&&l.m.test(m.n)).sort((a,b)=>b.sc-a.sc);
 // 상세 카드용: 세대, 출시, 등급 위치, 후속 모델
 const REL={tiempo:["티엠포 레전드 10","2023","nike",1,"티엠포 마에스트로 (2026.01월)"],vapor:["머큐리얼 베이퍼 16","2024","nike",1,"베이퍼 17 (2026.06월)"],phantom:["팬텀 GX 2","2024-01","nike",1,"팬텀 6 (2025.10월)"],
  predator:["프레데터 25","2024-12","adi",2,"프레데터 26 (2026)"],copa:["코파 퓨어 2","2024","adi",2,"코파 퓨어 3 (2025.01월)"],f50:["F50","2024-06","adi",2,""],
@@ -1052,7 +1052,11 @@ function renderLines(){const sel=document.getElementById("l-brand"),V=LINES.filt
   <header class="lh"><h3>${l.b} ${l.s}</h3><span class="pill">${l.role}</span></header>
   <ol class="gens">${l.g.map(([n,d,ok])=>`<li><time>${dtxt(d)}</time><span>${n}</span>${d&&!ok?'<em class="est">추정</em>':""}</li>`).join("")}</ol>
   <p class="k">이 사이트의 ${({tf:"풋살화",fg:"축구화"})[CAT]}</p><ul class="lm">${lineModels(l).map(m=>`<li><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><a href="/products/${SLUG[m.id]}/">${esc(m.n)}</a><span class="k">${m.pt}점 · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</span></li>`).join("")}</ul>
-  <p class="k">등급 (상위 → 하위) · 보통 나오는 밑창</p>${ladder(l.t,-1)}</article>`).join("")}
+  ${otherHint(l)}<p class="k">등급 (상위 → 하위) · 보통 나오는 밑창</p>${ladder(l.t,-1)}</article>`).join("")}
+function otherHint(l){const oc=CAT==="tf"?"fg":"tf",O=lineModels(l,oc);if(!O.length)return"";
+ const keys=l.g[l.g.length-1][0].replace(/\(.*?\)/g,"").split(/[\/·]/).map(x=>x.trim()).filter(Boolean),isNew=m=>keys.some(k=>m.n.includes(k));
+ const top=O.filter(m=>/엘리트|얼티밋|얼티메이트|재팬/.test(m.n)).sort((a,b)=>isNew(b)-isNew(a)).map(m=>m.n);
+ return `<p class="k" style="margin:0">${({tf:"풋살화",fg:"축구화"})[oc]} 탭에 ${top.length?esc(top.slice(0,2).join(", "))+(top.length>2?" 등 ":" 포함 "):""}${O.length}개 모델이 더 있어요${CAT==="tf"&&top.length?" (엘리트 등급은 주로 FG·AG로만 나와요)":""}. <button type="button" class="rvbtn" data-cat-go="${oc}" style="margin-left:0">${({tf:"풋살화",fg:"축구화"})[oc]}로 보기</button></p>`}
 
 // tabs
 function show(tab){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
@@ -1078,6 +1082,7 @@ function renderDB(){const b=fb.value,w=document.getElementById("f-width").value,
  document.getElementById("cards").innerHTML=L.length?L.map(m=>card(m)).join(""):'<p class="empty">조건에 맞는 모델이 없어요. 필터를 하나 풀어 보세요.</p>'}
 document.querySelectorAll("#db .filters select:not(#l-brand)").forEach(s=>s.addEventListener("change",renderDB));renderDB();
 document.getElementById("l-brand").addEventListener("change",renderLines);renderLines();
+document.getElementById("lines").addEventListener("click",e=>{const b=e.target.closest("[data-cat-go]");if(b){const y=b.closest(".line").querySelector("h3").textContent;setCat(b.dataset.catGo);const h=[...document.querySelectorAll("#lines .line h3")].find(x=>x.textContent===y);h?.scrollIntoView({block:"center"})}});
 
 // quiz
 const Q=[
@@ -1182,7 +1187,7 @@ function openD(id){cur=id;const m=M.find(x=>x.id===id),o=MY[id]||{};draft={};RK.
 dlg.addEventListener("click",e=>{const b=e.target.closest(".stars button");if(b){draft[b.closest(".stars").dataset.k]=+b.dataset.v;paintD()}
  const f=e.target.closest(".fitb button");if(f){const v=+f.dataset.fit;draft.fit=draft.fit===v?undefined:v;paintD()}});
 document.getElementById("rvx").onclick=()=>dlg.close();
-document.addEventListener("click",e=>{const b=e.target.closest(".rvbtn");if(b)openD(b.dataset.id)});
+document.addEventListener("click",e=>{const b=e.target.closest(".rvbtn[data-id]");if(b)openD(b.dataset.id)});
 // 리뷰 저장소: Cloudflare Pages Functions(/api/ratings) + D1. 로그인 없이 브라우저마다 임의 id(vid)로 모델당 1개
 const API="/api/ratings";let vid=null;
 try{vid=localStorage.getItem("vid");if(!vid){vid=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now());localStorage.setItem("vid",vid)}}catch(e){}
