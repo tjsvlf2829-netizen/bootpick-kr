@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS reviews (
   t       INTEGER NOT NULL,
   iph     TEXT    NOT NULL,
   fit     INTEGER,            -- 사이즈 체감: -1 작게 나옴, 0 맞음, 1 크게 나옴 (선택)
+  grip    INTEGER,            -- 접지력 1~5 (선택, 아직 점수 계산엔 안 씀)
   PRIMARY KEY (model, vid)
 );
 CREATE INDEX IF NOT EXISTS reviews_iph_t ON reviews (iph, t);

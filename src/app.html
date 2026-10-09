@@ -196,7 +196,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
           <tr><td>내구성</td><td>12%</td><td>밑창·어퍼가 버티는 기간</td></tr>
         </tbody></table>
         <p>위 비중은 풋살화 기준이에요. <b>축구화</b>는 넓은 구장에서 스피드 비중이 커서 터치 35% · 가벼움 35% · 발 편안함 18% · 내구성 12%로 계산해요.</p>
-        <p><b>가성비 좋음</b> 표시는 A티어(72점) 이상이면서 가격이 낮은 편(풋살화 약 10만 4천원, 축구화 약 18만원 이하)인 모델에 붙어요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
+        <p><b>가성비 좋음</b> 표시는 같은 종류·같은 가격대(10만 원 이하, 10~15만 원, 15~22만 원) 안에서 성능 점수가 상위 20%이고, 전체 중간 이상인 모델에 붙어요. 티어(성능)와는 따로 계산해요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
         <p><b>S</b> 78점 이상 · <b>A</b> 72점 이상 · <b>B</b> 62점 이상 · <b>C</b> 62점 미만</p>
         <p><b>점수가 바뀌는 방식</b>: 처음 점수는 공개 리뷰·가이드·커뮤니티 글을 종합한 값이고, <b>유저 리뷰 10명분</b>의 무게로 시작해요. 유저가 발볼·가벼움·쿠션·터치·내구성을 각각 1~5점으로 매기면 항목마다 유저 평균 쪽으로 옮겨가고(10명이면 반반), 위 공식으로 총점과 티어가 자동으로 다시 계산돼요. 모델 카드의 "리뷰 남기기"에서 한줄평과 함께 남길 수 있어요.</p>
         <p class="k">비중은 운영자 판단이에요. 모든 모델은 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요. 모델당 2~4곳의 자료를 참고했어요.</p>
@@ -1338,18 +1338,24 @@ const WC={tf:{touch:.41,comfort:.29,light:.18,dur:.12},fg:{touch:.35,light:.35,c
 const SEED_W=10;
 // 유저는 항목별(발볼·가벼움·쿠션·터치·내구성) 1~5점을 매기고, 항목마다 시드와 섞은 뒤 같은 공식으로 총점·티어를 다시 계산
 const RK=["width","light","cushion","touch","dur"];
+const BANDS=["10만 원 이하","10~15만 원","15~22만 원","22만 원 초과"],bandOf=w=>w<=100000?0:w<=150000?1:w<=220000?2:3;
+// 평가 신뢰도: 성능 점수엔 영향 없음. 참고 자료 수와 유저 리뷰 수로만 표시
+const confOf=m=>{const r=m.rev?m.rev.length:0,u=m.un||0;return r>=7||u>=20?"높음":r>=4||u>=5?"보통":"낮음"};
 const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
 // 100점 환산(5점 만점 × 20) 기준
 const tierOf=p=>p>=78?"S":p>=72?"A":p>=62?"B":"C";
 M.forEach(m=>{m.base={};RK.forEach(k=>m.base[k]=m[k])});
 const scOf=(o,c)=>{const W=WC[c];return o.touch*W.touch+comfortOf(o)*W.comfort+o.light*W.light+o.dur*W.dur};
 const UPDATED="2026년 10월";
-function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m.cm=u.cm;m.fit=u.fit||[0,0,0];
+function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m.cm=u.cm;m.fit=u.fit||[0,0,0];m.grip=u.grip||[0,0];
  RK.forEach(k=>m[k]=(m.base[k]*SEED_W+(u.sum[k]||0))/(SEED_W+u.n));
  m.sc=scOf(m,m.cat);m.pt=Math.round(m.sc*20);m.tier=tierOf(m.pt);
  // 자료 종합 점수(운영자 평가)와 유저 평균 점수를 따로 보관해 화면에서 구분해 보여줌
  m.seedPt=Math.round(scOf(m.base,m.cat)*20);m.userPt=u.n?Math.round(scOf(Object.fromEntries(RK.map(k=>[k,(u.sum[k]||0)/u.n])),m.cat)*20):null;
- m.vs=Math.round((m.sc+valueOf(m))/2*20);m.vgood=m.pt>=72&&valueOf(m)>=3.4});
+ m.vs=Math.round((m.sc+valueOf(m))/2*20)});
+ // 가성비 배지: 같은 종류·같은 가격대 안에서 성능 상위 20%이고, 종류 전체 중간 이상(22만 원 넘는 최상위 가격대는 제외)
+ ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c),med=L.map(m=>m.pt).sort((a,b)=>a-b)[L.length>>1];
+  L.forEach(m=>{m.band=bandOf(m.won);const B=L.filter(x=>x.band===m.band),hi=B.filter(x=>x.pt>m.pt).length;m.vgood=m.band<3&&m.pt>=med&&hi<Math.max(1,Math.round(B.length/5))})});
  ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c).sort((a,b)=>b.sc-a.sc);L.forEach((m,i)=>{m.rank=i+1;m.of=L.length})})}
 rescore();
 const TIERS=["S","A","B","C"], TORD={S:0,A:1,B:2,C:3};
@@ -1459,7 +1465,7 @@ function rateBlock(m){const src=m.rsum?`<details class="rv"><summary>리뷰 종�
  const cm=(m.cm||[]).slice(0,3).map(c=>`<li>“${esc(c.c)}”${c.mine?' <span class="k">(내 리뷰)</span>':""}</li>`).join("");
  const btn=rateOK?`<button type="button" class="rvbtn" data-id="${m.id}">${MY[m.id]?"내 리뷰 수정":"리뷰 남기기"}</button>`:"";
  return `<div class="rate"><div class="rline"><b>${m.pt}점</b><span class="k">${({tf:"풋살화",fg:"축구화"})[m.cat]} ${m.of}개 중 ${m.rank}위</span>${btn}</div>
- <p class="k" style="margin:2px 0 0">자료 종합 ${m.seedPt}점 (리뷰·판매처 자료 ${m.rev?m.rev.length:0}곳, ${UPDATED} 기준)${m.rev&&m.rev.length<=2?" · 자료가 적어 추정 비중이 커요":""}<br>${m.un?`유저 평균 ${m.userPt}점 (${m.un}명) · 유저 10명이 모이면 종합 점수의 절반을 차지해요`:"아직 유저 리뷰가 없어 자료 종합 점수만 반영됐어요"}</p>${fitTxt(m)?`<p class="k" style="margin:4px 0 0">${fitTxt(m)}</p>`:""}${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
+ <p class="k" style="margin:2px 0 0">자료 종합 ${m.seedPt}점 (리뷰·판매처 자료 ${m.rev?m.rev.length:0}곳, ${UPDATED} 기준)<br>평가 신뢰도 <b>${confOf(m)}</b> (참고 자료 ${m.rev?m.rev.length:0}곳 · 유저 리뷰 ${m.un||0}명) · 신뢰도는 점수에 더하거나 빼지 않아요<br>${m.un?`유저 평균 ${m.userPt}점 (${m.un}명) · 유저 10명이 모이면 종합 점수의 절반을 차지해요`:"아직 유저 리뷰가 없어 자료 종합 점수만 반영됐어요"}</p>${fitTxt(m)?`<p class="k" style="margin:4px 0 0">${fitTxt(m)}</p>`:""}${m.grip&&m.grip[1]>=3?`<p class="k" style="margin:4px 0 0">유저 접지력 평균 ${(m.grip[0]/m.grip[1]).toFixed(1)}/5 (${m.grip[1]}명)</p>`:""}${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
 function relBlock(m){const r=REL[m.id];if(!r)return"";const [gen,d,t,ti,next]=r;
  return `<div class="rel"><p><span class="k">세대</span> ${gen} · <span class="k">출시</span> ${dtxt(d)}${next?` · <span class="k">후속</span> ${next}`:""}</p>
  <p class="k">등급 (상위 → 하위)</p>${ladder(t,ti)}</div>`}
@@ -1557,7 +1563,7 @@ function whyOf(m,cap){const why=[],k=upKind(m.up),u=ans.width,sz=SIZE[m.id];
  if(why2&&tv>=3)why.push(why2+(tv<4?" (보통 수준)":"")+".");
  // 3) 가장 중요하다고 고른 느낌: 같은 종류 안 순위
  const pv=attr(m,ans.pref); if(pv>=3.5&&ans.pref!=="value")why.push(`중요하게 고른 ${en(NAME[ans.pref])} ${({tf:"풋살화",fg:"축구화"})[m.cat]} 중 상위 ${pctOf(m,ans.pref)}%예요.`);
- if(ans.pref==="value")why.push(m.vgood?`성능 ${m.pt}점에 비해 가격이 낮은 편이라 가성비가 좋아요.`:`가성비보다는 성능(${m.pt}점) 위주 모델이에요.`);
+ if(ans.pref==="value")why.push(m.vgood?`${BANDS[m.band]} 모델 중 성능(${m.pt}점)이 상위권이라 가성비가 좋아요.`:`가성비보다는 성능(${m.pt}점) 위주 모델이에요.`);
  // 구장 밑창
  if(ans.venue==="indoor"&&isIC(m))why.push("실내 코트용 IC 밑창이라 마루·우레탄에서 잘 잡혀요.");
  else if(ans.venue!=="indoor"&&isIC(m))why.push("실내용 밑창이라 인조잔디에서는 덜 잡힐 수 있어요.");
@@ -1592,6 +1598,7 @@ function toast(t){let e=document.getElementById("toast");if(!e){e=document.creat
 function rerender(){rescore();renderTier();renderDB();recommend();if(typeof renderSize==="function"){renderSize();renderVS()}}
 document.body.insertAdjacentHTML("beforeend",`<dialog id="rvd"><form method="dialog" id="rvf"><h3 id="rvt"></h3>
  ${RK.map(k=>`<div class="rrow"><b>${RLAB[k][0]}</b><span class="stars" data-k="${k}">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" aria-label="${RLAB[k][0]} ${i}점">★</button>`).join("")}</span><small>1 ${RLAB[k][1]} · 5 ${RLAB[k][2]}</small></div>`).join("")}
+ <div class="rrow"><b>접지력</b><span class="stars" data-k="grip">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" aria-label="접지력 ${i}점">★</button>`).join("")}</span><small>1 미끄러움 · 5 꽉 잡힘 (선택)</small></div>
  <div class="rrow"><b>사이즈</b><span class="fitb">${[[-1,"작게 나옴"],[0,"맞음"],[1,"크게 나옴"]].map(([v,t])=>`<button type="button" data-fit="${v}">${t}</button>`).join("")}</span><small>평소 신는 사이즈 기준 (선택)</small></div>
  <p class="k" style="margin:6px 0 0;font-size:.76rem">남긴 점수는 바로 티어 계산에, 사이즈는 사이즈 환승기에 반영돼요.</p>
  <input type="text" id="rvc" maxlength="60" placeholder="한줄평 (선택, 60자)">
@@ -1600,7 +1607,7 @@ const dlg=document.getElementById("rvd");let cur=null,draft={};
 function paintD(){dlg.querySelectorAll(".stars").forEach(g=>g.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.v<=(draft[g.dataset.k]||0))));
  dlg.querySelectorAll(".fitb button").forEach(b=>b.classList.toggle("on",+b.dataset.fit===draft.fit));
  document.getElementById("rvs").disabled=!RK.every(k=>draft[k]);document.getElementById("rvdel").style.visibility=MY[cur]?"visible":"hidden"}
-function openD(id){cur=id;const m=M.find(x=>x.id===id),o=MY[id]||{};draft={};RK.forEach(k=>{if(o[k])draft[k]=o[k]});if(o.fit!=null)draft.fit=o.fit;
+function openD(id){cur=id;const m=M.find(x=>x.id===id),o=MY[id]||{};draft={};RK.forEach(k=>{if(o[k])draft[k]=o[k]});if(o.fit!=null)draft.fit=o.fit;if(o.grip)draft.grip=o.grip;
  document.getElementById("rvt").textContent=m.b+" "+m.n;document.getElementById("rvc").value=o.c||"";paintD();dlg.showModal()}
 dlg.addEventListener("click",e=>{const b=e.target.closest(".stars button");if(b){draft[b.closest(".stars").dataset.k]=+b.dataset.v;paintD()}
  const f=e.target.closest(".fitb button");if(f){const v=+f.dataset.fit;draft.fit=draft.fit===v?undefined:v;paintD()}});
