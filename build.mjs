@@ -2,6 +2,7 @@
 // 실행: node build.mjs   (SITE_URL 환경변수로 주소 지정, 기본 https://bootpick-kr.pages.dev)
 import fs from "node:fs";
 import vm from "node:vm";
+import { COMPARE, BEST, GUIDES } from "./content.mjs";
 
 const SITE = (process.env.SITE_URL || "https://bootpick-kr.pages.dev").replace(/\/$/, "");
 const NAME = "FootRank";
@@ -33,7 +34,7 @@ ${style}
 .hero{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 .pg table{border-collapse:collapse;width:100%;font-size:.9rem}.pg td,.pg th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .cta{display:flex;gap:8px;flex-wrap:wrap}.cta a{font-weight:700;text-decoration:none;border:1px solid var(--turf);border-radius:8px;padding:8px 14px}
-.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
+.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.best{padding-left:20px}.best li{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}.best h2{font-size:1.05rem;margin:0 0 4px}.guide h2{margin-top:22px}.pg td .bar{min-width:90px}.pg th{white-space:nowrap}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
 body{background:var(--bg);color:var(--ink);font-family:var(--body)}</style></head><body>`;
 
 fs.rmSync("dist", { recursive: true, force: true });
@@ -41,7 +42,10 @@ fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
 const foot = `<p class="disc">${DISCLOSURE}</p>`;
-const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/football/">축구화</a> · <a href="/brands/">브랜드</a></p>`;
+const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
+const byId = (id) => M.find((m) => m.id === id);
+const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
+const cmpOf = (m) => COMPARE.filter((c) => c[0] === m.id || c[1] === m.id);
 const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</a>${extra}</li>`;
 
 // 메인 페이지: 앱 + 검색엔진용 전체 모델 링크 + 제휴 고지
@@ -91,6 +95,7 @@ for (const m of M) {
 <div class="bars" style="margin-top:12px"><span>발볼</span>${bar(m.width)}<span>가벼움</span>${bar(m.light)}<span>쿠션</span>${bar(m.cushion)}<span>터치</span>${bar(m.touch)}<span>내구성</span>${bar(m.dur)}</div>
 <p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
 ${src}
+${cmpOf(m).length ? `<h2>비교해 보기</h2><ul>${cmpOf(m).map((c) => `<li><a href="/compare/${c[2]}/">${esc(byId(c[0]).n)} vs ${esc(byId(c[1]).n)}</a></li>`).join("")}</ul>` : ""}
 <h2>발볼이 비슷한 ${catName(m)}</h2><ul class="rel-list">${similar.map((x) => li(x, ` (${x.tier})`)).join("")}</ul>
 <h2><a href="${burl(m.b)}">${esc(m.b)}</a> 다른 모델</h2><ul class="rel-list">${same.map((x) => li(x)).join("")}</ul>
 ${foot}</main>
@@ -117,9 +122,61 @@ for (const b of brands) {
   page(burl(b), head(`${b} 축구화·풋살화 추천 · 티어 · 발볼 | ${NAME}`, `${b} 축구화와 풋살화 ${L.length}개 모델의 티어, 발볼, 가격 비교.`, burl(b)) +
     `<main class="pg">${nav}<h1>${esc(b)} 축구화·풋살화</h1><p>${esc(b)} ${L.length}개 모델을 점수 순으로 정리했어요.${wide.length ? ` 발볼이 넓은 편인 모델은 ${esc(wide.join(", "))}이에요.` : " 대체로 발볼이 보통이거나 좁은 편이에요."}</p>${part("tf", "풋살화")}${part("fg", "축구화")}${foot}</main></body></html>`);
 }
+// 비교 페이지
+const scoreRow = (k, a, b) => `<tr><th>${RL[k]}</th><td>${bar(a[k])}</td><td>${bar(b[k])}</td></tr>`;
+for (const [ia, ib, slug, intro] of COMPARE) {
+  const a = byId(ia), b = byId(ib), path = `/compare/${slug}/`;
+  const verdict = Object.keys(RL).filter((k) => Math.abs(a[k] - b[k]) >= 1).map((k) => {
+    const w = a[k] > b[k] ? a : b;
+    return k === "width" ? `<li>발볼이 넓다면 <a href="${url(w)}">${esc(w.n)}</a>, 좁다면 <a href="${url(w === a ? b : a)}">${esc((w === a ? b : a).n)}</a></li>` : `<li>${({ light: "가벼움이", cushion: "쿠션이", touch: "터치가", dur: "내구성이" })[k]} 중요하면 <a href="${url(w)}">${esc(w.n)}</a></li>`;
+  });
+  const cheap = a.won < b.won ? a : b;
+  if (Math.abs(a.won - b.won) >= 20000) verdict.push(`<li>예산이 우선이면 약 ${((Math.abs(a.won - b.won)) / 10000).toFixed(1)}만원 저렴한 <a href="${url(cheap)}">${esc(cheap.n)}</a></li>`);
+  const t = `${a.n} vs ${b.n} 비교`;
+  page(path, head(`${t} · 발볼 터치 쿠션 차이 | ${NAME}`, `${a.b} ${a.n}과 ${b.b} ${b.n}의 발볼, 터치, 쿠션, 무게, 내구성, 가격 비교. ${intro}`, path) +
+    `<main class="pg">${nav}<h1>${esc(a.n)} vs ${esc(b.n)}</h1><p>${esc(intro)}</p>
+<table><thead><tr><th></th><th><a href="${url(a)}">${esc(a.b + " " + a.n)}</a></th><th><a href="${url(b)}">${esc(b.b + " " + b.n)}</a></th></tr></thead><tbody>
+<tr><th>티어</th><td>${a.tier} · ${a.sc.toFixed(2)}점</td><td>${b.tier} · ${b.sc.toFixed(2)}점</td></tr>
+<tr><th>가격</th><td>약 ${a.won.toLocaleString("ko-KR")}원</td><td>약 ${b.won.toLocaleString("ko-KR")}원</td></tr>
+<tr><th>어퍼</th><td>${esc(a.up)}</td><td>${esc(b.up)}</td></tr>
+${Object.keys(RL).map((k) => scoreRow(k, a, b)).join("")}
+<tr><th>사이즈</th><td>${esc(SIZE[a.id] || "")}</td><td>${esc(SIZE[b.id] || "")}</td></tr></tbody></table>
+<h2>결론: 이렇게 고르세요</h2><ul>${verdict.join("") || "<li>항목 점수가 거의 같아요. 디자인과 가격으로 골라도 괜찮아요.</li>"}</ul>
+<h2>한 줄 평</h2><ul><li><b>${esc(a.n)}</b>: ${esc(a.note)}</li><li><b>${esc(b.n)}</b>: ${esc(b.note)}</li></ul>
+<div class="cta"><a class="pri" href="${shop(a)}" target="_blank" rel="noopener sponsored">${esc(a.n)} 가격 확인</a><a class="pri" href="${shop(b)}" target="_blank" rel="noopener sponsored">${esc(b.n)} 가격 확인</a></div>
+<p><a href="/">내 스타일로 다시 추천받기 →</a></p>${foot}</main></body></html>`);
+}
+page("/compare/", head(`축구화·풋살화 비교 | ${NAME}`, "많이 고민하는 축구화·풋살화 두 모델을 발볼, 터치, 쿠션, 가격으로 비교했어요.", "/compare/") +
+  `<main class="pg">${nav}<h1>모델 비교</h1><ul>${COMPARE.map((c) => `<li><a href="/compare/${c[2]}/">${esc(byId(c[0]).n)} vs ${esc(byId(c[1]).n)}</a><br><span class="k">${esc(c[3])}</span></li>`).join("")}</ul>${foot}</main></body></html>`);
+
+// 조건별 추천 페이지
+const why = (m) => { const r = []; if (m.width >= 4) r.push("발볼 넓음"); if (m.touch >= 4.5) r.push("터치 최상급"); if (m.light >= 4.5) r.push("매우 가벼움"); if (m.cushion >= 4) r.push("쿠션 좋음"); if (m.dur >= 4) r.push("튼튼함"); if (m.won <= 100000) r.push("10만원 이하"); return r.join(" · "); };
+for (const B of BEST) {
+  const L = M.filter((m) => m.cat === B.cat && B.filter(m)).sort(B.sort).slice(0, B.n), path = `/best/${B.slug}/`;
+  page(path, head(`${B.title} TOP ${L.length} (2026) | ${NAME}`, `${B.intro.slice(0, 110)}`, path) +
+    `<main class="pg">${nav}<h1>${B.title} TOP ${L.length}</h1><p>${esc(B.intro)}</p>
+<ol class="best">${L.map((m) => `<li><h2><a href="${url(m)}">${esc(m.b + " " + m.n)}</a> <span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span></h2>
+<p class="k">${why(m) || "균형형"} · 약 ${m.won.toLocaleString("ko-KR")}원 · 사이즈 ${esc(SIZE[m.id] || "정보 없음")}</p><p>${esc(m.note)}</p>
+<div class="bars"><span>발볼</span>${bar(m.width)}<span>터치</span>${bar(m.touch)}<span>쿠션</span>${bar(m.cushion)}<span>가벼움</span>${bar(m.light)}</div>
+<div class="cta"><a href="${url(m)}">자세히 보기</a><a href="${shop(m)}" target="_blank" rel="noopener sponsored">가격 확인</a></div></li>`).join("")}</ol>
+<h2>고를 때 팁</h2><p>${esc(B.tip)}</p><p><a href="/">내 구장·스타일·예산으로 다시 추천받기 →</a></p>${foot}</main></body></html>`);
+}
+page("/best/", head(`조건별 축구화·풋살화 추천 | ${NAME}`, "발볼 넓은, 10만원 이하, 가벼운, 터치 좋은, 발 편한 풋살화와 축구화 추천 모음.", "/best/") +
+  `<main class="pg">${nav}<h1>조건별 추천</h1><ul>${BEST.map((B) => `<li><a href="/best/${B.slug}/">${B.title}</a></li>`).join("")}</ul>${foot}</main></body></html>`);
+
+// 가이드
+for (const G of GUIDES) {
+  const path = `/guides/${G.slug}/`;
+  page(path, head(`${G.title} | ${NAME}`, G.desc, path) + `<main class="pg">${nav}<article class="guide"><h1>${esc(G.title)}</h1>${G.body}</article>
+<h2>같이 보면 좋은 추천</h2><ul>${G.rel.map((r) => BEST.find((B) => B.slug === r)).map((B) => `<li><a href="/best/${B.slug}/">${B.title}</a></li>`).join("")}</ul>
+<p><a href="/">30초 만에 내 신발 찾기 →</a></p>${foot}</main></body></html>`);
+}
+page("/guides/", head(`축구화·풋살화 가이드 | ${NAME}`, "TF와 IC 차이, FG·AG 차이, 사이즈 고르는 법, 발볼 넓은 발 고르는 법, 가죽 관리법.", "/guides/") +
+  `<main class="pg">${nav}<h1>가이드</h1><ul>${GUIDES.map((G) => `<li><a href="/guides/${G.slug}/">${esc(G.title)}</a><br><span class="k">${esc(G.desc)}</span></li>`).join("")}</ul>${foot}</main></body></html>`);
+
 fs.writeFileSync("dist/_redirects", redirects.join("\n") + "\n");
 
-const urls = ["/", "/futsal/", "/football/", "/brands/", ...brands.map(burl), ...M.map(url)];
+const urls = ["/", "/futsal/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
