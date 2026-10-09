@@ -1,14 +1,13 @@
 <title>FootRank</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 /* Layout: 인조잔디 라인처럼 얇은 흰 선으로 나뉜 한 칸짜리 도구. 상단 탭 3개, 본문은 탭별 단일 컬럼 */
 :root{
   --bg:#f3f5f1; --surface:#ffffff; --ink:#17201a; --muted:#5d6a61; --line:#d6ddd4;
   --turf:#1f6b3a; --turf-soft:#e2efe5; --chalk:#ffffff;
   --s:#c2410c; --a:#b7791f; --b:#3f7d5a; --c:#6b7280;
-  --display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --display:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Pretendard Variable",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#101612; --surface:#18211b; --ink:#e7ede8; --muted:#9aa89e; --line:#2b372f;
@@ -19,28 +18,28 @@
   --turf:#5fbf80; --turf-soft:#1d3325; --chalk:#e7ede8;
   --s:#fb923c; --a:#e3b04b; --b:#6cc08f; --c:#9ca3af; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;letter-spacing:-.01em;word-break:keep-all;-webkit-font-smoothing:antialiased}
 .wrap{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
 .sitemenu{display:flex;flex-wrap:wrap;gap:12px;font-size:.88rem;font-weight:700}.sitemenu a{color:var(--ink);text-decoration:none}.sitemenu a:hover{color:var(--turf)}
 .hero{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0 4px;display:grid;gap:10px}
-.hero h2{font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.25;margin:0}
+.hero h2{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.25;margin:0}
 .hero p{margin:0;color:var(--muted);font-size:.92rem}
 .cta-main{justify-self:start;font:inherit;font-weight:700;font-size:1rem;background:var(--turf);color:var(--chalk);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
 .hot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem}.hot>span:first-child{color:var(--muted);margin-right:4px}
 #hotList{display:flex;flex-wrap:wrap;gap:6px}.hot a{white-space:nowrap;color:var(--turf);background:var(--turf-soft);border-radius:999px;padding:3px 10px;text-decoration:none;font-weight:700;margin:2px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 16px;border-bottom:2px solid var(--turf);padding-bottom:12px}
-h1{font-family:var(--display);font-weight:400;font-size:2.2rem;line-height:1;margin:0;color:var(--turf);letter-spacing:.02em}
+h1{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1;margin:0;color:var(--turf);letter-spacing:-.02em}
 .tag{color:var(--muted);font-size:.9rem;margin:0}
 .notice{margin:14px 0 0;padding:10px 12px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);font-size:.85rem;background:var(--surface)}
 nav{display:flex;gap:4px;margin:18px 0;overflow-x:auto}
 nav button{font:inherit;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
 nav button[aria-selected="true"]{background:var(--turf);border-color:var(--turf);color:var(--bg)}
 button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--turf);outline-offset:2px}
-h2{font-family:var(--display);font-weight:400;font-size:1.5rem;margin:0 0 4px;text-wrap:balance}
+h2{font-family:var(--display);font-weight:800;font-size:1.5rem;margin:0 0 4px;text-wrap:balance}
 .sub{color:var(--muted);margin:0 0 16px;font-size:.92rem}
 /* tier list */
 .tier{display:grid;grid-template-columns:64px 1fr;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:10px;background:var(--surface)}
-.tier .lbl{display:grid;place-items:center;font-family:var(--display);font-size:2rem;color:var(--chalk)}
+.tier .lbl{display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:2rem;color:var(--chalk)}
 .tier .row{display:flex;flex-wrap:wrap;gap:8px;padding:10px;min-width:0}
 .chip{font:inherit;font-size:.88rem;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
 .chip small{display:block;color:var(--muted);font-size:.75rem}
@@ -55,7 +54,7 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line
 .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.75rem}
 .pill{border-radius:999px;padding:1px 8px;background:var(--turf-soft);color:var(--turf);font-weight:500}
 .pill.vg{background:transparent;border:1px solid currentColor;padding:0 7px}
-.tb{color:var(--chalk);font-family:var(--display);padding:0 8px;border-radius:4px}
+.tb{color:var(--chalk);font-family:var(--display);font-weight:800;padding:0 8px;border-radius:4px}
 .bars{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;font-size:.8rem;color:var(--muted)}
 .bar{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
 .bar i{height:7px;border-radius:2px;background:var(--line)}
@@ -101,7 +100,7 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line
 .q p{margin:0 0 8px;font-weight:700}
 .opts{display:flex;flex-wrap:wrap;gap:6px}
 .tool label{flex:1 1 200px;min-width:0}.tool select{width:100%}
-.szbig{font-family:var(--display);font-size:1.5rem;color:var(--turf);margin:4px 0}
+.szbig{font-family:var(--display);font-weight:800;font-size:1.5rem;color:var(--turf);margin:4px 0}
 .vst{width:100%;border-collapse:collapse;font-size:.9rem}.vst th,.vst td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}.vst th:first-child{text-align:left;font-weight:500;color:var(--muted)}
 .vst td.win{font-weight:700;color:var(--turf)}.vst td.win::after{content:" ✓"}
 .fitb{display:inline-flex;gap:4px}.fitb button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;padding:3px 8px;cursor:pointer}.fitb button.on{background:var(--turf);border-color:var(--turf);color:var(--bg)}
@@ -109,16 +108,16 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line
 .opts button[aria-pressed="true"]{background:var(--turf);border-color:var(--turf);color:var(--bg);font-weight:700}
 .res{display:grid;gap:10px;margin-top:16px}
 .res .card{flex-direction:row;align-items:flex-start;gap:14px}
-.rank{font-family:var(--display);font-size:2rem;color:var(--turf);line-height:1;min-width:28px}
+.rank{font-family:var(--display);font-weight:800;font-size:2rem;color:var(--turf);line-height:1;min-width:28px}
 .score{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem}
 .why{margin:4px 0 0;padding-left:18px;font-size:.86rem}
-.bval{float:right;font-family:var(--display);font-weight:400;font-size:1.3rem;color:var(--turf);font-variant-numeric:tabular-nums}
+.bval{float:right;font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--turf);font-variant-numeric:tabular-nums}
 input[type=range]{--pct:40%;-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;background:linear-gradient(to right,var(--turf) var(--pct),var(--line) var(--pct));margin:10px 0 4px;cursor:pointer}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--surface);border:3px solid var(--turf);box-shadow:0 1px 3px rgba(0,0,0,.25)}
 input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surface);border:3px solid var(--turf)}
 input[type=range]:focus-visible{outline:2px solid var(--turf);outline-offset:4px}
 .scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted)}
-.h3{font-family:var(--display);font-weight:400;font-size:1.2rem;margin:8px 0 4px}
+.h3{font-family:var(--display);font-weight:800;font-size:1.2rem;margin:8px 0 4px}
 .lines{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:8px}
 .line{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .lh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
@@ -200,7 +199,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
         <p><b>가성비 좋음</b> 표시는 A티어(72점) 이상이면서 가격이 낮은 편(풋살화 약 10만 4천원, 축구화 약 18만원 이하)인 모델에 붙어요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
         <p><b>S</b> 78점 이상 · <b>A</b> 72점 이상 · <b>B</b> 62점 이상 · <b>C</b> 62점 미만</p>
         <p><b>점수가 바뀌는 방식</b>: 처음 점수는 공개 리뷰·가이드·커뮤니티 글을 종합한 값이고, <b>유저 리뷰 50명분</b>의 무게로 시작해요. 유저가 발볼·가벼움·쿠션·터치·내구성을 각각 1~5점으로 매기면 항목마다 유저 평균 쪽으로 옮겨가고(50명이면 반반), 위 공식으로 총점과 티어가 자동으로 다시 계산돼요. 모델 카드의 "리뷰 남기기"에서 한줄평과 함께 남길 수 있어요.</p>
-        <p class="k">비중은 운영자 판단이에요. 100개 모델 모두 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요(카드에 출처 표시). 모델당 참고 출처는 2~4곳이에요.</p>
+        <p class="k">비중은 운영자 판단이에요. 100개 모델 모두 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요. 모델당 2~4곳의 자료를 참고했어요.</p>
       </div></details>
     <div id="tierList"></div>
   </section>
@@ -847,7 +846,7 @@ function ladder(t,cur){return `<ol class="ladder">${STUD[t].map(([n,st],i)=>`<li
 const MY={}; let rateOK=false;
 const RLAB={width:["발볼","좁음","넓음"],light:["가벼움","무거움","가벼움"],cushion:["쿠션","얇음","푹신"],touch:["터치","둔함","부드러움"],dur:["내구성","약함","튼튼"]};
 const fitTxt=m=>{const [a,b,c]=m.fit||[0,0,0],n=a+b+c;if(n<3)return"";const P=x=>Math.round(x/n*100);return `사이즈 리뷰 ${n}명: 맞음 ${P(b)}% · 작게 나옴 ${P(a)}% · 크게 나옴 ${P(c)}%`};
-function rateBlock(m){const src=m.rev?`<details class="rv"><summary>리뷰 ${m.rev.length}곳 종합 점수</summary>${m.rsum?`<p style="margin:4px 0 0">${esc(m.rsum)}</p>`:""}<ul>${m.rev.map(i=>`<li><a href="${SRC[i][1]}" target="_blank" rel="noopener">${esc(SRC[i][0])}</a></li>`).join("")}</ul></details>`:`<p class="rv k">시작 점수는 예시 값 (리뷰 종합 전)</p>`;
+function rateBlock(m){const src=m.rsum?`<details class="rv"><summary>리뷰 종합 요약</summary><p style="margin:4px 0 0">${esc(m.rsum)}</p></details>`:"";
  const cm=(m.cm||[]).slice(0,3).map(c=>`<li>“${esc(c.c)}”${c.mine?' <span class="k">(내 리뷰)</span>':""}</li>`).join("");
  const btn=rateOK?`<button type="button" class="rvbtn" data-id="${m.id}">${MY[m.id]?"내 리뷰 수정":"리뷰 남기기"}</button>`:"";
  return `<div class="rate"><div class="rline"><b>${m.pt}점</b><span class="k">${({tf:"풋살화",fg:"축구화"})[m.cat]} ${m.of}개 중 ${m.rank}위</span><span class="k">${m.un?`유저 리뷰 ${m.un}명 반영`:"아직 유저 리뷰 없음"}</span>${btn}</div>${fitTxt(m)?`<p class="k" style="margin:4px 0 0">${fitTxt(m)}</p>`:""}${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}

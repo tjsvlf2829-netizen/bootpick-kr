@@ -9,7 +9,7 @@ const NAME = "FootRank";
 const DISCLOSURE = "이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
 const app = fs.readFileSync("src/app.html", "utf8");
 const style = app.match(/<style>[\s\S]*?<\/style>/)[0];
-const fonts = app.match(/<link rel="preconnect"[\s\S]*?display=swap">/)[0];
+const fonts = app.match(/<link rel="stylesheet" href="https:\/\/cdn\.jsdelivr\.net\/gh\/orioncactus\/pretendard[^>]*>/)[0];
 const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 
 // 데이터 부분만 실행해서 모델 목록을 얻음 (DOM 코드 이전까지)
@@ -73,7 +73,7 @@ for (const m of M) {
   redirects.push(`/m/${m.id}/ ${url(m)} 301`, `/m/${m.id} ${url(m)} 301`);
   const r = REL[m.id];
   const gen = r ? `<tr><th>세대</th><td>${esc(r[0])} · ${r[1] ? esc(r[1]) + " 출시" : "출시 연도 확인 중"} · ${esc(STUD[r[2]]?.[r[3]]?.[0] || "")} 등급</td></tr>` : "";
-  const src = m.rev ? `${m.rsum ? `<h2>리뷰 요약</h2><p>${esc(m.rsum)}</p>` : ""}<h2>점수 참고 출처</h2><ul>${m.rev.map((i) => `<li><a href="${SRC[i][1]}" rel="noopener nofollow" target="_blank">${esc(SRC[i][0])}</a></li>`).join("")}</ul>` : "";
+  const src = m.rev ? `${m.rsum ? `<h2>리뷰 요약</h2><p>${esc(m.rsum)}</p>` : ""}` : "";
   const same = M.filter((x) => x.b === m.b && x.id !== m.id).slice(0, 8);
   const similar = M.filter((x) => x.cat === m.cat && x.id !== m.id && Math.abs(x.width - m.width) <= 0.5).sort((a, b) => b.sc - a.sc).slice(0, 6);
   const f = fitFor(m);
