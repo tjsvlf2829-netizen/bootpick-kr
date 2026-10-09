@@ -118,6 +118,9 @@ input[type=range]:focus-visible{outline:2px solid var(--turf);outline-offset:4px
 .line{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .lh{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
 .lh h3{margin:0;font-size:1rem}
+.lm{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.lm li{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:.88rem}
+.lm .tb{font-size:.72rem;padding:0 6px}
 .gens{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid var(--turf);display:grid;gap:6px}
 .gens li{position:relative;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;font-size:.88rem}
 .gens li::before{content:"";position:absolute;left:-20px;top:.45em;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--turf)}
@@ -197,7 +200,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
 
   <section id="db" class="hidden-tab">
     <h2>모델별 특징</h2>
-    <p class="sub">위에서 브랜드별 세대와 등급을 보고, 아래에서 주요 풋살화를 자세히 비교해요.</p>
+    <p class="sub">위에서 브랜드별 세대와 등급을 보고, 아래에서 모델을 자세히 비교해요.</p>
     <h3 class="h3">브랜드별 전체 라인업 (2022년 이후)</h3>
     <p class="sub">축구화(FG·AG)와 풋살화(TF·IC)는 같은 모델의 밑창 버전이에요. 세대별 첫 출시 시기와 상위~하위 등급을 함께 보여줘요. 추정 표시가 있는 날짜는 아직 출처로 확인하지 못한 값이에요.</p>
     <div class="filters"><label for="l-brand">브랜드<select id="l-brand"><option value="">전체</option></select></label></div>
@@ -324,7 +327,7 @@ const M=[
  {"id": "n_puma_king_top_tt", "b": "푸마", "n": "킹 탑 TT", "up": "합성 가죽(K-BETTER)", "note": "레트로 킹 디자인에 길들일 필요 없는 합성 갑피", "won": 109000, "dur": 3, "light": 4, "cushion": 2, "touch": 4, "width": 3},
  {"id": "n_joma_top_flex_rebound_in", "b": "조마", "n": "탑 플렉스 리바운드 IN", "up": "천연가죽", "note": "발볼 넓고 쿠션 좋은 유럽 풋살 정통 모델", "won": 89000, "dur": 3, "light": 4, "cushion": 4, "touch": 4, "width": 4},
  {"id": "n_joma_regate_rebound_in", "b": "조마", "n": "레가테 리바운드 IN", "up": "메쉬+합성", "note": "매우 가벼운 메쉬 갑피의 쿠션형 실내화", "won": 89000, "dur": 3, "light": 5, "cushion": 4, "touch": 3, "width": 3},
- {"id": "n_athleta_cultura_id", "b": "아스레타", "n": "쿠르투라 ID", "up": "합성 가죽+합성 섬유", "note": "끈 구멍 위치로 발등 맞춤, 가벼운 클래식 실내화", "won": 110000, "dur": 3, "light": 4, "cushion": 3, "touch": 3, "width": 3},
+ {"id": "n_athleta_cultura_id", "b": "아슬레타", "n": "쿠르투라 ID", "up": "합성 가죽+합성 섬유", "note": "끈 구멍 위치로 발등 맞춤, 가벼운 클래식 실내화", "won": 110000, "dur": 3, "light": 4, "cushion": 3, "touch": 3, "width": 3},
  {"id": "n_umbro_accerator_sala_wide_in", "b": "엄브로", "n": "액셀러레이터 살라 와이드 IN", "up": "합성 가죽", "note": "일본 설계 와이드 라스트, 발볼러용 입문 실내화", "won": 79000, "dur": 3, "light": 3, "cushion": 3, "touch": 3, "width": 5},
  {"id": "n_nike_phantom_6_academy_tf", "b": "나이키", "n": "팬텀 6 로우 아카데미 TF", "up": "합성 가죽(NikeSkin)", "note": "그립 코팅 갑피의 컨트롤형 TF, 감싸는 핏", "won": 109000, "dur": 3, "light": 3, "cushion": 3, "touch": 3, "width": 2}
 ];
@@ -738,30 +741,46 @@ const STUD={nike:[["엘리트","FG · AG · SG"],["프로","FG · TF · IC"],["�
  nb:[["프로","FG"],["디스트로이·팀","FG · TF"],["디스패치·아카데미","FG · TF · IN"]],
  asics:[["상위","FG"],["중위","FG · TF"],["입문","TF · IN"]],
  one:[["단일 등급","TF · IN"]]};
+// 라인업: m(모델명 정규식)으로 이 사이트의 모델과 연결. 현재 종류(풋살화/축구화)에 모델이 있는 라인만 보여줌
 const LINES=[
- {b:"나이키",s:"머큐리얼 베이퍼 / 슈퍼플라이",role:"스피드형",t:"nike",g:[["베이퍼 15 / 슈퍼플라이 9","2022-07",0],["베이퍼 16 / 슈퍼플라이 10","2024",1],["베이퍼 17 / 슈퍼플라이 11","2026-06",1]]},
- {b:"나이키",s:"팬텀",role:"컨트롤·슈팅형",t:"nike",g:[["팬텀 GX (월드컵 데뷔)","2022-12",1],["팬텀 루나","2023-06",1],["팬텀 GX 2 / 루나 2","2024-01",1],["팬텀 6","2025-10",1]]},
- {b:"나이키",s:"티엠포",role:"터치·가죽형",t:"nike",g:[["티엠포 레전드 10","2023",1],["티엠포 마에스트로","2026-01",1]]},
- {b:"아디다스",s:"프레데터",role:"컨트롤·슈팅형",t:"adi",g:[["프레데터 엣지 (.1~.4 등급)","2022-01",1],["프레데터 어큐러시 (.1~.4 등급)","2023-02",1],["프레데터 24","2024",1],["프레데터 25","2024-12",1],["프레데터 26","2026",0]]},
- {b:"아디다스",s:"X / F50",role:"스피드형",t:"adi",g:[["X 스피드포털 (.1~.4 등급)","2022",1],["X 크레이지패스트","2023",1],["F50 (X 후속)","2024-06",1]]},
- {b:"아디다스",s:"코파",role:"터치·가죽형",t:"adi",g:[["코파 퓨어 (+·.1~.4 등급)","2023",0],["코파 퓨어 2","2024",1],["코파 퓨어 3","2025-01",1]]},
- {b:"푸마",s:"퓨처",role:"드리블·컨트롤형",t:"puma",g:[["퓨처 얼티밋","2023",0],["퓨처 7","2023-12",1],["퓨처 8","2025-01",1],["퓨처 9","2025-12",1]]},
- {b:"푸마",s:"울트라",role:"스피드형",t:"puma",g:[["울트라 얼티밋","2022",0],["울트라 5","2024-05",1],["울트라 6","2025-12",1]]},
- {b:"푸마",s:"킹",role:"터치·가죽형",t:"puma",g:[["킹 얼티밋 (리뉴얼)","2023-03",1],["킹 얼티밋 2세대","2024-06",1]]},
- {b:"미즈노",s:"모렐리아 네오",role:"터치·가죽형",t:"mizuno",g:[["모렐리아 네오 4 / 네오 4 베타","2023-07",1],["모렐리아 네오 5 / 네오 5 베타","2026-06",1]]},
- {b:"미즈노",s:"미즈노 알파",role:"스피드형",t:"mizuno",g:[["미즈노 알파","2022-11",1],["미즈노 알파 2","2025-01",1],["미즈노 알파 3","2025-12",1]]},
- {b:"미즈노",s:"모렐리아 살라 (풋살 전용)",role:"풋살·가죽 터치",t:"one",g:[["모렐리아 살라 재팬 TF · 살라 엘리트 TF","",0]]},
- {b:"미즈노",s:"모렐리아 클래식",role:"천연가죽 스테디셀러",t:"mizuno",g:[["모렐리아 II · 모렐리아 TF/살라 (계속 판매)","",0]]},
- {b:"미즈노",s:"모나르시다 네오",role:"발볼 넓은 입문형",t:"mona",g:[["모나르시다 네오 3 (2020년 출시, 계속 판매)","",0]]},
- {b:"뉴발란스",s:"퓨런",role:"스피드형",t:"nb",g:[["퓨런 V7","2022",0],["퓨런 V7+","2024-01",1],["퓨런 V8","2025-01",1]]},
- {b:"뉴발란스",s:"테켈라",role:"드리블·컨트롤형",t:"nb",g:[["테켈라 V4","2022",0],["테켈라 V4+","2024-01",1],["테켈라 V5","2025-06",1]]},
- {b:"아식스",s:"DS 라이트 X-FLY",role:"쿠션·편안함",t:"asics",g:[["DS 라이트 X-FLY 프로 3","2024-12",1]]},
- {b:"아식스",s:"C3 FF (풋살)",role:"풋살·캥거루 가죽",t:"one",g:[["C3 FF TF (2021년 출시, 계속 판매)","2021-08",1]]},
- {b:"아식스",s:"칼체토·데스타크 (풋살)",role:"풋살 전용",t:"asics",g:[["칼체토 WD 9","",0]]},
- {b:"아슬레타",s:"오레이",role:"풋살·발볼 여유",t:"one",g:[["오레이 트레이닝 T","",0]]},
- {b:"조마",s:"탑 플렉스",role:"풋살·가죽",t:"one",g:[["탑 플렉스 TF/IN","",0]]},
- {b:"엄브로",s:"벨로시타",role:"입문 스피드형",t:"one",g:[["벨로시타 클럽","",0]]}
+ {b:"나이키",s:"머큐리얼 베이퍼 / 슈퍼플라이",role:"스피드형",t:"nike",m:/머큐리얼/,g:[["베이퍼 15 / 슈퍼플라이 9","2022-07",0],["베이퍼 16 / 슈퍼플라이 10","2024",1],["베이퍼 17 / 슈퍼플라이 11","2026-06",1]]},
+ {b:"나이키",s:"팬텀",role:"컨트롤·슈팅형",t:"nike",m:/팬텀/,g:[["팬텀 GX (월드컵 데뷔)","2022-12",1],["팬텀 루나","2023-06",1],["팬텀 GX 2 / 루나 2","2024-01",1],["팬텀 6","2025-10",1]]},
+ {b:"나이키",s:"티엠포",role:"터치·가죽형",t:"nike",m:/티엠포/,g:[["티엠포 레전드 10","2023",1],["티엠포 마에스트로","2026-01",1]]},
+ {b:"나이키",s:"루나가토 (실내 풋살)",role:"풋살·쿠션",t:"one",m:/루나가토/,g:[["루나가토 II (재출시)","2019",0]]},
+ {b:"나이키",s:"스트리트가토 (실내·스트리트)",role:"풋살·그립",t:"one",m:/스트리트가토/,g:[["스트리트가토","2021",0]]},
+ {b:"아디다스",s:"프레데터",role:"컨트롤·슈팅형",t:"adi",m:/프레데터/,g:[["프레데터 엣지 (.1~.4 등급)","2022-01",1],["프레데터 어큐러시 (.1~.4 등급)","2023-02",1],["프레데터 24","2024",1],["프레데터 25","2024-12",1],["프레데터 26","2026",0]]},
+ {b:"아디다스",s:"X / F50",role:"스피드형",t:"adi",m:/F50|크레이지패스트/,g:[["X 스피드포털 (.1~.4 등급)","2022",1],["X 크레이지패스트","2023",1],["F50 (X 후속)","2024-06",1]]},
+ {b:"아디다스",s:"코파 퓨어",role:"터치·가죽형",t:"adi",m:/코파 퓨어/,g:[["코파 퓨어 (+·.1~.4 등급)","2023",0],["코파 퓨어 2","2024",1],["코파 퓨어 3","2025-01",1]]},
+ {b:"아디다스",s:"코파 문디알 · 문디알",role:"클래식 캥거루 가죽",t:"one",m:/문디알/,g:[["코파 문디알 (첫 출시, 계속 판매)","1979",0],["문디알 팀 TF · 문디알 골 IN (계속 판매)","",0]]},
+ {b:"아디다스",s:"탑 살라 (실내 풋살)",role:"풋살·가성비",t:"one",m:/탑 살라/,g:[["탑 살라 컴페티션","2023",0]]},
+ {b:"푸마",s:"퓨처",role:"드리블·컨트롤형",t:"puma",m:/퓨처/,g:[["퓨처 얼티밋","2023",0],["퓨처 7","2023-12",1],["퓨처 8","2025-01",1],["퓨처 9","2025-12",1]]},
+ {b:"푸마",s:"울트라",role:"스피드형",t:"puma",m:/울트라/,g:[["울트라 얼티밋","2022",0],["울트라 5","2024-05",1],["울트라 6","2025-12",1]]},
+ {b:"푸마",s:"킹",role:"터치·가죽형",t:"puma",m:/킹/,g:[["킹 얼티밋 (리뉴얼)","2023-03",1],["킹 얼티밋 2세대","2024-06",1],["킹 탑 (레트로 디자인)","2025",0]]},
+ {b:"미즈노",s:"모렐리아 네오",role:"터치·가죽형",t:"mizuno",m:/모렐리아 네오/,g:[["모렐리아 네오 4 / 네오 4 베타","2023-07",1],["모렐리아 네오 5 / 네오 5 베타","2026-06",1]]},
+ {b:"미즈노",s:"모렐리아 클래식",role:"천연가죽 스테디셀러",t:"mizuno",m:/^모렐리아 (II|2|TF)/,g:[["모렐리아 II 재팬 · 모렐리아 2 엘리트 · 모렐리아 TF (계속 판매)","",0]]},
+ {b:"미즈노",s:"모렐리아 살라 (풋살 전용)",role:"풋살·가죽 터치",t:"mizuno",m:/모렐리아 살라/,g:[["모렐리아 살라 재팬 TF · 살라 엘리트 TF","",0],["모렐리아 살라 클럽 TF","2023",0],["모렐리아 살라 클래식 TF","2024",0]]},
+ {b:"미즈노",s:"미즈노 알파",role:"스피드형",t:"mizuno",m:/알파/,g:[["미즈노 알파","2022-11",1],["미즈노 알파 2","2025-01",1],["미즈노 알파 3","2025-12",1]]},
+ {b:"미즈노",s:"모나르시다 네오",role:"발볼 넓은 입문형",t:"mona",m:/모나르시다/,g:[["모나르시다 네오 3 (2020년 출시, 계속 판매)","2020",0]]},
+ {b:"뉴발란스",s:"퓨런",role:"스피드형",t:"nb",m:/퓨런/,g:[["퓨런 V7","2022",0],["퓨런 V7+","2024-01",1],["퓨런 V8","2025-01",1]]},
+ {b:"뉴발란스",s:"테켈라",role:"드리블·컨트롤형",t:"nb",m:/테켈라/,g:[["테켈라 V4","2022",0],["테켈라 V4+","2024-01",1],["테켈라 V5","2025-06",1]]},
+ {b:"뉴발란스",s:"442",role:"가죽·편안함",t:"nb",m:/442/,g:[["442 V2","2022",0]]},
+ {b:"아식스",s:"DS 라이트",role:"쿠션·편안함",t:"asics",m:/DS 라이트/,g:[["DS 라이트 클럽","2023",0],["DS 라이트 X-FLY 프로 3","2024-12",1]]},
+ {b:"아식스",s:"C3 FF (풋살)",role:"풋살·캥거루 가죽",t:"one",m:/C3/,g:[["C3 FF TF (2021년 출시, 계속 판매)","2021-08",1]]},
+ {b:"아식스",s:"칼체토 (풋살)",role:"풋살 전용",t:"asics",m:/칼체토/,g:[["칼체토 WD 9","",0]]},
+ {b:"데스포르치",s:"캄피나스",role:"풋살·가죽 터치",t:"one",m:/캄피나스/,g:[["캄피나스 JTF7","2025",0]]},
+ {b:"데스포르치",s:"상루이스",role:"풋살·홀드감",t:"one",m:/상루이스/,g:[["상루이스 KT III","2024",0]]},
+ {b:"데스포르치",s:"테사 라이트",role:"풋살 상급·쿠션",t:"one",m:/테사/,g:[["테사 라이트 TF3","2024",0]]},
+ {b:"아슬레타",s:"오레이",role:"풋살·발볼 여유",t:"one",m:/오레이/,g:[["오레이 트레이닝 T","",0]]},
+ {b:"아슬레타",s:"쿠르투라 (실내 풋살)",role:"풋살·발등 조절",t:"one",m:/쿠르투라/,g:[["쿠르투라 ID","2024",0]]},
+ {b:"조마",s:"탑 플렉스",role:"풋살·가죽",t:"one",m:/탑 플렉스/,g:[["탑 플렉스 TF/IN","",0],["탑 플렉스 리바운드 IN","2023",0]]},
+ {b:"조마",s:"레가테 (실내 풋살)",role:"풋살·가벼움",t:"one",m:/레가테/,g:[["레가테 리바운드 IN","2024",0]]},
+ {b:"조마",s:"아길라",role:"입문 클래식",t:"one",m:/아길라/,g:[["아길라 컵","2023",0]]},
+ {b:"엄브로",s:"벨로시타",role:"입문 스피드형",t:"one",m:/벨로시타/,g:[["벨로시타 클럽","",0]]},
+ {b:"엄브로",s:"액셀러레이터 (실내 풋살)",role:"풋살·넓은 발볼",t:"one",m:/액셀러레이터/,g:[["액셀러레이터 살라 와이드 IN","2026",0]]},
+ {b:"엄브로",s:"스페치알리",role:"클래식 캥거루 가죽",t:"one",m:/스페치알리/,g:[["스페치알리 프로 24 (1998년 모델 복각)","2024",0]]},
+ {b:"스케쳐스",s:"SKX_01",role:"쿠션·넓은 발",t:"one",m:/SKX/,g:[["SKX_01","2023-08",1]]}
 ];
+const lineModels=l=>M.filter(m=>m.cat===CAT&&m.b===l.b&&l.m.test(m.n)).sort((a,b)=>b.sc-a.sc);
 // 상세 카드용: 세대, 출시, 등급 위치, 후속 모델
 const REL={tiempo:["티엠포 레전드 10","2023","nike",1,"티엠포 마에스트로 (2026.01월)"],vapor:["머큐리얼 베이퍼 16","2024","nike",1,"베이퍼 17 (2026.06월)"],phantom:["팬텀 GX 2","2024-01","nike",1,"팬텀 6 (2025.10월)"],
  predator:["프레데터 25","2024-12","adi",2,"프레데터 26 (2026)"],copa:["코파 퓨어 2","2024","adi",2,"코파 퓨어 3 (2025.01월)"],f50:["F50","2024-06","adi",2,""],
@@ -805,10 +824,13 @@ function rateBlock(m){const src=m.rev?`<details class="rv"><summary>리뷰 ${m.r
 function relBlock(m){const r=REL[m.id];if(!r)return"";const [gen,d,t,ti,next]=r;
  return `<div class="rel"><p><span class="k">세대</span> ${gen} · <span class="k">출시</span> ${dtxt(d)}${next?` · <span class="k">후속</span> ${next}`:""}</p>
  <p class="k">등급 (상위 → 하위)</p>${ladder(t,ti)}</div>`}
-function renderLines(){const b=document.getElementById("l-brand").value;
- document.getElementById("lines").innerHTML=LINES.filter(l=>!b||l.b===b).map(l=>`<article class="line">
+function renderLines(){const sel=document.getElementById("l-brand"),V=LINES.filter(l=>lineModels(l).length),bs=[...new Set(V.map(l=>l.b))];
+ if(!bs.includes(sel.value))sel.value="";
+ sel.innerHTML='<option value="">전체</option>'+bs.map(b=>`<option${b===sel.value?" selected":""}>${b}</option>`).join("");const b=sel.value;
+ document.getElementById("lines").innerHTML=V.filter(l=>!b||l.b===b).map(l=>`<article class="line">
   <header class="lh"><h3>${l.b} ${l.s}</h3><span class="pill">${l.role}</span></header>
   <ol class="gens">${l.g.map(([n,d,ok])=>`<li><time>${dtxt(d)}</time><span>${n}</span>${d&&!ok?'<em class="est">추정</em>':""}</li>`).join("")}</ol>
+  <p class="k">이 사이트의 ${({tf:"풋살화",fg:"축구화"})[CAT]}</p><ul class="lm">${lineModels(l).map(m=>`<li><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><a href="/products/${SLUG[m.id]}/">${esc(m.n)}</a><span class="k">${m.pt}점 · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</span></li>`).join("")}</ul>
   <p class="k">등급 (상위 → 하위) · 보통 나오는 밑창</p>${ladder(l.t,-1)}</article>`).join("")}
 
 // tabs
@@ -834,7 +856,7 @@ function renderDB(){const b=fb.value,w=document.getElementById("f-width").value,
  L.sort((x,y)=>k(x,y)||y.sc-x.sc);
  document.getElementById("cards").innerHTML=L.length?L.map(m=>card(m)).join(""):'<p class="empty">조건에 맞는 모델이 없어요. 필터를 하나 풀어 보세요.</p>'}
 document.querySelectorAll("#db .filters select:not(#l-brand)").forEach(s=>s.addEventListener("change",renderDB));renderDB();
-const lb=document.getElementById("l-brand");[...new Set(LINES.map(l=>l.b))].forEach(b=>lb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));lb.addEventListener("change",renderLines);renderLines();
+document.getElementById("l-brand").addEventListener("change",renderLines);renderLines();
 
 // quiz
 const Q=[
@@ -919,7 +941,7 @@ buildQuiz();recommend();
 const NAMEC={tf:"풋살화",fg:"축구화"};
 function setCat(c){CAT=c;document.querySelectorAll(".cat button").forEach(b=>b.setAttribute("aria-checked",b.dataset.cat===c));
  document.getElementById("tierTitle").textContent=`2026 하반기 ${NAMEC[c]} 티어리스트`;document.getElementById("dbTitle").textContent=`주요 ${NAMEC[c]} 상세`;document.getElementById("quizTitle").textContent=`나에게 맞는 ${NAMEC[c]}`;
- renderTier();renderDB();buildQuiz();recommend();try{localStorage.setItem("cat",c)}catch(e){}}
+ renderTier();renderDB();renderLines();buildQuiz();recommend();try{localStorage.setItem("cat",c)}catch(e){}}
 document.querySelectorAll(".cat button").forEach(b=>b.addEventListener("click",()=>setCat(b.dataset.cat)));
 function toast(t){let e=document.getElementById("toast");if(!e){e=document.createElement("div");e.id="toast";e.setAttribute("role","status");document.body.appendChild(e)}
  e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),3500)}
