@@ -513,7 +513,7 @@ function card(m,extra=""){return `<article class="card" id="m-${m.id}">
  <p class="size">사이즈 <b>${SIZE[m.id]||"정보 없음"}</b></p>
  ${relBlock(m)}
  <p class="note">${esc(m.note)}</p>${rateBlock(m)}${extra}
- <div class="links">${SLUG[m.id]?`<a href="/products/${SLUG[m.id]}/">자세히 보기</a>`:""}<a href="${shop(m)}" target="_blank" rel="noopener sponsored">가격 보기</a></div></article>`}
+ <div class="links">${SLUG[m.id]?`<a href="/products/${SLUG[m.id]}/">자세히 보기</a>`:""}<a href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 보기</a></div></article>`}
 
 // 2022년 이후 브랜드별 라인업. 날짜: 세대 첫 출시(글로벌). ok=1 출처 확인, 0 추정. 컬러웨이 팩은 제외
 const STUD={nike:[["엘리트","FG · AG · SG"],["프로","FG · TF · IC"],["아카데미","MG · TF · IC"],["클럽","MG · TF · IC"]],
@@ -667,7 +667,7 @@ function recommend(){
  document.getElementById("res").innerHTML="<h2>추천 결과</h2>"+(note?`<p class="notice" style="margin:0">${note}</p>`:"")+R.slice(0,3).map((r,i)=>`<article class="card"><div class="rank">${i+1}</div><div class="shot">${shoe(r.m.id)}</div><div style="min-width:0;flex:1">
   <div class="meta"><span class="tb" style="background:${tc(r.m.tier)}">${r.m.tier}</span><span class="pill">${esc(r.m.b)}</span><span class="pill">약 ${won(r.m.won)}</span><span class="score">적합도 ${Math.max(0,Math.round(r.s/max*100))}%</span></div>
   <h3 style="margin:6px 0 0">${esc(r.m.n)}</h3><ul class="why">${r.why.map(w=>`<li>${w}</li>`).join("")}</ul>
-  <div class="links" style="margin-top:8px"><a href="${shop(r.m)}" target="_blank" rel="noopener">가격 보기</a></div></div></article>`).join("")}
+  <div class="links" style="margin-top:8px">${SLUG[r.m.id]?`<a href="/products/${SLUG[r.m.id]}/">자세히 보기</a>`:""}<a href="${shop(r.m)}" target="_blank" rel="noopener sponsored" data-m="${r.m.id}">가격 보기</a></div></div></article>`).join("")+`<div class="links" style="margin-top:4px"><button type="button" class="rvbtn" id="shareRes" style="margin-left:0">내 추천 결과 공유하기</button></div>`}
 buildQuiz();recommend();
 const NAMEC={tf:"풋살화",fg:"축구화"};
 function setCat(c){CAT=c;document.querySelectorAll(".cat button").forEach(b=>b.setAttribute("aria-checked",b.dataset.cat===c));
@@ -711,4 +711,20 @@ if(location.hash.startsWith("#m-")){const id=location.hash.slice(3),m=M.find(x=>
 const HOT=["salajp","morelia","g_ph6e","g_vap17e","predator","tiempo","monarcida","c3ff"];
 document.getElementById("hotList").innerHTML=HOT.map(id=>M.find(m=>m.id===id)).filter(Boolean).map(m=>`<a href="/products/${SLUG[m.id]}/">${esc(m.n.replace(/ (TF|FG|AS|MG|TT)$/,""))}</a>`).join("");
 document.getElementById("startQuiz").addEventListener("click",()=>{show("quiz");document.getElementById("quiz").scrollIntoView({behavior:"smooth"})});
+// 사용 기록(익명)과 결과 공유
+const track=(type,o={})=>{try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type,page:location.pathname,...o})],{type:"application/json"}))}catch(e){}};
+document.addEventListener("click",e=>{const a=e.target.closest("a[data-m]");if(a)track("buy",{model:a.dataset.m})});
+const qStr=()=>[CAT,ans.venue,ans.width,ans.style,ans.pref,ans.budget].join(",");
+let qT=null;const logQuiz=()=>{clearTimeout(qT);qT=setTimeout(()=>track("quiz",{q:qStr()}),1500)};
+document.getElementById("qs").addEventListener("click",e=>{if(e.target.closest("button"))logQuiz()});
+document.getElementById("qs").addEventListener("input",logQuiz);
+document.addEventListener("click",async e=>{if(!e.target.closest("#shareRes"))return;
+ const u=new URL(location.origin+"/");u.search=new URLSearchParams({c:CAT,v:ans.venue,w:ans.width,s:ans.style,p:ans.pref,b:ans.budget}).toString();u.hash="quiz";
+ const top=document.querySelector("#res h3")?.textContent||"";track("share",{q:qStr()});
+ const text=`FootRank가 추천한 내 ${CAT==="fg"?"축구화":"풋살화"} 1위: ${top}`;
+ try{if(navigator.share){await navigator.share({title:"FootRank",text,url:u.toString()});return}}catch(err){return}
+ try{await navigator.clipboard.writeText(text+" "+u);toast("링크를 복사했어요. 친구에게 붙여 넣어 보내 보세요")}catch(err){toast(u.toString())}});
+{const P=new URLSearchParams(location.search);if(P.get("v")){if(P.get("c")==="fg"||P.get("c")==="tf")setCat(P.get("c"));
+ for(const [k,key] of [["v","venue"],["w","width"],["s","style"],["p","pref"]])if(P.get(k))ans[key]=P.get(k);
+ const bd=+P.get("b");if(bd>0)ans.budget=bd;buildQuiz();recommend();show("quiz");setTimeout(()=>document.getElementById("res").scrollIntoView(),60)}}
 </script>

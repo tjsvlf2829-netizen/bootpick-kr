@@ -41,7 +41,7 @@ fs.rmSync("dist", { recursive: true, force: true });
 fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
-const foot = `<p class="disc">${DISCLOSURE}</p>`;
+const foot = `<p class="disc">${DISCLOSURE}</p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
 const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
@@ -86,7 +86,7 @@ for (const m of M) {
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
 <p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · ${m.sc.toFixed(2)}점 <span class="k">(유저 리뷰가 쌓이면 바뀌어요)</span></p>
 <p><b>${esc(m.note)}</b></p>
-<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기 · 다른 모델과 비교</a></div></div>
+<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기 · 다른 모델과 비교</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("") || "<li>뚜렷한 약점이 적은 편이에요</li>"}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
@@ -143,7 +143,7 @@ ${Object.keys(RL).map((k) => scoreRow(k, a, b)).join("")}
 <tr><th>사이즈</th><td>${esc(SIZE[a.id] || "")}</td><td>${esc(SIZE[b.id] || "")}</td></tr></tbody></table>
 <h2>결론: 이렇게 고르세요</h2><ul>${verdict.join("") || "<li>항목 점수가 거의 같아요. 디자인과 가격으로 골라도 괜찮아요.</li>"}</ul>
 <h2>한 줄 평</h2><ul><li><b>${esc(a.n)}</b>: ${esc(a.note)}</li><li><b>${esc(b.n)}</b>: ${esc(b.note)}</li></ul>
-<div class="cta"><a class="pri" href="${shop(a)}" target="_blank" rel="noopener sponsored">${esc(a.n)} 가격 확인</a><a class="pri" href="${shop(b)}" target="_blank" rel="noopener sponsored">${esc(b.n)} 가격 확인</a></div>
+<div class="cta"><a class="pri" href="${shop(a)}" target="_blank" rel="noopener sponsored" data-m="${a.id}">${esc(a.n)} 가격 확인</a><a class="pri" href="${shop(b)}" target="_blank" rel="noopener sponsored" data-m="${b.id}">${esc(b.n)} 가격 확인</a></div>
 <p><a href="/">내 스타일로 다시 추천받기 →</a></p>${foot}</main></body></html>`);
 }
 page("/compare/", head(`축구화·풋살화 비교 | ${NAME}`, "많이 고민하는 축구화·풋살화 두 모델을 발볼, 터치, 쿠션, 가격으로 비교했어요.", "/compare/") +
@@ -158,7 +158,7 @@ for (const B of BEST) {
 <ol class="best">${L.map((m) => `<li><h2><a href="${url(m)}">${esc(m.b + " " + m.n)}</a> <span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span></h2>
 <p class="k">${why(m) || "균형형"} · 약 ${m.won.toLocaleString("ko-KR")}원 · 사이즈 ${esc(SIZE[m.id] || "정보 없음")}</p><p>${esc(m.note)}</p>
 <div class="bars"><span>발볼</span>${bar(m.width)}<span>터치</span>${bar(m.touch)}<span>쿠션</span>${bar(m.cushion)}<span>가벼움</span>${bar(m.light)}</div>
-<div class="cta"><a href="${url(m)}">자세히 보기</a><a href="${shop(m)}" target="_blank" rel="noopener sponsored">가격 확인</a></div></li>`).join("")}</ol>
+<div class="cta"><a href="${url(m)}">자세히 보기</a><a href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a></div></li>`).join("")}</ol>
 <h2>고를 때 팁</h2><p>${esc(B.tip)}</p><p><a href="/">내 구장·스타일·예산으로 다시 추천받기 →</a></p>${foot}</main></body></html>`);
 }
 page("/best/", head(`조건별 축구화·풋살화 추천 | ${NAME}`, "발볼 넓은, 10만원 이하, 가벼운, 터치 좋은, 발 편한 풋살화와 축구화 추천 모음.", "/best/") +
