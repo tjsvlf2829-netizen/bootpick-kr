@@ -45,6 +45,7 @@ h2{font-family:var(--display);font-weight:800;font-size:1.5rem;margin:0 0 4px;te
 .chip small{display:block;color:var(--muted);font-size:.75rem}
 .chip:hover{border-color:var(--turf)}
 /* db */
+.dbq{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 6px;margin-bottom:6px}.dbq input{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);margin-top:4px}.dbq input:focus{outline:2px solid var(--turf);outline-offset:1px}.dbq p{margin:4px 0 0}.dbq p:empty{display:none}
 .filters{display:flex;flex-wrap:wrap;gap:8px 12px;margin-bottom:14px}
 .filters label{display:flex;flex-direction:column;font-size:.78rem;color:var(--muted);gap:2px;letter-spacing:.03em}
 select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
@@ -202,6 +203,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
   <section id="db" class="hidden-tab">
     <h2>모델별 특징</h2>
     <p class="sub">위에서 브랜드별 세대와 등급을 보고, 아래에서 모델을 자세히 비교해요.</p>
+    <div class="dbq"><label for="dbq" class="k">모델 검색</label><input id="dbq" type="search" placeholder="예: 머큐리얼, 프레데터, mizuno, 모렐리아" autocomplete="off" enterkeyhint="search"><p class="k" id="dbqHit" aria-live="polite"></p></div>
     <h3 class="h3">브랜드별 전체 라인업 (2022년 이후)</h3>
     <p class="sub">축구화(FG·AG)와 풋살화(TF·IC)는 같은 모델의 밑창 버전이에요. 세대별 첫 출시 시기와 상위~하위 등급을 함께 보여줘요. 추정 표시가 있는 날짜는 아직 출처로 확인하지 못한 값이에요.</p>
     <div class="filters"><label for="l-brand">브랜드<select id="l-brand"><option value="">전체</option></select></label></div>
@@ -1489,14 +1491,20 @@ function rateBlock(m){const src=m.rsum?`<details class="rv"><summary>리뷰 종�
 function relBlock(m){const r=REL[m.id];if(!r)return"";const [gen,d,t,ti,next]=r;
  return `<div class="rel"><p><span class="k">세대</span> ${gen} · <span class="k">출시</span> ${dtxt(d)}${next?` · <span class="k">후속</span> ${next}`:""}</p>
  <p class="k">등급 (상위 → 하위)</p>${ladder(t,ti)}</div>`}
+const qn=s=>(s||"").toLowerCase().replace(/[\s\-·_]/g,"");
+const qHit=m=>{const q=qn(document.getElementById("dbq")?.value);return !q||qn(m.n+m.b+(SLUG[m.id]||"")+(BRAND_EN[m.b]||"")+(m.up||"")).includes(q)};
+function dbSearch(){renderLines();renderDB();const q=document.getElementById("dbq").value.trim(),el=document.getElementById("dbqHit");
+ if(!q){el.textContent="";return}const n=M.filter(m=>m.cat===CAT&&qHit(m)).length,o=M.filter(m=>m.cat!==CAT&&qHit(m)).length,oc=CAT==="tf"?"축구화":"풋살화";
+ el.textContent=n?`${n}개 모델을 찾았어요${o?` (${oc} 탭에 ${o}개 더)`:""}.`:(o?`이 탭에는 없고 ${oc} 탭에 ${o}개 있어요.`:"찾는 모델이 없어요. 다른 이름이나 영어로 검색해 보세요.")}
 function renderLines(){const sel=document.getElementById("l-brand"),V=LINES.filter(l=>lineModels(l).length),bs=[...new Set(V.map(l=>l.b))];
  if(!bs.includes(sel.value))sel.value="";
  sel.innerHTML='<option value="">전체</option>'+bs.map(b=>`<option${b===sel.value?" selected":""}>${b}</option>`).join("");const b=sel.value;
- document.getElementById("lines").innerHTML=V.filter(l=>!b||l.b===b).map(l=>`<article class="line">
+ const Q=qn(document.getElementById("dbq")?.value),V2=V.filter(l=>(!b||l.b===b)&&(!Q||qn(l.b+l.s+(BRAND_EN[l.b]||"")).includes(Q)||lineModels(l).some(qHit)));
+ document.getElementById("lines").innerHTML=V2.length?V2.map(l=>`<article class="line">
   <header class="lh"><h3>${l.b} ${l.s}</h3><span class="pill">${l.role}</span></header>
   <ol class="gens">${l.g.map(([n,d,ok])=>`<li><time>${dtxt(d)}</time><span>${n}</span>${d&&!ok?'<em class="est">추정</em>':""}</li>`).join("")}</ol>
   <p class="k">이 사이트의 ${({tf:"풋살화",fg:"축구화"})[CAT]}</p><ul class="lm">${lineModels(l).map(m=>`<li><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><a href="/products/${SLUG[m.id]}/">${esc(m.n)}</a><span class="k">${m.pt}점 · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</span></li>`).join("")}</ul>
-  ${otherHint(l)}<p class="k">등급 (상위 → 하위) · 보통 나오는 밑창</p>${ladder(l.t,-1)}</article>`).join("")}
+  ${otherHint(l)}<p class="k">등급 (상위 → 하위) · 보통 나오는 밑창</p>${ladder(l.t,-1)}</article>`).join(""):'<p class="empty">검색어에 맞는 라인업이 없어요.</p>'}
 function otherHint(l){const oc=CAT==="tf"?"fg":"tf",O=lineModels(l,oc);if(!O.length)return"";
  const keys=l.g[l.g.length-1][0].replace(/\(.*?\)/g,"").split(/[\/·]/).map(x=>x.trim()).filter(Boolean),isNew=m=>keys.some(k=>m.n.includes(k));
  const top=O.filter(m=>/엘리트|얼티밋|얼티메이트|재팬/.test(m.n)).sort((a,b)=>isNew(b)-isNew(a)).map(m=>m.n);
@@ -1522,12 +1530,13 @@ document.getElementById("tierList").addEventListener("click",e=>{const c=e.targe
 // db
 const fb=document.getElementById("f-brand");[...new Set(M.map(m=>m.b))].forEach(b=>fb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));
 function renderDB(){const b=fb.value,w=document.getElementById("f-width").value,p=document.getElementById("f-price").value,s=document.getElementById("f-sort").value;
- let L=M.filter(m=>m.cat===CAT&&(!b||m.b===b)&&(!w||wcls(m.width)===w)&&(!p||m.price==p));
+ let L=M.filter(m=>m.cat===CAT&&qHit(m)&&(!b||m.b===b)&&(!w||wcls(m.width)===w)&&(!p||m.price==p));
  const k={tier:(x,y)=>y.sc-x.sc,light:(x,y)=>y.light-x.light,cushion:(x,y)=>y.cushion-x.cushion,price:(x,y)=>x.price-y.price,value:(x,y)=>y.vs-x.vs}[s];
  L.sort((x,y)=>k(x,y)||y.sc-x.sc);
  document.getElementById("cards").innerHTML=L.length?L.map(m=>card(m)).join(""):'<p class="empty">조건에 맞는 모델이 없어요. 필터를 하나 풀어 보세요.</p>'}
 document.querySelectorAll("#db .filters select:not(#l-brand)").forEach(s=>s.addEventListener("change",renderDB));renderDB();
 document.getElementById("l-brand").addEventListener("change",renderLines);renderLines();
+document.getElementById("dbq").addEventListener("input",dbSearch);
 document.getElementById("lines").addEventListener("click",e=>{const b=e.target.closest("[data-cat-go]");if(b){const y=b.closest(".line").querySelector("h3").textContent;setCat(b.dataset.catGo);const h=[...document.querySelectorAll("#lines .line h3")].find(x=>x.textContent===y);h?.scrollIntoView({block:"center"})}});
 
 // quiz
@@ -1613,7 +1622,7 @@ buildQuiz();recommend();
 const NAMEC={tf:"풋살화",fg:"축구화"};
 function setCat(c){CAT=c;document.querySelectorAll(".cat button").forEach(b=>b.setAttribute("aria-checked",b.dataset.cat===c));
  document.getElementById("tierTitle").textContent=`${NAMEC[c]} 티어리스트`;renderCrit(c);document.getElementById("dbTitle").textContent=`주요 ${NAMEC[c]} 상세`;document.getElementById("quizTitle").textContent=`나에게 맞는 ${NAMEC[c]}`;
- renderTier();renderDB();renderLines();buildQuiz();recommend();if(typeof initVS==="function")initVS();try{localStorage.setItem("cat",c)}catch(e){}}
+ renderTier();dbSearch();buildQuiz();recommend();if(typeof initVS==="function")initVS();try{localStorage.setItem("cat",c)}catch(e){}}
 document.querySelectorAll(".cat button").forEach(b=>b.addEventListener("click",()=>setCat(b.dataset.cat)));
 function toast(t){let e=document.getElementById("toast");if(!e){e=document.createElement("div");e.id="toast";e.setAttribute("role","status");document.body.appendChild(e)}
  e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),3500)}
