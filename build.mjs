@@ -55,15 +55,30 @@ fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
   body.replace(/<script>/, `<footer class="pg"><nav aria-label="전체 모델">${links}</nav>${foot}</footer>\n<script>`) + "</body></html>");
 
-// 이런 사람 추천 / 비추천: 항목 점수에서 규칙으로 뽑음
+// 이런 사람 추천 / 비추천: 항목 점수를 같은 종류 평균과 비교해 규칙으로 뽑음. 비추천은 모델마다 최소 2개
+const AVG = {};
+for (const c of ["tf", "fg"]) { const L = M.filter((m) => m.cat === c); AVG[c] = Object.fromEntries(["width", "light", "cushion", "touch", "dur"].map((k) => [k, L.reduce((a, m) => a + m[k], 0) / L.length])); }
+const indoor = (m) => /\b(IC|IN)\b|실내|살라 .*IN/.test(m.n);
 function fitFor(m) {
-  const yes = [], no = [];
-  if (m.width >= 4) yes.push("발볼이 넓은 편인 사람"); else if (m.width <= 2) { yes.push("발볼이 좁거나 발에 딱 붙는 핏을 좋아하는 사람"); no.push("발볼이 넓은 사람 (신어 보거나 반 치수 업 권장)"); }
-  if (m.touch >= 4.5) yes.push("공 터치감을 가장 중요하게 보는 사람"); else if (m.touch <= 2) no.push("부드러운 터치감을 원하는 사람");
-  if (m.light >= 4.5) yes.push("순간 스피드가 중요한 윙어·공격수"); else if (m.light <= 2.5) no.push("아주 가벼운 신발을 원하는 사람");
-  if (m.cushion >= 4) yes.push("딱딱한 인조잔디에서 오래 뛰어도 발이 편해야 하는 사람"); else if (m.cushion <= 2) no.push("쿠션이 푹신한 신발을 원하는 사람");
-  if (m.dur >= 4) yes.push("자주 뛰어서 오래 신을 신발이 필요한 사람"); else if (m.dur <= 2) no.push("주 2회 이상 뛰며 한 켤레를 오래 신으려는 사람");
-  if (m.won <= 100000) yes.push("10만원 안팎에서 고르는 사람"); else if (m.won >= 250000) no.push("가성비가 최우선인 사람");
+  const yes = [], no = [], A = AVG[m.cat], leather = /천연 ?가죽|캥거루|소가죽|풀그레인|K-?레더|가죽 앞코/.test(m.up);
+  if (m.width >= 4) { yes.push("발볼이 넓은 편인 사람"); no.push("발볼이 좁은 사람 (안에서 발이 놀 수 있어 끈을 단단히 묶거나 반 치수 다운 고려)"); }
+  else if (m.width <= 2) { yes.push("발볼이 좁거나 발에 딱 붙는 핏을 좋아하는 사람"); no.push("발볼이 넓은 사람 (신어 보거나 반 치수 업 권장)"); }
+  if (m.touch >= 4.5) yes.push("공 터치감을 가장 중요하게 보는 사람"); else if (m.touch <= A.touch - 0.5) no.push("맨발 같은 부드러운 터치감을 원하는 사람");
+  if (m.light >= 4.5) yes.push("순간 스피드가 중요한 윙어·공격수"); else if (m.light <= A.light - 0.5) no.push("가벼움을 가장 중요하게 보는 스피드형 선수");
+  if (m.cushion >= 4) yes.push("딱딱한 인조잔디에서 오래 뛰어도 발이 편해야 하는 사람"); else if (m.cushion <= A.cushion - 0.5) no.push("쿠션이 푹신한 신발을 원하는 사람");
+  if (m.dur >= 4) yes.push("자주 뛰어서 오래 신을 신발이 필요한 사람"); else if (m.dur <= A.dur - 0.5) no.push("주 2회 이상 뛰며 한 켤레를 오래 신으려는 사람");
+  if (m.grip != null && m.gripKnown && m.grip >= 4.5) yes.push("급정지·방향 전환이 많은 플레이");
+  if (leather) no.push("가죽 관리(젖은 뒤 말리기·오염 관리)가 번거로운 사람");
+  if (m.won <= 100000) yes.push("10만원 안팎에서 고르는 사람"); else if (m.won >= 200000) no.push(`예산이 15만원 이하인 사람 (약 ${Math.round(m.won / 10000)}만원대)`);
+  if (m.cat === "tf" && indoor(m)) no.push("인조잔디 구장 위주로 뛰는 사람 (실내 코트용 평평한 밑창)");
+  else if (m.cat === "tf") no.push("실내 마룻바닥 코트 위주로 뛰는 사람 (인조잔디용 고무 스터드)");
+  if (m.cat === "fg" && /FG/.test(m.n) && !/AG|MG/.test(m.n)) no.push("인조잔디 구장 위주인 사람 (FG 전용 스터드는 AG·MG 모델이 더 안전)");
+  if (m.cat === "fg" && /AG/.test(m.n) && !/FG/.test(m.n)) no.push("천연잔디 경기 위주인 사람 (AG 스터드는 짧아 천연잔디에선 덜 박혀요)");
+  // 상대적으로 가장 약한 항목을 하나 더 짚어 줌 (중복 방지)
+  const weaks = ["touch", "light", "cushion", "dur"].map((k) => [k, m[k] - A[k]]).sort((a, b) => a[1] - b[1]);
+  const W = { touch: "터치감", light: "가벼움", cushion: "쿠션", dur: "내구성" };
+  no.splice(0, no.length, ...new Set(no));
+  for (const [k] of weaks) { if (no.length >= 2) break; const t = `${W[k]}을 가장 중요하게 보는 사람 (이 모델에서 상대적으로 약한 항목)`; if (!no.includes(t)) no.push(t); }
   return { yes: yes.slice(0, 4), no: no.slice(0, 3) };
 }
 
@@ -89,7 +104,7 @@ for (const m of M) {
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
-<div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("") || "<li>뚜렷한 약점이 적은 편이에요</li>"}</ul></div></div>
+<div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("")}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
 <table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원 <span class="k">(정가 기준 참고값, 실제 판매가는 판매처에서 확인)</span></td></tr>${gen}
 <tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")} · <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산</a></td></tr></tbody></table>

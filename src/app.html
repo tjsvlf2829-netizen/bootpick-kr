@@ -151,6 +151,7 @@ input[type=range]:focus-visible{outline:2px solid var(--turf);outline-offset:4px
 .cat{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:-6px 0 18px;background:var(--surface)}
 .cat button{font:inherit;font-weight:700;border:0;background:transparent;color:var(--ink);padding:8px 16px;cursor:pointer;display:flex;gap:6px;align-items:baseline}
 .cat button small{font-weight:400;color:var(--muted);font-size:.72rem}
+.surf{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}.surf[hidden]{display:none}.surf button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}.surf button[aria-pressed="true"]{background:var(--turf-soft);color:var(--turf);border-color:var(--turf)}
 .cat button[aria-checked="true"]{background:var(--turf-soft);color:var(--turf);box-shadow:inset 0 -3px 0 var(--turf)}
 .hidden-tab{display:none}
 footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--line);padding-top:12px}
@@ -184,6 +185,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
 
   <section id="tier">
     <h2 id="tierTitle">풋살화 티어리스트</h2>
+    <div class="surf" id="surf" role="group" aria-label="구장"><button data-s="all" aria-pressed="true">전체</button><button data-s="tf" aria-pressed="false">인조잔디 (TF)</button><button data-s="ic" aria-pressed="false">실내 코트 (IC)</button></div>
     <p class="sub"><span id="tierCount"></span> 같은 공식으로 점수 매겨 나눴어요. 모델을 누르면 특징을 볼 수 있어요.</p>
     <p class="live"><b>이 티어는 고정이 아니에요.</b> 유저 리뷰가 쌓일 때마다 점수와 티어가 실시간으로 다시 매겨져요. 신어 본 모델이 있다면 카드의 <b>리뷰 남기기</b>로 순위에 참여해 주세요.</p>
     <details class="crit" open><summary>티어 나누는 기준</summary>
@@ -193,7 +195,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
         <p id="wtNote"></p>
         <p><b>가성비 좋음</b> 표시는 <b>12만 원 이하</b> 모델 중에서 성능 점수가 상위 4분의 1이면서 같은 종류 전체에서 중간보다 높은 모델에 붙어요. 티어(성능)와는 따로 계산해요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
         <p id="cutNote"></p>
-        <p><b>점수가 바뀌는 방식</b>: 처음 점수는 공개 리뷰·가이드·커뮤니티 글을 종합한 값이고, <b>유저 리뷰 10명분</b>의 무게로 시작해요. 유저가 발볼·가벼움·쿠션·터치·내구성을 각각 1~5점으로 매기면 항목마다 유저 평균 쪽으로 옮겨가고(10명이면 반반), 위 공식으로 총점과 티어가 자동으로 다시 계산돼요. 모델 카드의 "리뷰 남기기"에서 한줄평과 함께 남길 수 있어요.</p>
+        <p><b>평가 항목과 리뷰 항목은 같아요</b>: 리뷰에서 매기는 <b>발볼·쿠션·가벼움·터치·내구성·접지력</b>이 그대로 점수에 들어가요. 표의 <b>발 편안함</b>은 쿠션과 발볼 점수를 합쳐 계산해요. 처음 점수는 공개 리뷰·가이드·판매처 구매평을 종합한 값이고 유저 리뷰 10명분의 무게로 시작해요. 유저 리뷰가 쌓이면 항목마다 유저 평균 쪽으로 옮겨가고(10명이면 반반), 총점과 티어가 자동으로 다시 계산돼요. 접지력은 리뷰에서 선택 항목이고, 근거가 없는 모델은 유저 접지력 평가가 3명 이상 모이면 반영돼요.</p>
         <p class="k">비중은 운영자 판단이에요. 모든 모델은 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요. 모델당 3~10곳(평균 6곳)의 자료를 참고했어요.</p>
       </div></details>
     <div id="tierList"></div>
@@ -1356,7 +1358,7 @@ const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
 // 티어 컷: 종류별로 따로. 축구화는 상위 점수대가 몰려 있어 S가 너무 많아지지 않게 높게 잡음(2026-10)
 const CUT={tf:[78,72,62],fg:[83,76,66]};
 const tierOf=(p,c)=>{const t=CUT[c||"tf"];return p>=t[0]?"S":p>=t[1]?"A":p>=t[2]?"B":"C"};
-const WDESC={touch:["터치","공이 발에 닿는 느낌"],comfort:["발 편안함","쿠션과 발볼 여유"],light:["가벼움","순간 스피드와 피로도"],dur:["내구성","밑창·어퍼가 버티는 기간"],grip:["접지력","멈추고 방향 바꿀 때 미끄러지지 않는지. 리뷰 근거가 있는 모델만 넣고, 없으면 나머지 항목 비중을 키워 계산해요(감점 없음)"]};
+const WDESC={touch:["터치","공이 발에 닿는 느낌"],comfort:["발 편안함","쿠션 점수와 발볼 점수를 합쳐 계산"],light:["가벼움","순간 스피드와 피로도"],dur:["내구성","밑창·어퍼가 버티는 기간"],grip:["접지력","멈추고 방향 바꿀 때 미끄러지지 않는지. 리뷰 근거가 있는 모델만 넣고, 없으면 나머지 항목 비중을 키워 계산해요(감점 없음)"]};
 const WWHY={tf:{touch:"풋살은 짧은 패스·트래핑이 많아서 가장 크게 봐요",comfort:"딱딱한 인조잔디에서 오래 뛰는 국내 환경 반영"},fg:{touch:"볼 컨트롤은 포지션과 관계없이 중요해요",light:"넓은 구장에서 스프린트가 많아 크게 봐요",grip:"스터드가 잔디를 잘 물어야 빠르게 방향을 바꿔요"}};
 function renderCrit(c){const W=WC[c],t=CUT[c],b=document.getElementById("wtBody");if(!b)return;
  b.innerHTML=Object.keys(W).sort((x,y)=>W[y]-W[x]).map(k=>`<tr><td>${WDESC[k][0]}</td><td>${Math.round(W[k]*100)}%</td><td>${WDESC[k][1]}${WWHY[c][k]?". "+WWHY[c][k]:""}</td></tr>`).join("");
@@ -1509,10 +1511,14 @@ function show(tab){document.querySelectorAll("nav button").forEach(b=>b.setAttri
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 
 // tier list
-function renderTier(){const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
+// 풋살화는 인조잔디(TF)와 실내 코트(IC/IN) 밑창이 달라서 구장별로 나눠 볼 수 있게 함
+const isIndoor=m=>m.cat==="tf"&&/\b(IC|IN|ID)\b|실내/.test(m.n);let SURF="all";
+function renderTier(){const sf=document.getElementById("surf");if(sf){sf.hidden=CAT!=="tf";sf.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===SURF))}
+ const L=M.filter(m=>m.cat===CAT&&(CAT!=="tf"||SURF==="all"||(SURF==="ic")===isIndoor(m))).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
 document.getElementById("tierList").innerHTML=TIERS.map(t=>`<div class="tier"><div class="lbl" style="background:${tc(t)}">${t}</div><div class="row">${
- L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)} · ${m.pt}점${m.vgood?" · 가성비":""} · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
+ L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)}${isIndoor(m)?" · 실내용":""} · ${m.pt}점${m.vgood?" · 가성비":""} · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
 renderTier();
+document.getElementById("surf").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b)return;SURF=b.dataset.s;renderTier()});
 document.getElementById("tierList").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
  ["f-brand","f-width","f-price"].forEach(i=>document.getElementById(i).value="");renderDB();show("db");
  const el=document.getElementById("m-"+c.dataset.id);if(el){el.scrollIntoView({block:"center"});el.style.borderColor="var(--turf)"}});
@@ -1620,7 +1626,7 @@ document.body.insertAdjacentHTML("beforeend",`<dialog id="rvd"><form method="dia
  ${RK.map(k=>`<div class="rrow"><b>${RLAB[k][0]}</b><span class="stars" data-k="${k}">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" aria-label="${RLAB[k][0]} ${i}점">★</button>`).join("")}</span><small>1 ${RLAB[k][1]} · 5 ${RLAB[k][2]}</small></div>`).join("")}
  <div class="rrow"><b>접지력</b><span class="stars" data-k="grip">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}" aria-label="접지력 ${i}점">★</button>`).join("")}</span><small>1 미끄러움 · 5 꽉 잡힘 (선택)</small></div>
  <div class="rrow"><b>사이즈</b><span class="fitb">${[[-1,"작게 나옴"],[0,"맞음"],[1,"크게 나옴"]].map(([v,t])=>`<button type="button" data-fit="${v}">${t}</button>`).join("")}</span><small>평소 신는 사이즈 기준 (선택)</small></div>
- <p class="k" style="margin:6px 0 0;font-size:.76rem">남긴 점수는 바로 티어 계산에, 사이즈는 사이즈 환승기에 반영돼요.</p>
+ <p class="k" style="margin:6px 0 0;font-size:.76rem">여기서 매긴 여섯 항목이 그대로 티어 점수에 들어가요(쿠션+발볼 = 발 편안함). 사이즈는 사이즈 환승기에 반영돼요.</p>
  <input type="text" id="rvc" maxlength="60" placeholder="한줄평 (선택, 60자)">
  <div class="dact"><button type="button" class="del" id="rvdel">삭제</button><button type="button" id="rvx">닫기</button><button type="button" class="pri" id="rvs">저장</button></div></form></dialog>`);
 const dlg=document.getElementById("rvd");let cur=null,draft={};
