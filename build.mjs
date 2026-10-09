@@ -5,7 +5,7 @@ import vm from "node:vm";
 import { COMPARE, BEST, GUIDES } from "./content.mjs";
 
 const SITE = (process.env.SITE_URL || "https://bootpick-kr.pages.dev").replace(/\/$/, "");
-const NAME = "FootRank";
+const NAME = "FootPick";
 const DISCLOSURE = "이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
 const app = fs.readFileSync("src/app.html", "utf8");
 const style = app.match(/<style>[\s\S]*?<\/style>/)[0];
@@ -15,8 +15,8 @@ const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 // 데이터 부분만 실행해서 모델 목록을 얻음 (DOM 코드 이전까지)
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN};", ctx);
-const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN } = ctx.D;
+vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED};", ctx);
+const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
@@ -41,7 +41,7 @@ fs.rmSync("dist", { recursive: true, force: true });
 fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
-const foot = `<p class="disc">${DISCLOSURE}</p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
+const foot = `<p class="disc">${DISCLOSURE}</p><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
 const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
@@ -52,7 +52,7 @@ const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</
 const links = ["tf", "fg"].map((c) => `<h3>${c === "fg" ? "축구화" : "풋살화"} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
 const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
 fs.writeFileSync("dist/index.html",
-  head(`${NAME} 풋랭크 | 나에게 맞는 축구화·풋살화 찾기, 2026 티어리스트`, "구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. 56개 모델 티어리스트와 리뷰 기반 비교.", "/") +
+  head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
   body.replace(/<script>/, `<footer class="pg"><nav aria-label="전체 모델">${links}</nav>${foot}</footer>\n<script>`) + "</body></html>");
 
 // 이런 사람 추천 / 비추천: 항목 점수에서 규칙으로 뽑음
@@ -84,13 +84,14 @@ for (const m of M) {
 <p class="crumb"><a href="/">${NAME}</a> › <a href="/${m.cat === "fg" ? "football" : "futsal"}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
 <h1>${esc(m.b)} ${esc(m.n)}</h1>
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
-<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외. 유저 리뷰가 쌓이면 바뀌어요)</span></p>
+<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외)</span></p>
+<p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요${m.rev && m.rev.length <= 2 ? " (자료가 적어 추정 비중이 커요)" : ""}. ${UPDATED} 기준이고, 유저 리뷰가 쌓이면 메인 페이지 점수에 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("") || "<li>뚜렷한 약점이 적은 편이에요</li>"}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
-<table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원</td></tr>${gen}
+<table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원 <span class="k">(정가 기준 참고값, 실제 판매가는 판매처에서 확인)</span></td></tr>${gen}
 <tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")} · <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산</a></td></tr></tbody></table>
 <div class="bars" style="margin-top:12px"><span>발볼</span>${bar(m.width)}<span>가벼움</span>${bar(m.light)}<span>쿠션</span>${bar(m.cushion)}<span>터치</span>${bar(m.touch)}<span>내구성</span>${bar(m.dur)}</div>
 <p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
@@ -176,7 +177,22 @@ page("/guides/", head(`축구화·풋살화 가이드 | ${NAME}`, "TF와 IC 차�
 
 fs.writeFileSync("dist/_redirects", redirects.join("\n") + "\n");
 
-const urls = ["/", "/futsal/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
+page("/about/", head(`평가 방법·운영 정보 | ${NAME}`, "풋픽 점수와 티어를 매기는 방법, 데이터 출처, 업데이트 주기, 제휴 고지.", "/about/") +
+  `<main class="pg guide">${nav}<h1>평가 방법·운영 정보</h1>
+<h2>점수는 이렇게 매겨요</h2><p>모델마다 발볼·가벼움·쿠션·터치·내구성을 1~5점으로 매긴 뒤, 항목별 비중을 곱해 100점 만점으로 바꿔요. 티어는 성능만으로 정하고 가격은 넣지 않아요. 풋살화는 터치 41%·발 편안함 29%·가벼움 18%·내구성 12%, 축구화는 터치 35%·가벼움 35%·발 편안함 18%·내구성 12%예요. S 78점 이상, A 72점 이상, B 62점 이상, C 62점 미만이에요.</p>
+<h2>처음 점수는 운영자 평가예요</h2><p>직접 신어 본 측정값이 아니라, 모델마다 공개 리뷰·판매처 구매평·제조사 핏 안내 2~4곳을 읽고 운영자가 매긴 값이에요. 자료가 2곳 이하인 모델은 상세 페이지에 "추정 비중이 커요"라고 표시해요. 문장은 그대로 옮기지 않고 직접 요약해요.</p>
+<h2>유저 리뷰는 이렇게 반영돼요</h2><p>로그인 없이 브라우저마다 모델당 1개씩 항목별 점수를 남길 수 있어요. 운영자 평가는 유저 50명분의 무게로 시작하고, 유저 리뷰가 쌓일수록 유저 평균 쪽으로 옮겨가요(50명이 모이면 반반). 카드에는 자료 종합 점수와 유저 평균 점수를 따로 보여줘요. 같은 곳에서 짧은 시간에 리뷰를 몰아서 남기는 것은 막고 있어요.</p>
+<h2>사이즈 환승기</h2><p>브랜드 실측값이 아니라 판매처·제조사 사이즈 안내, 발볼 점수, 갑피 소재, 유저 사이즈 리뷰를 합친 참고값이에요. 근거가 적으면 "추천 신뢰도 낮음"으로 표시해요.</p>
+<h2>가격과 제휴</h2><p>가격은 정가 기준 참고값이고, 해외 정가를 환산한 추정치가 섞여 있어요. 실제 판매가와 재고는 판매처에서 확인해 주세요. ${DISCLOSURE} 제휴 여부는 점수와 티어에 영향을 주지 않아요.</p>
+<h2>업데이트</h2><p>마지막 업데이트: ${UPDATED}. 새 모델이 나오면 추가하고 점수를 다시 매겨요.</p>${foot}</main></body></html>`);
+page("/privacy/", head(`개인정보처리방침 | ${NAME}`, "풋픽이 수집하는 정보와 이용 목적.", "/privacy/") +
+  `<main class="pg guide">${nav}<h1>개인정보처리방침</h1>
+<p>풋픽은 회원가입이 없고, 이름·이메일·전화번호 같은 개인정보를 받지 않아요.</p>
+<h2>수집하는 정보</h2><ul><li>리뷰를 남길 때: 브라우저에 저장되는 임의의 식별값(같은 브라우저의 리뷰 수정·삭제용), 항목 점수, 한줄평, 사이즈 체감, 작성 시각</li><li>도배 방지를 위해 접속 IP를 복원할 수 없게 변환(해시)한 값</li><li>서비스 개선용 익명 이용 기록: 구매처 버튼 클릭, 추천·비교 사용, 공유 버튼 사용(개인을 알아볼 수 없는 형태)</li></ul>
+<h2>이용 목적과 보관</h2><p>리뷰 표시, 점수 계산, 도배 방지, 기능 개선에만 써요. 리뷰는 작성한 브라우저에서 언제든 삭제할 수 있고, 삭제하면 서버에서도 지워져요.</p>
+<h2>외부 서비스</h2><p>사이트는 Cloudflare에서 운영되고, 구매처 링크를 누르면 쿠팡 등 판매처 사이트로 이동해요. 이동한 사이트의 개인정보 처리는 그 사이트의 방침을 따라요.</p>
+<p class="k">시행일: ${UPDATED}</p>${foot}</main></body></html>`);
+const urls = ["/", "/about/", "/futsal/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
