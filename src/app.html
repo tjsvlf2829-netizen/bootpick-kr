@@ -54,6 +54,7 @@ select{font:inherit;font-size:.92rem;padding:6px 8px;border:1px solid var(--line
 .card h3{margin:0;font-size:1rem;line-height:1.35}
 .meta{display:flex;flex-wrap:wrap;gap:6px;font-size:.75rem}
 .pill{border-radius:999px;padding:1px 8px;background:var(--turf-soft);color:var(--turf);font-weight:500}
+.pill.vg{background:transparent;border:1px solid currentColor;padding:0 7px}
 .tb{color:var(--chalk);font-family:var(--display);padding:0 8px;border-radius:4px}
 .bars{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center;font-size:.8rem;color:var(--muted)}
 .bar{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
@@ -178,18 +179,18 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
     <p class="live"><b>이 티어는 고정이 아니에요.</b> 유저 리뷰가 쌓일 때마다 점수와 티어가 실시간으로 다시 매겨져요. 신어 본 모델이 있다면 카드의 <b>리뷰 남기기</b>로 순위에 참여해 주세요.</p>
     <details class="crit" open><summary>티어 나누는 기준</summary>
       <div class="critbody">
-        <p>각 항목 1~5점에 비중을 곱해 더해요 (만점 5점).</p>
+        <p>각 항목 1~5점에 비중을 곱해 더한 뒤 <b>100점 만점</b>으로 바꿔요(5점 만점 × 20). 티어는 <b>성능만</b>으로 매기고, 가격은 넣지 않아요.</p>
         <table class="wt"><thead><tr><th>항목</th><th>비중</th><th>보는 것</th></tr></thead><tbody>
-          <tr><td>터치</td><td>35%</td><td>공이 발에 닿는 느낌. 풋살은 짧은 패스·트래핑이 많아서 가장 크게 봐요</td></tr>
-          <tr><td>발 편안함</td><td>25%</td><td>쿠션과 발볼 여유. 딱딱한 인조잔디에서 오래 뛰는 국내 환경 반영</td></tr>
-          <tr><td>가벼움</td><td>15%</td><td>순간 스피드와 피로도</td></tr>
-          <tr><td>가성비</td><td>15%</td><td>가격이 낮을수록 높음 (6 − 가격/4만원)</td></tr>
-          <tr><td>내구성</td><td>10%</td><td>밑창·어퍼가 버티는 기간</td></tr>
+          <tr><td>터치</td><td>41%</td><td>공이 발에 닿는 느낌. 풋살은 짧은 패스·트래핑이 많아서 가장 크게 봐요</td></tr>
+          <tr><td>발 편안함</td><td>29%</td><td>쿠션과 발볼 여유. 딱딱한 인조잔디에서 오래 뛰는 국내 환경 반영</td></tr>
+          <tr><td>가벼움</td><td>18%</td><td>순간 스피드와 피로도</td></tr>
+          <tr><td>내구성</td><td>12%</td><td>밑창·어퍼가 버티는 기간</td></tr>
         </tbody></table>
-        <p>위 비중은 풋살화 기준이에요. <b>축구화</b>는 넓은 구장에서 스피드 비중이 커서 터치 30% · 가벼움 30% · 발 편안함 15% · 가성비 15%(6 − 가격/7만원) · 내구성 10%로 계산해요.</p>
-        <p><b>S</b> 3.70점 이상 · <b>A</b> 3.50 이상 · <b>B</b> 3.00 이상 · <b>C</b> 3.00 미만</p>
+        <p>위 비중은 풋살화 기준이에요. <b>축구화</b>는 넓은 구장에서 스피드 비중이 커서 터치 35% · 가벼움 35% · 발 편안함 18% · 내구성 12%로 계산해요.</p>
+        <p><b>가성비 좋음</b> 표시는 A티어(72점) 이상이면서 가격이 낮은 편(풋살화 약 10만 4천원, 축구화 약 18만원 이하)인 모델에 붙어요. 상세 목록에서 "가성비 좋은 순"으로 정렬할 수도 있어요.</p>
+        <p><b>S</b> 78점 이상 · <b>A</b> 72점 이상 · <b>B</b> 62점 이상 · <b>C</b> 62점 미만</p>
         <p><b>점수가 바뀌는 방식</b>: 처음 점수는 공개 리뷰·가이드·커뮤니티 글을 종합한 값이고, <b>유저 리뷰 50명분</b>의 무게로 시작해요. 유저가 발볼·가벼움·쿠션·터치·내구성을 각각 1~5점으로 매기면 항목마다 유저 평균 쪽으로 옮겨가고(50명이면 반반), 위 공식으로 총점과 티어가 자동으로 다시 계산돼요. 모델 카드의 "리뷰 남기기"에서 한줄평과 함께 남길 수 있어요.</p>
-        <p class="k">비중은 운영자 판단이에요. 56개 모델 모두 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요(카드에 출처 표시). 모델당 참고 출처는 2~4곳이에요.</p>
+        <p class="k">비중은 운영자 판단이에요. 100개 모델 모두 공개 리뷰·판매처 구매평·제조사 핏 안내를 읽고 항목 점수를 매겼어요(카드에 출처 표시). 모델당 참고 출처는 2~4곳이에요.</p>
       </div></details>
     <div id="tierList"></div>
   </section>
@@ -208,7 +209,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
       <label for="f-brand">브랜드<select id="f-brand"><option value="">전체</option></select></label>
       <label for="f-width">발볼<select id="f-width"><option value="">전체</option><option value="n">좁은 편</option><option value="r">보통</option><option value="w">넓은 편</option></select></label>
       <label for="f-price">가격대<select id="f-price"><option value="">전체</option><option value="1">10만원 이하</option><option value="2">10~15만원</option><option value="3">15만원 이상</option></select></label>
-      <label for="f-sort">정렬<select id="f-sort"><option value="tier">티어순</option><option value="light">가벼운 순</option><option value="cushion">쿠션 많은 순</option><option value="price">저렴한 순</option></select></label>
+      <label for="f-sort">정렬<select id="f-sort"><option value="tier">티어순</option><option value="light">가벼운 순</option><option value="cushion">쿠션 많은 순</option><option value="price">저렴한 순</option><option value="value">가성비 좋은 순</option></select></label>
     </div>
     <div class="grid" id="cards"></div>
   </section>
@@ -570,13 +571,13 @@ const REV={
  g_fur8:{s:{width:4,cushion:3},r:[0]},
  copa:{s:{"width": 2, "light": 3, "cushion": 3, "touch": 4, "dur": 4},r:[10, 11, 12],sum:"소가죽 전족부 덕분에 볼 터치는 호평이지만, 발볼이 좁고 작게 나온다는 의견이 많아 반 치수 업이 권장되고 내구성은 좋다는 평입니다(일부 근거는 같은 세대 League FG 리뷰)."},
  f50:{s:{"width": 2, "light": 4, "cushion": 2, "touch": 3, "dur": 3},r:[13, 14, 15],sum:"좁고 딱 붙는 핏이라 발볼 넓으면 사이즈업이 필요하고, 가볍고 착용감이 좋다는 평이 많으나 쿠션에 대한 언급은 거의 없습니다."},
- tiempoac:{s:{"width": 3, "light": 3, "cushion": 3, "touch": 4, "dur": 4},r:[16, 17],sum:"FlyTouch Lite 합성가죽이 가죽처럼 부드럽고 물에 강해 내구성이 좋으며, 이전 세대보다 미드풋이 약간 슬림해졌다는 평입니다."},
+ tiempoac:{s:{"width": 3, "light": 3, "cushion": 3, "touch": 3, "dur": 4},r:[16, 17],sum:"FlyTouch Lite 합성가죽이 가죽처럼 부드럽고 물에 강해 내구성이 좋으며, 이전 세대보다 미드풋이 약간 슬림해졌다는 평입니다."},
  vaporac:{s:{"width": 2, "light": 4, "cushion": 3, "touch": 2, "dur": 3},r:[18, 19],sum:"딱 붙는 좁은 핏이라 발볼 넓은 사람에게는 비추천이라는 구매평이 있고, 뒤꿈치 줌에어 덕분에 반발력이 있으며 인조잔디와 실내에서 무난하다는 평입니다."},
  predclub:{s:{"width": 3, "light": 3, "cushion": 2, "touch": 2, "dur": 3},r:[20, 21, 22],sum:"단순한 합성 갑피를 쓴 입문형으로 작게 나와 사이즈업이 권장되고, 표기보다 좁게 느껴진다는 구매평도 있습니다."},
  f50club:{s:{"width": 2, "light": 4, "cushion": 2, "touch": 2, "dur": 2},r:[23, 24, 25],sum:"작게 나와 사이즈업이 권장되고 착용감은 무난하지만, 일부에서 접착 부위가 빨리 떨어진다는 지적이 있는 입문형 모델입니다."},
  g_vap16p:{s:{"width": 1, "light": 4, "cushion": 3, "touch": 4, "dur": 3},r:[26, 27],sum:"플라이니트 갑피가 맨발 같은 볼 감각을 주고 줌에어 유닛을 넣었으며, 핏이 매우 타이트해 반 치수 업이 권장되지만 착용감과 고정력은 호평입니다."},
  g_vap16a:{s:{"width": 2, "light": 4, "cushion": 2, "touch": 2, "dur": 3},r:[28, 18],sum:"NikeSkin 갑피에 뒤꿈치 줌에어를 넣은 슬림한 핏으로, 발볼 넓은 사람에게는 맞지 않는다는 평이 많습니다(일부 근거는 같은 모델 TF 리뷰)."},
- g_tie10a:{s:{"width": 3, "light": 3, "cushion": 3, "touch": 4, "dur": 4},r:[29, 16],sum:"부드러운 합성가죽과 쿠션 인솔로 편안하며 내구성이 좋은 테이크다운 모델로 평가되지만, 구매평 평점은 4.1점으로 중간 수준입니다."},
+ g_tie10a:{s:{"width": 3, "light": 3, "cushion": 3, "touch": 3, "dur": 4},r:[29, 16],sum:"부드러운 합성가죽과 쿠션 인솔로 편안하며 내구성이 좋은 테이크다운 모델로 평가되지만, 구매평 평점은 4.1점으로 중간 수준입니다."},
  g_pred25l:{s:{"width": 3, "light": 3, "cushion": 2, "touch": 3, "dur": 4},r:[30, 31],sum:"처음엔 조금 작고 타이트하지만 길들이기 쉽고, 돌기 텍스처 덕분에 볼 그립이 좋으며 튼튼하다는 구매평이 많습니다."},
  g_f50l:{s:{"width": 2, "light": 4, "cushion": 2, "touch": 3, "dur": 3},r:[32, 14],sum:"토박스가 좁고 작게 나와 사이즈업이 필요하며, 가볍고 볼 컨트롤은 좋지만 바닥 쿠션은 아쉽다는 평입니다."},
  g_copa3l:{s:{"width": 3, "light": 3, "cushion": 3, "touch": 4, "dur": 3},r:[33, 34],sum:"가죽 느낌의 Fusionfeel 합성 갑피가 부드럽고 패딩이 넉넉해 편안하며 정사이즈로 잘 맞는다는 평입니다."},
@@ -617,7 +618,7 @@ const REV={
  n_adidas_x_crazyfast_1_fg:{s:{},r:[116, 117, 118],sum:"아주 얇은 갑피로 맨발 같은 감각과 좋은 고정감을 주고 금방 길든다는 평가입니다. 대신 태클을 받으면 충격이 그대로 느껴지고, 스터드 내구성이 걱정된다는 의견이 있습니다."},
  n_adidas_predator_accuracy_1_fg:{s:{},r:[119, 120, 121],sum:"중족부가 넓어 편하고, 그립 패드 덕분에 쿠션감 있는 터치와 강한 슈팅감을 준다는 평가입니다. 뒤꿈치 고정감이 약하고 끈 구멍이 얕다는 점은 아쉽다고 합니다."},
  n_nike_phantom_gx_elite_fg:{s:{},r:[122, 123, 124],sum:"그립니트 갑피는 비가 와도 공이 잘 붙어 터치가 뛰어나고, 처음부터 편하다는 평가입니다. 반면 솔이 너무 유연하고 뒤쪽 스터드가 약해 보인다는 지적이 있습니다."},
- n_nike_tiempo_legend_10_pro_ag:{s:{},r:[125, 126, 98],sum:"레전드 10은 천연가죽 대신 플라이터치 합성 가죽을 써서 가죽 같은 착화감과 물에 강한 내구성을 갖췄다는 평가입니다. 프로 등급은 엘리트보다 저렴한 중급 모델로, 인조잔디용 AG-PRO 버전이 따로 있습니다."},
+ n_nike_tiempo_legend_10_pro_ag:{s:{touch:4},r:[125, 126, 98],sum:"레전드 10은 천연가죽 대신 플라이터치 합성 가죽을 써서 가죽 같은 착화감과 물에 강한 내구성을 갖췄다는 평가입니다. 프로 등급은 엘리트보다 저렴한 중급 모델로, 인조잔디용 AG-PRO 버전이 따로 있습니다."},
  n_nike_mercurial_superfly_9_elit:{s:{},r:[127, 128],sum:"리뷰들은 아주 가볍고 처음부터 편하며 터치가 깔끔하다고 평가합니다. 너비는 한 곳은 넉넉하다고, 다른 곳은 좁다고 해서 의견이 갈립니다."},
  n_mizuno_morelia_neo_4_beta_japa:{s:{},r:[129, 130, 131],sum:"앞발 캥거루 가죽과 미드풋 니트로 가볍고 부드러운 터치가 강점이라는 평이 많습니다. 미드풋이 좁게 감싸서 발볼·발등이 높은 발에는 답답할 수 있습니다."},
  n_mizuno_monarcida_neo_3_select_:{s:{},r:[132, 133],sum:"모렐리아 네오를 바탕으로 만든 입문형 모델로, 와이드 핏과 부드러운 인조가죽 덕분에 처음부터 편하다는 평입니다. 230g 정도라 상위 모델보다는 무겁습니다."},
@@ -695,17 +696,21 @@ const cl=v=>Math.max(1,Math.min(5,v));
 let CAT="tf";
 M.forEach(m=>{m.cat=m.cat||"tf"});
 const comfortOf=m=>cl((m.cushion+Math.min(m.width,5))/2+0.5), valueOf=m=>cl(6-m.won/(m.cat==="fg"?70000:40000));
-const WC={tf:{touch:.35,comfort:.25,light:.15,dur:.10,value:.15},fg:{touch:.30,light:.30,comfort:.15,dur:.10,value:.15}};
+// 티어는 성능만으로 계산(가격은 넣지 않음). 가성비는 m.vs로 따로 표시
+const WC={tf:{touch:.41,comfort:.29,light:.18,dur:.12},fg:{touch:.35,light:.35,comfort:.18,dur:.12}};
 // 시드 점수(리뷰 종합)는 유저 별점 SEED_W명분의 무게. 유저 별점이 쌓일수록 유저 평균 쪽으로 이동
 const SEED_W=50;
 // 유저는 항목별(발볼·가벼움·쿠션·터치·내구성) 1~5점을 매기고, 항목마다 시드와 섞은 뒤 같은 공식으로 총점·티어를 다시 계산
 const RK=["width","light","cushion","touch","dur"];
 const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
-const tierOf=v=>v>=3.7?"S":v>=3.5?"A":v>=3.0?"B":"C";
+// 100점 환산(5점 만점 × 20) 기준
+const tierOf=p=>p>=78?"S":p>=72?"A":p>=62?"B":"C";
 M.forEach(m=>{m.base={};RK.forEach(k=>m.base[k]=m[k])});
 function rescore(){M.forEach(m=>{const u=UR[m.id]||{n:0,sum:{},cm:[]};m.un=u.n;m.cm=u.cm;
  RK.forEach(k=>m[k]=(m.base[k]*SEED_W+(u.sum[k]||0))/(SEED_W+u.n));
- const W=WC[m.cat];m.sc=m.touch*W.touch+comfortOf(m)*W.comfort+m.light*W.light+m.dur*W.dur+valueOf(m)*W.value;m.tier=tierOf(m.sc)})}
+ const W=WC[m.cat];m.sc=m.touch*W.touch+comfortOf(m)*W.comfort+m.light*W.light+m.dur*W.dur;m.pt=Math.round(m.sc*20);m.tier=tierOf(m.pt);
+ m.vs=Math.round((m.sc+valueOf(m))/2*20);m.vgood=m.pt>=72&&valueOf(m)>=3.4});
+ ["tf","fg"].forEach(c=>{const L=M.filter(m=>m.cat===c).sort((a,b)=>b.sc-a.sc);L.forEach((m,i)=>{m.rank=i+1;m.of=L.length})})}
 rescore();
 const TIERS=["S","A","B","C"], TORD={S:0,A:1,B:2,C:3};
 const wcls=w=>w<=2?"n":w>=4?"w":"r", wtxt=w=>({n:"좁은 편",r:"보통",w:"넓은 편"})[wcls(w)];
@@ -715,7 +720,7 @@ const bar=v=>`<div class="bar">${[1,2,3,4,5].map(i=>`<i class="${i<=Math.round(v
 const shop=m=>`https://www.coupang.com/np/search?q=${encodeURIComponent(m.b+" "+m.n)}`;
 function card(m,extra=""){return `<article class="card" id="m-${m.id}">
  <div class="shot">${shoe(m.id)}</div>
- <div class="meta"><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><span class="pill">${esc(m.b)}</span><span class="pill">${esc(m.up)}</span><span class="pill">약 ${m.won.toLocaleString("ko-KR")}원</span></div>
+ <div class="meta"><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><span class="pill">${esc(m.b)}</span><span class="pill">${esc(m.up)}</span><span class="pill">약 ${m.won.toLocaleString("ko-KR")}원</span>${m.vgood?'<span class="pill vg">가성비 좋음</span>':""}</div>
  <h3>${esc(m.n)}</h3>
  <div class="bars"><span>발볼</span>${bar(m.width)}<span>가벼움</span>${bar(m.light)}<span>쿠션</span>${bar(m.cushion)}<span>터치</span>${bar(m.touch)}<span>내구성</span>${bar(m.dur)}</div>
  <p class="size">사이즈 <b>${SIZE[m.id]||"정보 없음"}</b></p>
@@ -796,7 +801,7 @@ const RLAB={width:["발볼","좁음","넓음"],light:["가벼움","무거움","�
 function rateBlock(m){const src=m.rev?`<details class="rv"><summary>리뷰 ${m.rev.length}곳 종합 점수</summary>${m.rsum?`<p style="margin:4px 0 0">${esc(m.rsum)}</p>`:""}<ul>${m.rev.map(i=>`<li><a href="${SRC[i][1]}" target="_blank" rel="noopener">${esc(SRC[i][0])}</a></li>`).join("")}</ul></details>`:`<p class="rv k">시작 점수는 예시 값 (리뷰 종합 전)</p>`;
  const cm=(m.cm||[]).slice(0,3).map(c=>`<li>“${esc(c.c)}”${c.mine?' <span class="k">(내 리뷰)</span>':""}</li>`).join("");
  const btn=rateOK?`<button type="button" class="rvbtn" data-id="${m.id}">${MY[m.id]?"내 리뷰 수정":"리뷰 남기기"}</button>`:"";
- return `<div class="rate"><div class="rline"><b>${m.sc.toFixed(2)}점</b><span class="k">${m.un?`유저 리뷰 ${m.un}명 반영`:"아직 유저 리뷰 없음"}</span>${btn}</div>${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
+ return `<div class="rate"><div class="rline"><b>${m.pt}점</b><span class="k">${({tf:"풋살화",fg:"축구화"})[m.cat]} ${m.of}개 중 ${m.rank}위</span><span class="k">${m.un?`유저 리뷰 ${m.un}명 반영`:"아직 유저 리뷰 없음"}</span>${btn}</div>${cm?`<ul class="cm">${cm}</ul>`:""}${src}</div>`}
 function relBlock(m){const r=REL[m.id];if(!r)return"";const [gen,d,t,ti,next]=r;
  return `<div class="rel"><p><span class="k">세대</span> ${gen} · <span class="k">출시</span> ${dtxt(d)}${next?` · <span class="k">후속</span> ${next}`:""}</p>
  <p class="k">등급 (상위 → 하위)</p>${ladder(t,ti)}</div>`}
@@ -813,9 +818,9 @@ function show(tab){document.querySelectorAll("nav button").forEach(b=>b.setAttri
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 
 // tier list
-function renderTier(){const L=M.filter(m=>m.cat===CAT);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
+function renderTier(){const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
 document.getElementById("tierList").innerHTML=TIERS.map(t=>`<div class="tier"><div class="lbl" style="background:${tc(t)}">${t}</div><div class="row">${
- L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)} · ${m.sc.toFixed(2)}점 · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
+ L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)} · ${m.pt}점${m.vgood?" · 가성비":""} · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
 renderTier();
 document.getElementById("tierList").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
  ["f-brand","f-width","f-price"].forEach(i=>document.getElementById(i).value="");renderDB();show("db");
@@ -825,8 +830,8 @@ document.getElementById("tierList").addEventListener("click",e=>{const c=e.targe
 const fb=document.getElementById("f-brand");[...new Set(M.map(m=>m.b))].forEach(b=>fb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));
 function renderDB(){const b=fb.value,w=document.getElementById("f-width").value,p=document.getElementById("f-price").value,s=document.getElementById("f-sort").value;
  let L=M.filter(m=>m.cat===CAT&&(!b||m.b===b)&&(!w||wcls(m.width)===w)&&(!p||m.price==p));
- const k={tier:(x,y)=>TORD[x.tier]-TORD[y.tier],light:(x,y)=>y.light-x.light,cushion:(x,y)=>y.cushion-x.cushion,price:(x,y)=>x.price-y.price}[s];
- L.sort((x,y)=>k(x,y)||TORD[x.tier]-TORD[y.tier]);
+ const k={tier:(x,y)=>y.sc-x.sc,light:(x,y)=>y.light-x.light,cushion:(x,y)=>y.cushion-x.cushion,price:(x,y)=>x.price-y.price,value:(x,y)=>y.vs-x.vs}[s];
+ L.sort((x,y)=>k(x,y)||y.sc-x.sc);
  document.getElementById("cards").innerHTML=L.length?L.map(m=>card(m)).join(""):'<p class="empty">조건에 맞는 모델이 없어요. 필터를 하나 풀어 보세요.</p>'}
 document.querySelectorAll("#db .filters select:not(#l-brand)").forEach(s=>s.addEventListener("change",renderDB));renderDB();
 const lb=document.getElementById("l-brand");[...new Set(LINES.map(l=>l.b))].forEach(b=>lb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));lb.addEventListener("change",renderLines);renderLines();
@@ -859,18 +864,52 @@ const VENUE={short:{},long:{cushion:1},hard:{cushion:3},indoor:{light:1,touch:1}
 const VNOTE={indoor:"실내 마루·우레탄 코트는 TF보다 IC(인도어) 밑창이 더 미끄럽지 않을 수 있어요.",dirt:"맨땅은 밑창이 빨리 닳아서 비싼 천연가죽 모델은 아까울 수 있어요.",hard:"딱딱한 인조잔디는 무릎·발바닥 피로가 커서 쿠션 비중을 높였어요.",natural:"천연잔디는 FG 밑창이 기본이고, 비 온 뒤 무른 땅은 SG가 더 잘 잡아줘요.",ag:"인조잔디에서는 AG나 MG 밑창이 스터드 걸림과 무릎 부담이 적어요. FG를 오래 쓰면 스터드가 빨리 닳아요.",hardag:"딱딱한 인조잔디는 무릎 부담이 커서 쿠션 비중을 높였어요. AG·MG 밑창을 추천해요."};
 const NAME={light:"가벼움",cushion:"쿠션",touch:"터치",comfort:"발 편안함",dur:"내구성",value:"가성비"};
 const attr=(m,a)=>a==="comfort"?Math.min(5,(m.cushion+Math.min(m.width,5))/2+0.5):a==="value"?Math.max(1,Math.min(5,6-m.won/(m.cat==="fg"?70000:40000)+(3-TORD[m.tier])*0.5)):m[a];
+// 추천 이유: 데이터(갑피 소재·항목 점수·사이즈 안내)와 고른 조건을 엮어 문장으로. 데이터에 없는 기술명은 쓰지 않음
+const isIC=m=>/(^|\s)(IC|IN|ID)$/.test(m.n);
+const upKind=u=>/캥거루|천연가죽|가죽\(|^가죽|스웨이드/.test(u)&&!/합성 ?가죽|인조/.test(u.split("+")[0])?"leather":/니트/.test(u)?"knit":/메쉬/.test(u)?"mesh":"synth";
+const STYLEN={speed:"치고 달리는 스피드형",dribble:"드리블형",control:"패스·조율형",shoot:"슈팅형",stamina:"많이 뛰는 활동량형",defense:"몸싸움 수비형",keeper:"골키퍼"};
+const VENN={short:"짧은 인조잔디",long:"긴 인조잔디",hard:"딱딱한 인조잔디",indoor:"실내 코트",dirt:"맨땅",natural:"천연잔디",ag:"인조잔디 대형 구장",hardag:"딱딱한 인조잔디"};
+const pctOf=(m,a)=>{const L=M.filter(x=>x.cat===m.cat),v=attr(m,a);return Math.max(1,Math.round(L.filter(x=>attr(x,a)>=v-0.01).length/L.length*100))};
+const jong=w=>{const c=w.charCodeAt(w.length-1);return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28>0}, ig=w=>w+(jong(w)?"이":"가"), en=w=>w+(jong(w)?"은":"는");
+function whyOf(m,cap){const why=[],k=upKind(m.up),u=ans.width,sz=SIZE[m.id];
+ // 1) 발볼 + 소재
+ const fitW=m.width>=4?"넓게":m.width<=2?"좁게":"보통으로";
+ const mat={leather:"천연가죽이라 신을수록 발 모양대로 늘어나요",knit:"니트 갑피가 발을 감싸며 늘어나 압박이 덜한 편이에요",mesh:"메쉬 갑피라 통기가 좋고 부드러워요",synth:"합성 갑피라 처음 모양이 오래 유지되고 잘 늘어나지 않아요"}[k];
+ if((u==="w"||u==="xw")&&m.width>=4)why.push(`발볼이 ${fitW} 나온 모델이라 넓은 발도 앞쪽 압박이 적은 편이에요. ${mat}.`);
+ else if(u==="n"&&m.width<=2)why.push(`폭이 ${fitW} 잡혀 있어 좁은 발이 신발 안에서 덜 놀아요. ${mat}.`);
+ else if((u==="w"||u==="xw")&&m.width<4)why.push(`발볼이 ${fitW} 나와서 넓은 발이면 매장에서 신어 보는 게 좋아요. ${k==="leather"?"가죽이라 조금은 늘어나요.":k==="synth"?"합성 갑피라 많이 늘어나진 않아요.":mat+"."}`);
+ else if(u==="n"&&m.width>2)why.push(`발볼이 ${fitW} 나와서 좁은 발이면 끈을 단단히 묶거나 반 치수 작게 고려해 보세요.`);
+ else why.push(`발볼이 보통이라 대부분의 발에 무난해요. ${mat}.`);
+ // 2) 플레이 스타일 + 구장: 해당 조합에서 가장 중요한 항목으로 설명
+ const w={};[STYLE[ans.style],VENUE[ans.venue]].forEach(o=>{for(const a in o)w[a]=(w[a]||0)+o[a]});
+ const top=Object.keys(w).sort((a,b)=>w[b]-w[a]||attr(m,b)-attr(m,a))[0], tv=Math.round(attr(m,top));
+ const why2={light:`가벼움이 ${tv}/5점이라 ${STYLEN[ans.style]}처럼 짧게 자주 치고 나갈 때 발이 덜 무거워요`,
+  touch:`터치가 ${tv}/5점이라 ${STYLEN[ans.style]}에 필요한 트래핑·패스 감각이 잘 전달돼요`,
+  cushion:`쿠션이 ${tv}/5점이라 ${VENN[ans.venue]}에서 ${ans.style==="stamina"?"오래 뛰어도 후반 발바닥 피로가":"착지 충격이"} 덜한 편이에요`,
+  comfort:`발 편안함이 ${tv}/5점이라 ${VENN[ans.venue]}에서 한 경기 내내 신기 편해요`,
+  dur:`내구성이 ${tv}/5점이라 ${ans.venue==="dirt"?"밑창이 빨리 닳는 맨땅에서도":"몸싸움과 잦은 사용에도"} 오래 버티는 편이에요`}[top];
+ if(why2&&tv>=3)why.push(why2+(tv<4?" (보통 수준)":"")+".");
+ // 3) 가장 중요하다고 고른 느낌: 같은 종류 안 순위
+ const pv=attr(m,ans.pref); if(pv>=3.5&&ans.pref!=="value")why.push(`중요하게 고른 ${en(NAME[ans.pref])} ${({tf:"풋살화",fg:"축구화"})[m.cat]} 중 상위 ${pctOf(m,ans.pref)}%예요.`);
+ if(ans.pref==="value")why.push(m.vgood?`성능 ${m.pt}점에 비해 가격이 낮은 편이라 가성비가 좋아요.`:`가성비보다는 성능(${m.pt}점) 위주 모델이에요.`);
+ // 구장 밑창
+ if(ans.venue==="indoor"&&isIC(m))why.push("실내 코트용 IC 밑창이라 마루·우레탄에서 잘 잡혀요.");
+ else if(ans.venue!=="indoor"&&isIC(m))why.push("실내용 밑창이라 인조잔디에서는 덜 잡힐 수 있어요.");
+ if(sz)why.push(`사이즈: ${sz}`);
+ why.push(m.won>cap?`예산보다 ${won(m.won-cap)} 비싸요`:`예산 안 (약 ${won(m.won)})`);
+ return why}
 function recommend(){
  const target={n:1.5,r:3,w:4.3,xw:5}[ans.width], cap=ans.budget;
- const R=M.filter(m=>m.cat===CAT).map(m=>{const why=[];let s=0;
-  const wd=Math.abs(m.width-target); s+=Math.max(0,30-wd*12); if(wd<=1)why.push(`발볼이 ${wtxt(m.width)}이라 ${({n:"좁은",r:"보통",w:"넓은",xw:"아주 넓은"})[ans.width]} 발에 맞아요`);
+ const R=M.filter(m=>m.cat===CAT).map(m=>{let s=0;
+  const wd=Math.abs(m.width-target); s+=Math.max(0,30-wd*12);
   const w={};[STYLE[ans.style],VENUE[ans.venue]].forEach(o=>{for(const a in o)w[a]=(w[a]||0)+o[a]});
   for(const a in w)s+=attr(m,a)*w[a]*2;
-  const pv=attr(m,ans.pref); s+=pv*6; if(pv>=4)why.push(`${NAME[ans.pref]}이 좋은 편이에요 (${Math.round(pv)}/5)`);
-  if(ans.venue==="hard"&&m.cushion>=4)why.push("쿠션이 많아 딱딱한 구장에서 덜 피곤해요");
-  if(ans.venue==="dirt"&&m.dur>=4)why.push("밑창이 튼튼한 편이라 맨땅에서도 오래 가요");
+  const pv=attr(m,ans.pref); s+=pv*6;
+  const ic=isIC(m); if(ans.venue==="indoor")s+=ic?8:-4; else if(ic)s-=12;
   s+=(4-TORD[m.tier])*3;
-  if(m.won>cap){const over=(m.won-cap)/10000;s-=10+over*4;why.push(`예산보다 ${won(m.won-cap)} 비싸요`)}else why.push(`예산 안 (약 ${won(m.won)})`);
-  return {m,s,why}}).sort((x,y)=>y.s-x.s);
+  if(m.won>cap){const over=(m.won-cap)/10000;s-=10+over*4}
+  return {m,s}}).sort((x,y)=>y.s-x.s);
+ R.slice(0,3).forEach(r=>r.why=whyOf(r.m,cap));
  const max=Math.max(1,R[0].s), note=VNOTE[ans.venue];
  document.getElementById("res").innerHTML="<h2>추천 결과</h2>"+(note?`<p class="notice" style="margin:0">${note}</p>`:"")+R.slice(0,3).map((r,i)=>`<article class="card"><div class="rank">${i+1}</div><div class="shot">${shoe(r.m.id)}</div><div style="min-width:0;flex:1">
   <div class="meta"><span class="tb" style="background:${tc(r.m.tier)}">${r.m.tier}</span><span class="pill">${esc(r.m.b)}</span><span class="pill">약 ${won(r.m.won)}</span><span class="score">적합도 ${Math.max(0,Math.round(r.s/max*100))}%</span></div>
@@ -904,12 +943,12 @@ try{vid=localStorage.getItem("vid");if(!vid){vid=(crypto.randomUUID?crypto.rando
 async function loadReviews(){try{const r=await fetch(API+"?vid="+encodeURIComponent(vid||""));if(!r.ok)return;const j=await r.json();
  for(const k in UR)delete UR[k];Object.assign(UR,j.agg||{});for(const k in MY)delete MY[k];Object.assign(MY,j.mine||{});
  rateOK=!!vid;rerender()}catch(e){}}
-async function save(next,msg){const id=cur,m=M.find(x=>x.id===id),before=m.sc;dlg.close();
+async function save(next,msg){const id=cur,m=M.find(x=>x.id===id),before=m.pt;dlg.close();
  try{const r=await fetch(API,{method:next?"POST":"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({vid,model:id,...(next||{})})});
   const j=await r.json().catch(()=>({}));if(!r.ok){toast(j.error||"저장하지 못했어요. 잠시 후 다시 시도해 주세요");return}
   await loadReviews();toast(msg(before,m))}catch(e){toast("저장하지 못했어요. 잠시 후 다시 시도해 주세요")}}
 document.getElementById("rvs").onclick=()=>{if(!RK.every(k=>draft[k]))return;const c=document.getElementById("rvc").value.trim().slice(0,60);
- save({...draft,c},(b,m)=>`리뷰를 저장했어요 · ${m.n} 점수 ${b.toFixed(2)} → ${m.sc.toFixed(2)}`)};
+ save({...draft,c},(b,m)=>`리뷰를 저장했어요 · ${m.n} 점수 ${b}점 → ${m.pt}점`)};
 document.getElementById("rvdel").onclick=()=>save(null,()=>"리뷰를 삭제했어요");
 loadReviews();
 try{const sc=localStorage.getItem("cat");if(sc==="fg")setCat("fg")}catch(e){}

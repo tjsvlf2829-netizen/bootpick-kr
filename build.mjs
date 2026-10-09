@@ -84,7 +84,7 @@ for (const m of M) {
 <p class="crumb"><a href="/">${NAME}</a> › <a href="/${m.cat === "fg" ? "football" : "futsal"}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
 <h1>${esc(m.b)} ${esc(m.n)}</h1>
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
-<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · ${m.sc.toFixed(2)}점 <span class="k">(유저 리뷰가 쌓이면 바뀌어요)</span></p>
+<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외. 유저 리뷰가 쌓이면 바뀌어요)</span></p>
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기 · 다른 모델과 비교</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
@@ -106,7 +106,7 @@ ${foot}</main>
 const TIERS = ["S", "A", "B", "C"];
 for (const [c, path, label, sub] of [["tf", "/futsal/", "풋살화", "TF · IC"], ["fg", "/football/", "축구화", "FG · AG · MG"]]) {
   const L = M.filter((m) => m.cat === c).sort((a, b) => b.sc - a.sc);
-  const rows = TIERS.map((t) => { const T = L.filter((m) => m.tier === t); return T.length ? `<h2><span class="tb" style="background:var(--${t.toLowerCase()})">${t}</span> ${t}티어 (${T.length})</h2><ul>${T.map((m) => li(m, ` · ${m.sc.toFixed(2)}점 · 발볼 ${wtxt(m.width)} · 약 ${(m.won / 10000).toFixed(1)}만원`)).join("")}</ul>` : ""; }).join("");
+  const rows = TIERS.map((t) => { const T = L.filter((m) => m.tier === t); return T.length ? `<h2><span class="tb" style="background:var(--${t.toLowerCase()})">${t}</span> ${t}티어 (${T.length})</h2><ul>${T.map((m) => li(m, ` · ${m.pt}점 · 발볼 ${wtxt(m.width)} · 약 ${(m.won / 10000).toFixed(1)}만원`)).join("")}</ul>` : ""; }).join("");
   page(path, head(`2026 ${label} 티어리스트 ${L.length}개 모델 순위 | ${NAME}`, `${label}(${sub}) ${L.length}개 모델을 터치·쿠션·발볼·무게·내구성·가성비로 점수 매긴 2026 티어리스트. 유저 리뷰로 계속 바뀌어요.`, path) +
     `<main class="pg">${nav}<h1>2026 ${label} 티어리스트</h1><p>${label}(${sub}) ${L.length}개 모델을 공개 리뷰로 매긴 시작 점수와 유저 리뷰로 순위를 매겨요. <a href="/">내 스타일로 추천받기 →</a></p>${rows}${foot}</main></body></html>`);
 }
@@ -136,7 +136,7 @@ for (const [ia, ib, slug, intro] of COMPARE) {
   page(path, head(`${t} · 발볼 터치 쿠션 차이 | ${NAME}`, `${a.b} ${a.n}과 ${b.b} ${b.n}의 발볼, 터치, 쿠션, 무게, 내구성, 가격 비교. ${intro}`, path) +
     `<main class="pg">${nav}<h1>${esc(a.n)} vs ${esc(b.n)}</h1><p>${esc(intro)}</p>
 <table><thead><tr><th></th><th><a href="${url(a)}">${esc(a.b + " " + a.n)}</a></th><th><a href="${url(b)}">${esc(b.b + " " + b.n)}</a></th></tr></thead><tbody>
-<tr><th>티어</th><td>${a.tier} · ${a.sc.toFixed(2)}점</td><td>${b.tier} · ${b.sc.toFixed(2)}점</td></tr>
+<tr><th>티어</th><td>${a.tier} · ${a.pt}점</td><td>${b.tier} · ${b.pt}점</td></tr>
 <tr><th>가격</th><td>약 ${a.won.toLocaleString("ko-KR")}원</td><td>약 ${b.won.toLocaleString("ko-KR")}원</td></tr>
 <tr><th>어퍼</th><td>${esc(a.up)}</td><td>${esc(b.up)}</td></tr>
 ${Object.keys(RL).map((k) => scoreRow(k, a, b)).join("")}
