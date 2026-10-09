@@ -1584,7 +1584,7 @@ function recommend(){
  R.slice(0,3).forEach(r=>r.why=whyOf(r.m,cap));
  const max=Math.max(1,R[0].s), note=VNOTE[ans.venue];
  document.getElementById("res").innerHTML="<h2>추천 결과</h2>"+(note?`<p class="notice" style="margin:0">${note}</p>`:"")+R.slice(0,3).map((r,i)=>`<article class="card"><div class="rank">${i+1}</div><div class="shot">${shoe(r.m.id)}</div><div style="min-width:0;flex:1">
-  <div class="meta"><span class="tb" style="background:${tc(r.m.tier)}">${r.m.tier}</span><span class="pill">${esc(r.m.b)}</span><span class="pill">약 ${won(r.m.won)}</span><span class="score">적합도 ${Math.max(0,Math.round(r.s/max*100))}%</span></div>
+  <div class="meta"><span class="tb" style="background:${tc(r.m.tier)}">${r.m.tier}</span><span class="pill">${esc(r.m.b)}</span><span class="pill">약 ${won(r.m.won)}</span>${r.m.vgood?'<span class="pill vg">가성비 좋음</span>':""}<span class="score">적합도 ${Math.max(0,Math.round(r.s/max*100))}%</span></div>
   <h3 style="margin:6px 0 0">${esc(r.m.n)}</h3><ul class="why">${r.why.map(w=>`<li>${w}</li>`).join("")}</ul>
   <div class="links" style="margin-top:8px">${SLUG[r.m.id]?`<a href="/products/${SLUG[r.m.id]}/">자세히 보기</a>`:""}<a href="#vs-${r.m.id}" data-vs="${r.m.id}">비교하기</a><a href="${shop(r.m)}" target="_blank" rel="noopener sponsored" data-m="${r.m.id}">가격 보기</a></div></div></article>`).join("")+`<div class="links" style="margin-top:4px"><button type="button" class="rvbtn" id="shareRes" style="margin-left:0">내 추천 결과 공유하기</button></div>`}
 buildQuiz();recommend();
