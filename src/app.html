@@ -21,6 +21,13 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6}
 .wrap{max-width:960px;margin:0 auto;padding-inline:16px;padding-block:20px 48px}
+.sitemenu{display:flex;gap:12px;font-size:.88rem;font-weight:700}.sitemenu a{color:var(--ink);text-decoration:none}.sitemenu a:hover{color:var(--turf)}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0 4px;display:grid;gap:10px}
+.hero h2{font-family:var(--display);font-weight:400;font-size:1.6rem;line-height:1.25;margin:0}
+.hero p{margin:0;color:var(--muted);font-size:.92rem}
+.cta-main{justify-self:start;font:inherit;font-weight:700;font-size:1rem;background:var(--turf);color:var(--chalk);border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
+.hot{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem}.hot>span:first-child{color:var(--muted);margin-right:4px}
+#hotList{display:flex;flex-wrap:wrap;gap:6px}.hot a{white-space:nowrap;color:var(--turf);background:var(--turf-soft);border-radius:999px;padding:3px 10px;text-decoration:none;font-weight:700;margin:2px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 16px;border-bottom:2px solid var(--turf);padding-bottom:12px}
 h1{font-family:var(--display);font-weight:400;font-size:2.2rem;line-height:1;margin:0;color:var(--turf);letter-spacing:.02em}
 .tag{color:var(--muted);font-size:.9rem;margin:0}
@@ -147,10 +154,16 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
   <header>
     <div>
       <h1>FootRank</h1>
-      <p class="tag">축구화·풋살화 티어리스트, 모델 특징, 내 스타일 추천</p>
+      <p class="tag">축구화·풋살화 검색 · 비교 · 추천</p>
     </div>
+    <div class="sitemenu" aria-label="사이트 메뉴"><a href="/futsal/">풋살화</a><a href="/football/">축구화</a><a href="/brands/">브랜드</a></div>
   </header>
-  <p class="notice">시제품입니다. 모델 목록, 점수, 티어, 가격대는 화면 구성을 보여주기 위한 예시 값이라 실제 스펙과 다를 수 있어요. 신발 그림은 실제 컬러웨이가 아닌 일러스트예요. 출시 전에 하나씩 검증해서 바꿀 예정입니다.</p>
+  <section class="hero">
+    <h2>나에게 맞는 축구화·풋살화,<br>30초면 찾아요</h2>
+    <p>구장 · 발볼 · 플레이 스타일 · 예산을 고르면 리뷰 데이터로 가장 잘 맞는 모델을 골라 드려요.</p>
+    <button type="button" class="cta-main" id="startQuiz">내 신발 찾기</button>
+    <div class="hot"><span>많이 찾는 모델</span><span id="hotList"></span></div>
+  </section>
 
   <nav role="tablist">
     <button role="tab" id="t-tier" aria-selected="true" data-tab="tier">티어리스트</button>
@@ -240,7 +253,7 @@ const M=[
  {id:"f50club",b:"아디다스",n:"F50 클럽 TF",up:"합성",light:4,cushion:2,touch:2,width:2,tier:"C",note:"가볍고 싸지만 쿠션과 내구성은 기본 수준."},
  {id:"future8",b:"푸마",n:"퓨처 8 매치 TF",up:"니트",light:3,cushion:3,touch:4,width:4,tier:"A",note:"퓨처 7 후속. 니트 어퍼가 발을 감싸고 발볼 여유가 있음."},
  {id:"ultraplay",b:"푸마",n:"울트라 5 플레이 TT",up:"합성",light:4,cushion:2,touch:2,width:2,tier:"C",note:"울트라의 가벼움을 최저가로. 오래 신기엔 얇음."},
- {id:"alphasel",b:"미즈노",n:"미즈노 알파 셀렉트 AS",up:"합성",light:4,cushion:3,touch:3,width:2,tier:"B",note:"미즈노 스피드 라인의 입문 등급. 핏이 날렵한 편."},
+ {id:"alphasel",b:"미즈노",n:"알파 셀렉트 AS",up:"합성",light:4,cushion:3,touch:3,width:2,tier:"B",note:"미즈노 스피드 라인의 입문 등급. 핏이 날렵한 편."},
  {id:"salael",b:"미즈노",n:"모렐리아 살라 엘리트 TF",up:"천연가죽",light:3,cushion:3,touch:5,width:3,tier:"A",note:"풋살 전용으로 만든 모렐리아. 가죽 터치를 원하는 풋살러에게."},
  {id:"tekela",b:"뉴발란스",n:"테켈라 V4+ 매직 TF",up:"합성 니트",light:3,cushion:3,touch:4,width:4,tier:"B",note:"볼 컨트롤형 테켈라의 중간 등급. 발볼 여유가 있음."},
  {id:"c3ff",b:"아식스",n:"C3 FF TF",up:"캥거루 가죽 + 인조 가죽",light:3,cushion:4,touch:5,width:3,tier:"A",note:"캥거루 가죽 어퍼에 플라이트폼(FF) 쿠션. 국내에선 해외구매·일본판으로 많이 팔리는 고급 풋살화."},
@@ -264,7 +277,7 @@ const M=[
  {id:"g_fut8m",cat:"fg",b:"푸마",n:"퓨처 8 매치 FG/AG",up:"니트",light:3,cushion:3,touch:3,width:4,tier:"B",note:"천연·인조잔디 겸용. 발볼 여유 있는 입문 등급."},
  {id:"g_neo5j",cat:"fg",b:"미즈노",n:"모렐리아 네오 5 재팬",up:"천연가죽",light:4,cushion:3,touch:5,width:3,tier:"B",note:"일본 생산 가죽화. 맨발 같은 터치와 가벼움."},
  {id:"g_mor2j",cat:"fg",b:"미즈노",n:"모렐리아 II 재팬",up:"캥거루 가죽",light:3,cushion:3,touch:5,width:3,tier:"B",note:"오래된 클래식 가죽 축구화. 발에 맞게 길들여짐."},
- {id:"g_alpha3j",cat:"fg",b:"미즈노",n:"미즈노 알파 3 재팬",up:"니트",light:5,cushion:2,touch:4,width:2,tier:"B",note:"알파 시리즈 첫 니트 어퍼. 미즈노 최경량 스피드화."},
+ {id:"g_alpha3j",cat:"fg",b:"미즈노",n:"알파 3 재팬",up:"니트",light:5,cushion:2,touch:4,width:2,tier:"B",note:"알파 시리즈 첫 니트 어퍼. 미즈노 최경량 스피드화."},
  {id:"g_neo4p",cat:"fg",b:"미즈노",n:"모렐리아 네오 4 프로 FG",up:"합성 가죽",light:4,cushion:3,touch:4,width:3,tier:"B",note:"모렐리아 네오 4의 가성비 등급."},
  {id:"g_tek5",cat:"fg",b:"뉴발란스",n:"테켈라 V5 엘리트 FG",up:"합성 니트",light:3,cushion:3,touch:4,width:4,tier:"B",note:"볼 컨트롤형. 발볼 선택지가 넓은 브랜드."},
  {id:"g_fur8",cat:"fg",b:"뉴발란스",n:"퓨런 V8 프로 FG",up:"합성",light:4,cushion:2,touch:3,width:3,tier:"B",note:"뉴발란스 스피드 라인 최상위."},
@@ -273,6 +286,9 @@ const M=[
 // 대략적 가격(원)과 내구성 1~5: 예시 값, 검증 전
 const WON={tiempo:149000,vapor:159000,phantom:159000,predator:99000,copa:99000,f50:109000,morelia:199000,monarcida:89000,calcetto:99000,dslight:89000,future:99000,ultra:89000,king:89000,tiempoac:89000,moreliatf:179000,orei:99000,topflex:89000,nb442:89000,furon:99000,velocita:59000,vaporac:89000,phantomac:89000,predclub:59000,copa3:109000,f50club:59000,future8:99000,ultraplay:59000,alphasel:99000,salael:119000,tekela:99000,c3ff:186000,salajp:169000,g_vap17e:339000,g_vap16p:159000,g_vap16a:89000,g_ph6e:349000,g_phgx2p:159000,g_tie10e:289000,g_tie10a:89000,g_pred25e:299000,g_pred25l:109000,g_f50e:289000,g_f50l:109000,g_copa3e:279000,g_copa3l:109000,g_fut9u:289000,g_ult6u:289000,g_kingu:239000,g_fut8m:109000,g_neo5j:299000,g_mor2j:279000,g_alpha3j:279000,g_neo4p:159000,g_tek5:269000,g_fur8:249000,g_dsx3:239000};
 const DUR={tiempo:4,vapor:3,phantom:3,predator:4,copa:3,f50:3,morelia:3,monarcida:4,calcetto:4,dslight:4,future:3,ultra:2,king:4,tiempoac:4,moreliatf:3,orei:4,topflex:3,nb442:4,furon:3,velocita:3,vaporac:3,phantomac:3,predclub:3,copa3:3,f50club:2,future8:3,ultraplay:2,alphasel:3,salael:3,tekela:3,c3ff:3,salajp:3,g_vap17e:3,g_vap16p:3,g_vap16a:3,g_ph6e:3,g_phgx2p:3,g_tie10e:4,g_tie10a:4,g_pred25e:3,g_pred25l:4,g_f50e:2,g_f50l:3,g_copa3e:3,g_copa3l:3,g_fut9u:3,g_ult6u:2,g_kingu:3,g_fut8m:3,g_neo5j:3,g_mor2j:4,g_alpha3j:3,g_neo4p:3,g_tek5:3,g_fur8:3,g_dsx3:3};
+// 검색용 주소: /products/<slug>/, /brands/<brand>/
+const SLUG={"tiempo": "nike-tiempo-legend-10-pro-tf", "vapor": "nike-mercurial-vapor-16-pro-tf", "phantom": "nike-phantom-gx-2-pro-tf", "predator": "adidas-predator-league-tf", "copa": "adidas-copa-pure-2-league-tf", "f50": "adidas-f50-league-tf", "morelia": "mizuno-morelia-neo-4-pro-as", "monarcida": "mizuno-monarcida-neo-3-select-as", "calcetto": "asics-calcetto-wd-9-tf", "dslight": "asics-ds-light-club-tf", "future": "puma-future-7-match-tt", "ultra": "puma-ultra-5-match-tt", "king": "puma-king-match-tt", "tiempoac": "nike-tiempo-legend-10-academy-tf", "moreliatf": "mizuno-morelia-tf", "orei": "athleta-o-rei-treinamento-t", "topflex": "joma-top-flex-tf", "nb442": "new-balance-442-v2-team-tf", "furon": "new-balance-furon-v7-dispatch-tf", "velocita": "umbro-velocita-club-tf", "vaporac": "nike-mercurial-vapor-16-academy-tf", "phantomac": "nike-phantom-gx-2-academy-tf", "predclub": "adidas-predator-club-tf", "copa3": "adidas-copa-pure-3-league-tf", "f50club": "adidas-f50-club-tf", "future8": "puma-future-8-match-tt", "ultraplay": "puma-ultra-5-play-tt", "alphasel": "mizuno-alpha-select-as", "salael": "mizuno-morelia-sala-elite-tf", "tekela": "new-balance-tekela-v4-magique-tf", "c3ff": "asics-c3-ff-tf", "salajp": "mizuno-morelia-sala-japan-tf", "g_vap17e": "nike-mercurial-vapor-17-elite-fg", "g_vap16p": "nike-mercurial-vapor-16-pro-fg", "g_vap16a": "nike-mercurial-vapor-16-academy-mg", "g_ph6e": "nike-phantom-6-elite-fg", "g_phgx2p": "nike-phantom-gx-2-pro-fg", "g_tie10e": "nike-tiempo-legend-10-elite-fg", "g_tie10a": "nike-tiempo-legend-10-academy-mg", "g_pred25e": "adidas-predator-elite-fg", "g_pred25l": "adidas-predator-league-fg", "g_f50e": "adidas-f50-elite-fg", "g_f50l": "adidas-f50-league-fg", "g_copa3e": "adidas-copa-pure-3-elite-fg", "g_copa3l": "adidas-copa-pure-3-league-fg", "g_fut9u": "puma-future-9-ultimate-fg", "g_ult6u": "puma-ultra-6-ultimate-fg", "g_kingu": "puma-king-ultimate-fg", "g_fut8m": "puma-future-8-match-fg", "g_neo5j": "mizuno-morelia-neo-5-japan", "g_mor2j": "mizuno-morelia-2-japan", "g_alpha3j": "mizuno-alpha-3-japan", "g_neo4p": "mizuno-morelia-neo-4-pro-fg", "g_tek5": "new-balance-tekela-v5-elite-fg", "g_fur8": "new-balance-furon-v8-pro-fg", "g_dsx3": "asics-ds-light-x-fly-pro-3-fg"};
+const BRAND_EN={"나이키": "nike", "아디다스": "adidas", "미즈노": "mizuno", "푸마": "puma", "아식스": "asics", "뉴발란스": "new-balance", "조마": "joma", "아슬레타": "athleta", "엄브로": "umbro"};
 M.forEach(m=>{m.won=WON[m.id];m.dur=DUR[m.id];m.price=m.won<=100000?1:m.won<=150000?2:3});
 // 리뷰 종합 시드: 공개 리뷰·가이드·커뮤니티 글을 읽고 항목 점수를 다시 매김 (문장 복사 없음). s=덮어쓸 항목, r=참고 출처 번호
 const SRC=[
@@ -497,7 +513,7 @@ function card(m,extra=""){return `<article class="card" id="m-${m.id}">
  <p class="size">사이즈 <b>${SIZE[m.id]||"정보 없음"}</b></p>
  ${relBlock(m)}
  <p class="note">${esc(m.note)}</p>${rateBlock(m)}${extra}
- <div class="links"><a href="${shop(m)}" target="_blank" rel="noopener">가격 보기</a></div></article>`}
+ <div class="links">${SLUG[m.id]?`<a href="/products/${SLUG[m.id]}/">자세히 보기</a>`:""}<a href="${shop(m)}" target="_blank" rel="noopener sponsored">가격 보기</a></div></article>`}
 
 // 2022년 이후 브랜드별 라인업. 날짜: 세대 첫 출시(글로벌). ok=1 출처 확인, 0 추정. 컬러웨이 팩은 제외
 const STUD={nike:[["엘리트","FG · AG · SG"],["프로","FG · TF · IC"],["아카데미","MG · TF · IC"],["클럽","MG · TF · IC"]],
@@ -692,4 +708,7 @@ try{const sc=localStorage.getItem("cat");if(sc==="fg")setCat("fg")}catch(e){}
 let saved=null;try{saved=localStorage.getItem("tab")}catch(e){}
 if(["tier","db","quiz"].includes(saved))show(saved);
 if(location.hash.startsWith("#m-")){const id=location.hash.slice(3),m=M.find(x=>x.id===id);if(m){setCat(m.cat);show("db");setTimeout(()=>document.getElementById("m-"+id)?.scrollIntoView(),50)}}
+const HOT=["salajp","morelia","g_ph6e","g_vap17e","predator","tiempo","monarcida","c3ff"];
+document.getElementById("hotList").innerHTML=HOT.map(id=>M.find(m=>m.id===id)).filter(Boolean).map(m=>`<a href="/products/${SLUG[m.id]}/">${esc(m.n.replace(/ (TF|FG|AS|MG|TT)$/,""))}</a>`).join("");
+document.getElementById("startQuiz").addEventListener("click",()=>{show("quiz");document.getElementById("quiz").scrollIntoView({behavior:"smooth"})});
 </script>
