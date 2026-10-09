@@ -4,7 +4,7 @@ import fs from "node:fs";
 import vm from "node:vm";
 
 const SITE = (process.env.SITE_URL || "https://bootpick-kr.pages.dev").replace(/\/$/, "");
-const NAME = "축구화·풋살화 픽";
+const NAME = "FootRank";
 const DISCLOSURE = "이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
 const app = fs.readFileSync("src/app.html", "utf8");
 const style = app.match(/<style>[\s\S]*?<\/style>/)[0];
@@ -41,7 +41,7 @@ fs.mkdirSync("dist", { recursive: true });
 const links = ["tf", "fg"].map((c) => `<h3>${c === "fg" ? "축구화" : "풋살화"} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => `<li><a href="/m/${m.id}/">${esc(m.b + " " + m.n)}</a></li>`).join("")}</ul>`).join("");
 const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
 fs.writeFileSync("dist/index.html",
-  head(`${NAME} | 2026 풋살화·축구화 티어리스트와 발볼별 추천`, "풋살화·축구화 56개 모델의 티어리스트, 발볼·쿠션·터치 비교, 플레이 스타일 추천. 유저 리뷰로 티어가 계속 바뀌어요.", "/") +
+  head(`${NAME} 풋랭크 | 2026 풋살화·축구화 티어리스트와 발볼별 추천`, "풋살화·축구화 56개 모델의 티어리스트, 발볼·쿠션·터치 비교, 플레이 스타일 추천. 유저 리뷰로 티어가 계속 바뀌어요.", "/") +
   body.replace(/<script>/, `<footer class="pg"><nav aria-label="전체 모델">${links}</nav><p class="disc">${DISCLOSURE}</p></footer>\n<script>`) + "</body></html>");
 
 // 모델 페이지
