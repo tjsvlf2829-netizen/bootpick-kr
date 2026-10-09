@@ -151,7 +151,6 @@ input[type=range]:focus-visible{outline:2px solid var(--turf);outline-offset:4px
 .cat{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:-6px 0 18px;background:var(--surface)}
 .cat button{font:inherit;font-weight:700;border:0;background:transparent;color:var(--ink);padding:8px 16px;cursor:pointer;display:flex;gap:6px;align-items:baseline}
 .cat button small{font-weight:400;color:var(--muted);font-size:.72rem}
-.surf{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}.surf[hidden]{display:none}.surf button{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}.surf button[aria-pressed="true"]{background:var(--turf-soft);color:var(--turf);border-color:var(--turf)}
 .cat button[aria-checked="true"]{background:var(--turf-soft);color:var(--turf);box-shadow:inset 0 -3px 0 var(--turf)}
 .hidden-tab{display:none}
 footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid var(--line);padding-top:12px}
@@ -185,7 +184,6 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
 
   <section id="tier">
     <h2 id="tierTitle">풋살화 티어리스트</h2>
-    <div class="surf" id="surf" role="group" aria-label="구장"><button data-s="all" aria-pressed="true">전체</button><button data-s="tf" aria-pressed="false">인조잔디 (TF)</button><button data-s="ic" aria-pressed="false">실내 코트 (IC)</button></div>
     <p class="sub"><span id="tierCount"></span> 같은 공식으로 점수 매겨 나눴어요. 모델을 누르면 특징을 볼 수 있어요.</p>
     <p class="live"><b>이 티어는 고정이 아니에요.</b> 유저 리뷰가 쌓일 때마다 점수와 티어가 실시간으로 다시 매겨져요. 신어 본 모델이 있다면 카드의 <b>리뷰 남기기</b>로 순위에 참여해 주세요.</p>
     <details class="crit" open><summary>티어 나누는 기준</summary>
@@ -1512,13 +1510,11 @@ document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()
 
 // tier list
 // 풋살화는 인조잔디(TF)와 실내 코트(IC/IN) 밑창이 달라서 구장별로 나눠 볼 수 있게 함
-const isIndoor=m=>m.cat==="tf"&&/\b(IC|IN|ID)\b|실내/.test(m.n);let SURF="all";
-function renderTier(){const sf=document.getElementById("surf");if(sf){sf.hidden=CAT!=="tf";sf.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.s===SURF))}
- const L=M.filter(m=>m.cat===CAT&&(CAT!=="tf"||SURF==="all"||(SURF==="ic")===isIndoor(m))).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
+function renderTier(){
+ const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
 document.getElementById("tierList").innerHTML=TIERS.map(t=>`<div class="tier"><div class="lbl" style="background:${tc(t)}">${t}</div><div class="row">${
- L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)}${isIndoor(m)?" · 실내용":""} · ${m.pt}점${m.vgood?" · 가성비":""} · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
+ L.filter(m=>m.tier===t).map(m=>`<button class="chip" data-id="${m.id}"><span class="mini">${shoe(m.id)}</span><span>${esc(m.n)}<small>${esc(m.b)} · ${m.pt}점${m.vgood?" · 가성비":""} · 약 ${(m.won/10000).toFixed(1).replace(".0","")}만원</small></span></button>`).join("")||'<span class="empty">없음</span>'}</div></div>`).join("")}
 renderTier();
-document.getElementById("surf").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b)return;SURF=b.dataset.s;renderTier()});
 document.getElementById("tierList").addEventListener("click",e=>{const c=e.target.closest(".chip");if(!c)return;
  ["f-brand","f-width","f-price"].forEach(i=>document.getElementById(i).value="");renderDB();show("db");
  const el=document.getElementById("m-"+c.dataset.id);if(el){el.scrollIntoView({block:"center"});el.style.borderColor="var(--turf)"}});
