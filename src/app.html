@@ -180,6 +180,13 @@ section{scroll-margin-top:var(--toph)}
 .linkbtn{font:inherit;font-size:.85rem;font-weight:700;color:var(--turf);background:none;border:0;cursor:pointer;padding:0}
 .rail{display:grid;grid-auto-flow:column;grid-auto-columns:70%;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 18px;padding:2px 16px 4px;scrollbar-width:none}
 .rail::-webkit-scrollbar{display:none}
+.moves{display:grid;gap:8px;margin:0 0 18px}
+.mv{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:10px;text-align:left;cursor:pointer;width:100%}
+.mv .nm{flex:1;min-width:0}.mv .nm b{display:block;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mv .nm span{font-size:.78rem;color:var(--muted)}
+.mv .tt{display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)}.mv .tt .tbadge{width:22px;height:22px;font-size:.78rem}
+.mv .dl{min-width:44px;text-align:right;font-weight:800}.mv .up{color:var(--turf)}.mv .dn{color:#ff8a8a}
+.mvempty{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:14px;font-size:.88rem;color:var(--muted);line-height:1.5}
+.rc{list-style:none;margin:2px 0 0;padding:0;display:grid;gap:6px}.rc li{font-size:.84rem;color:var(--muted)}.rc b{color:var(--ink);font-weight:600}
 @media (min-width:640px){.rail{grid-auto-columns:32%}}
 .topcard{font:inherit;color:var(--ink);scroll-snap-align:start;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:6px;text-align:left;cursor:pointer}
 .topcard .shot{background:var(--raise);border-radius:12px}
@@ -263,6 +270,8 @@ section{scroll-margin-top:var(--toph)}
     </div>
     <div class="hrow"><h2 id="topTitle">풋살화 TOP 5</h2><button type="button" class="linkbtn" data-go="tier">전체 티어 ›</button></div>
     <div class="rail" id="rail"></div>
+    <div class="hrow"><h2>이번 주 티어 변동</h2></div>
+    <div id="moves" class="moves"></div>
     <div class="quick">
       <button type="button" data-go="vs"><b>VS 비교</b><span>두 모델 항목별로</span></button>
       <button type="button" data-go="size"><b>사이즈 환승</b><span>지금 신발 기준 몇 mm</span></button>
@@ -1454,7 +1463,8 @@ const RK=["width","light","cushion","touch","dur"];
 const VMAX=120000;
 // 평가 신뢰도: 성능 점수엔 영향 없음. 참고 자료 수와 유저 리뷰 수로만 표시
 const confOf=m=>{const r=m.rev?m.rev.length:0,u=m.un||0;return r>=7||u>=20?"높음":r>=4||u>=5?"보통":"낮음"};
-const UR={}; // 모델 id -> {n, sum:{항목:합}, cm:[한줄평]}
+const UR={}; // 모델 id -> {n, n7, sum:{항목:합}, cm:[한줄평]}
+let RECENT=[]; // 최신 한줄평 [{model,c,t}]
 // 100점 환산(5점 만점 × 20) 기준
 // 티어 컷: 종류별로 따로. 축구화는 상위 점수대가 몰려 있어 S가 너무 많아지지 않게 높게 잡음(2026-10)
 const CUT={tf:[78,72,62],fg:[83,76,66],ic:[78,72,62]};
@@ -1665,7 +1675,19 @@ document.addEventListener("click",e=>{const r=e.target.closest("[data-sheet]");i
 // 홈: 종류별 TOP 5
 function renderHome(){const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc).slice(0,5);
  document.getElementById("heroCat").textContent=CN[CAT];document.getElementById("topTitle").textContent=`${CN[CAT]} TOP 5`;
- document.getElementById("rail").innerHTML=L.map((m,i)=>`<button type="button" class="topcard" data-sheet="${m.id}"><span class="rk">${i+1}</span><span class="shot">${shoe(m.id)}</span><b>${esc(m.n)}</b><span class="k">${esc(m.b)} · ${m.tier}티어 ${m.pt}점 · 약 ${won1(m.won)}</span></button>`).join("")}
+ document.getElementById("rail").innerHTML=L.map((m,i)=>`<button type="button" class="topcard" data-sheet="${m.id}"><span class="rk">${i+1}</span><span class="shot">${shoe(m.id)}</span><b>${esc(m.n)}</b><span class="k">${esc(m.b)} · ${m.tier}티어 ${m.pt}점 · 약 ${won1(m.won)}</span></button>`).join("");renderMoves()}
+// 홈: 이번 주(최근 7일) 리뷰가 달린 모델의 점수·티어 변동(자료 종합 점수 대비)과 최신 한줄평
+function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/60000));return m<60?m+"분 전":m<1440?Math.round(m/60)+"시간 전":Math.round(m/1440)+"일 전"}
+function renderMoves(){const el=document.getElementById("moves");if(!el)return;
+ const L=M.filter(m=>m.cat===CAT&&(UR[m.id]?.n7||0)>0).sort((a,b)=>Math.abs(b.pt-b.seedPt)-Math.abs(a.pt-a.seedPt)||UR[b.id].n7-UR[a.id].n7).slice(0,5);
+ const rows=L.map(m=>{const d=m.pt-m.seedPt,st=tierOf(m.seedPt,m.cat);
+  return `<button type="button" class="mv" data-sheet="${m.id}"><span class="nm"><b>${esc(m.n)}</b><span>이번 주 리뷰 ${UR[m.id].n7}개 · 누적 ${m.un}명</span></span>
+  <span class="tt">${st!==m.tier?`<span class="tbadge" style="background:${tc(st)}">${st}</span>→`:""}<span class="tbadge" style="background:${tc(m.tier)}">${m.tier}</span></span>
+  <span class="dl ${d>0?"up":d<0?"dn":""}">${d>0?"▲"+d:d<0?"▼"+(-d):"–"}</span></button>`}).join("");
+ const rc=RECENT.map(r=>({r,m:M.find(x=>x.id===r.model)})).filter(x=>x.m&&x.m.cat===CAT).slice(0,3);
+ el.innerHTML=(rows||`<div class="mvempty">아직 이번 주 ${CN[CAT]} 리뷰가 없어요. 신어 본 신발에 첫 리뷰를 남기면 여기에 점수 변동이 올라와요. <button type="button" class="rvbtn" data-go="tier" style="margin-left:0">리뷰 남길 모델 찾기</button></div>`)
+  +(rows?`<p class="k" style="margin:0;font-size:.74rem">▲▼는 자료 종합 점수 대비 유저 리뷰로 바뀐 점수예요.</p>`:"")
+  +(rc.length?`<ul class="rc">${rc.map(({r,m})=>`<li><b>${esc(m.n)}</b> “${esc(r.c)}” · ${ago(r.t)}</li>`).join("")}</ul>`:"")}
 
 // db
 const fb=document.getElementById("f-brand");[...new Set(M.map(m=>m.b))].forEach(b=>fb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));
@@ -1807,7 +1829,7 @@ document.addEventListener("click",e=>{const b=e.target.closest(".rvbtn[data-id]"
 const API="/api/ratings";let vid=null;
 try{vid=localStorage.getItem("vid");if(!vid){vid=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now());localStorage.setItem("vid",vid)}}catch(e){}
 async function loadReviews(){try{const r=await fetch(API+"?vid="+encodeURIComponent(vid||""));if(!r.ok)return;const j=await r.json();
- for(const k in UR)delete UR[k];Object.assign(UR,j.agg||{});for(const k in MY)delete MY[k];Object.assign(MY,j.mine||{});
+ for(const k in UR)delete UR[k];Object.assign(UR,j.agg||{});RECENT=j.recent||[];for(const k in MY)delete MY[k];Object.assign(MY,j.mine||{});
  rateOK=!!vid;rerender()}catch(e){}}
 // 리뷰 저장 뒤 점수가 바뀌면 목록이 다시 정렬돼 다른 카드가 화면에 오므로, 리뷰한 카드를 다시 보여 줌
 function keepInView(id){const b=[...document.querySelectorAll(`.rvbtn[data-id="${id}"]`)].find(x=>x.offsetParent);if(!b)return;

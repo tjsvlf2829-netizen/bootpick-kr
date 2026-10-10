@@ -1,4 +1,4 @@
-// GET  /api/ratings?vid=...  -> { agg: {모델: {n, sum:{항목:합}, cm:[{c,t,mine}]}}, mine: {모델: {항목..., c}} }
+// GET  /api/ratings?vid=...  -> { agg: {모델: {n, n7(최근 7일 리뷰 수), sum:{항목:합}, cm:[{c,t,mine}]}}, mine: {모델: {항목..., c}}, recent: [{model,c,t}] }
 // POST /api/ratings {vid, model, width, light, cushion, touch, dur, c, fit, grip}  fit: -1 작게 나옴, 0 맞음, 1 크게 나옴 (선택), grip: 접지력 1~5 (선택, 아직 점수 계산엔 안 씀)
 // DELETE /api/ratings {vid, model}
 const RK = ["width", "light", "cushion", "touch", "dur"];
@@ -30,11 +30,13 @@ export async function onRequestGet({ request, env }) {
   await ensureCols(env);
   const vid = new URL(request.url).searchParams.get("vid") || "";
   const { results: sums } = await env.DB.prepare(
-    "SELECT model, COUNT(*) n, SUM(width) width, SUM(light) light, SUM(cushion) cushion, SUM(touch) touch, SUM(dur) dur, SUM(fit = -1) fs, SUM(fit = 0) fm, SUM(fit = 1) fl, SUM(grip) gs, COUNT(grip) gn FROM reviews GROUP BY model"
-  ).all();
+    "SELECT model, COUNT(*) n, SUM(width) width, SUM(light) light, SUM(cushion) cushion, SUM(touch) touch, SUM(dur) dur, SUM(fit = -1) fs, SUM(fit = 0) fm, SUM(fit = 1) fl, SUM(grip) gs, COUNT(grip) gn, SUM(t > ?) n7 FROM reviews GROUP BY model"
+  ).bind(Date.now() - 7 * 86400_000).all();
   const agg = {};
-  for (const r of sums) agg[r.model] = { n: r.n, sum: Object.fromEntries(RK.map((k) => [k, r[k]])), cm: [], fit: [r.fs || 0, r.fm || 0, r.fl || 0], grip: [r.gs || 0, r.gn || 0] };
+  for (const r of sums) agg[r.model] = { n: r.n, sum: Object.fromEntries(RK.map((k) => [k, r[k]])), cm: [], fit: [r.fs || 0, r.fm || 0, r.fl || 0], grip: [r.gs || 0, r.gn || 0], n7: r.n7 || 0 };
   const { results: cms } = await env.DB.prepare("SELECT model, vid, c, t FROM reviews WHERE c <> '' ORDER BY t DESC LIMIT 1000").all();
+  // 홈 "최근 한줄평"용: 모델 상관없이 최신 한줄평 몇 개
+  const recent = cms.slice(0, 8).map((r) => ({ model: r.model, c: r.c, t: r.t }));
   for (const r of cms) {
     const a = agg[r.model];
     if (a && a.cm.length < 20) a.cm.push({ c: r.c, t: r.t, mine: r.vid === vid });
@@ -44,7 +46,7 @@ export async function onRequestGet({ request, env }) {
     const { results } = await env.DB.prepare("SELECT model, width, light, cushion, touch, dur, c, fit, grip FROM reviews WHERE vid = ?").bind(vid).all();
     for (const r of results) mine[r.model] = { width: r.width, light: r.light, cushion: r.cushion, touch: r.touch, dur: r.dur, c: r.c, fit: r.fit, grip: r.grip };
   }
-  return json({ agg, mine });
+  return json({ agg, mine, recent });
 }
 
 export async function onRequestPost({ request, env }) {
