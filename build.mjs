@@ -22,7 +22,8 @@ const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const wtxt = (w) => (w <= 2 ? "좁은 편" : w >= 4 ? "넓은 편" : "보통");
-const catName = (m) => (m.cat === "fg" ? "축구화" : "풋살화");
+const CNM = { tf: "풋살화", fg: "축구화", ic: "인도어화" }, CPATH = { tf: "futsal", fg: "football", ic: "indoor" };
+const catName = (m) => CNM[m.cat];
 const bar = (v) => `<div class="bar">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= Math.round(v) ? "on" : ""}"></i>`).join("")}</div>`;
 const head = (title, desc, path) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${SITE}${path}">
@@ -41,14 +42,14 @@ fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
 const foot = `<p class="disc">${DISCLOSURE}</p><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a> · 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
-const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
+const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
 const cmpOf = (m) => COMPARE.filter((c) => c[0] === m.id || c[1] === m.id);
 const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</a>${extra}</li>`;
 
 // 메인 페이지: 앱 + 검색엔진용 전체 모델 링크 + 제휴 고지
-const links = ["tf", "fg"].map((c) => `<h3>${c === "fg" ? "축구화" : "풋살화"} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
+const links = ["tf", "ic", "fg"].map((c) => `<h3>${CNM[c]} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
 const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
@@ -56,7 +57,7 @@ fs.writeFileSync("dist/index.html",
 
 // 이런 사람 추천 / 비추천: 항목 점수를 같은 종류 평균과 비교해 규칙으로 뽑음. 비추천은 모델마다 최소 2개
 const AVG = {};
-for (const c of ["tf", "fg"]) { const L = M.filter((m) => m.cat === c); AVG[c] = Object.fromEntries(["width", "light", "cushion", "touch", "dur"].map((k) => [k, L.reduce((a, m) => a + m[k], 0) / L.length])); }
+for (const c of ["tf", "ic", "fg"]) { const L = M.filter((m) => m.cat === c); AVG[c] = Object.fromEntries(["width", "light", "cushion", "touch", "dur"].map((k) => [k, L.reduce((a, m) => a + m[k], 0) / L.length])); }
 const indoor = (m) => /\b(IC|IN)\b|실내|살라 .*IN/.test(m.n);
 function fitFor(m) {
   const yes = [], no = [], A = AVG[m.cat], leather = /천연 ?가죽|캥거루|소가죽|풀그레인|K-?레더|가죽 앞코/.test(m.up);
@@ -69,7 +70,7 @@ function fitFor(m) {
   if (m.grip != null && m.gripKnown && m.grip >= 4.5) yes.push("급정지·방향 전환이 많은 플레이");
   if (leather) no.push("가죽 관리(젖은 뒤 말리기·오염 관리)가 번거로운 사람");
   if (m.won <= 100000) yes.push("10만원 안팎에서 고르는 사람"); else if (m.won >= 200000) no.push(`예산이 15만원 이하인 사람 (약 ${Math.round(m.won / 10000)}만원대)`);
-  if (m.cat === "tf" && indoor(m)) no.push("인조잔디 구장 위주로 뛰는 사람 (실내 코트용 평평한 밑창)");
+  if (m.cat === "ic") no.push("인조잔디 구장 위주로 뛰는 사람 (실내 코트용 평평한 밑창)");
   else if (m.cat === "tf") no.push("실내 마룻바닥 코트 위주로 뛰는 사람 (인조잔디용 고무 스터드)");
   if (m.cat === "fg" && /FG/.test(m.n) && !/AG|MG/.test(m.n)) no.push("인조잔디 구장 위주인 사람 (FG 전용 스터드는 AG·MG 모델이 더 안전)");
   if (m.cat === "fg" && /AG/.test(m.n) && !/FG/.test(m.n)) no.push("천연잔디 경기 위주인 사람 (AG 스터드는 짧아 천연잔디에선 덜 박혀요)");
@@ -95,10 +96,10 @@ for (const m of M) {
   const desc = `${m.b} ${m.n}: ${m.note} 발볼 ${wtxt(m.width)}, 약 ${m.won.toLocaleString("ko-KR")}원. 사이즈 팁과 유저 리뷰 점수.`;
   const ld = { "@context": "https://schema.org", "@type": "Product", name: `${m.b} ${m.n}`, brand: { "@type": "Brand", name: m.b }, category: catName(m), description: m.note };
   page(url(m), head(title, desc, url(m)) + `<main class="pg">
-<p class="crumb"><a href="/">${NAME}</a> › <a href="/${m.cat === "fg" ? "football" : "futsal"}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
+<p class="crumb"><a href="/">${NAME}</a> › <a href="/${CPATH[m.cat]}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
 <h1>${esc(m.b)} ${esc(m.n)}</h1>
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
-<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""}${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외)</span></p>
+<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""}${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외)</span></p>
 <p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 쌓이면 메인 페이지 점수에 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div><p class="cdisc">${DISCLOSURE}</p></div>
@@ -119,7 +120,7 @@ ${foot}</main>
 
 // 풋살화 / 축구화 티어리스트 페이지 (정적)
 const TIERS = ["S", "A", "B", "C"];
-for (const [c, path, label, sub] of [["tf", "/futsal/", "풋살화", "TF · IC"], ["fg", "/football/", "축구화", "FG · AG · MG"]]) {
+for (const [c, path, label, sub] of [["tf", "/futsal/", "풋살화", "TF"], ["ic", "/indoor/", "인도어화", "IC · IN"], ["fg", "/football/", "축구화", "FG · AG · MG"]]) {
   const L = M.filter((m) => m.cat === c).sort((a, b) => b.sc - a.sc);
   const rows = TIERS.map((t) => { const T = L.filter((m) => m.tier === t); return T.length ? `<h2><span class="tb" style="background:var(--${t.toLowerCase()})">${t}</span> ${t}티어 (${T.length})</h2><ul>${T.map((m) => li(m, ` · ${m.pt}점 · 발볼 ${wtxt(m.width)} · 약 ${(m.won / 10000).toFixed(1)}만원`)).join("")}</ul>` : ""; }).join("");
   page(path, head(`2026 ${label} 티어리스트 ${L.length}개 모델 순위 | ${NAME}`, `${label}(${sub}) ${L.length}개 모델을 터치·쿠션·발볼·무게·내구성·가성비로 점수 매긴 2026 티어리스트. 유저 리뷰로 계속 바뀌어요.`, path) +
@@ -193,7 +194,7 @@ fs.writeFileSync("dist/_redirects", redirects.join("\n") + "\n");
 
 page("/about/", head(`평가 방법·운영 정보 | ${NAME}`, "풋픽 점수와 티어를 매기는 방법, 데이터 출처, 업데이트 주기, 제휴 고지.", "/about/") +
   `<main class="pg guide">${nav}<h1>평가 방법·운영 정보</h1>
-<h2>점수는 이렇게 매겨요</h2><p>모델마다 발볼·가벼움·쿠션·터치·내구성·접지력을 1~5점으로 매긴 뒤, 항목별 비중을 곱해 100점 만점으로 바꿔요. 티어는 성능만으로 정하고 가격은 넣지 않아요. 풋살화는 터치 37%·발 편안함 26%·가벼움 16%·내구성 11%·접지력 10%, 축구화는 터치 30%·가벼움 30%·접지력 15%·발 편안함 15%·내구성 10%예요. 접지력은 리뷰에서 근거를 찾은 모델만 넣고, 근거가 없는 모델은 접지력을 빼고 나머지 항목 비중을 그만큼 키워 계산해요. 근거가 없다고 감점하지 않기 위해서예요. 티어 기준은 풋살화가 S 78점·A 72점·B 62점 이상, 축구화는 고득점 모델이 많아 S 83점·A 76점·B 66점 이상이에요.</p>
+<h2>점수는 이렇게 매겨요</h2><p>모델마다 발볼·가벼움·쿠션·터치·내구성·접지력을 1~5점으로 매긴 뒤, 항목별 비중을 곱해 100점 만점으로 바꿔요. 티어는 성능만으로 정하고 가격은 넣지 않아요. 풋살화는 터치 37%·발 편안함 26%·가벼움 16%·내구성 11%·접지력 10%, 인도어화(실내 코트용 IC·IN)는 터치 35%·발 편안함 25%·접지력 15%·가벼움 15%·내구성 10%, 축구화는 터치 30%·가벼움 30%·접지력 15%·발 편안함 15%·내구성 10%예요. 접지력은 리뷰에서 근거를 찾은 모델만 넣고, 근거가 없는 모델은 접지력을 빼고 나머지 항목 비중을 그만큼 키워 계산해요. 근거가 없다고 감점하지 않기 위해서예요. 티어 기준은 풋살화·인도어화가 S 78점·A 72점·B 62점 이상, 축구화는 고득점 모델이 많아 S 83점·A 76점·B 66점 이상이에요.</p>
 <h2>처음 점수는 운영자 평가예요</h2><p>직접 신어 본 측정값이 아니라, 모델마다 공개 리뷰·판매처 구매평·제조사 핏 안내 3~10곳(평균 6곳)을 읽고 운영자가 매긴 값이에요. 자료가 2곳 이하인 모델은 상세 페이지에 "추정 비중이 커요"라고 표시해요. 문장은 그대로 옮기지 않고 직접 요약해요.</p>
 <h2>평가 신뢰도와 가성비</h2><p><b>평가 신뢰도</b>는 참고 자료 수와 유저 리뷰 수로 정해요(높음: 자료 7곳 이상 또는 리뷰 20명 이상, 보통: 자료 4곳 이상 또는 리뷰 5명 이상). 근거가 적다고 성능이 낮은 건 아니라서 점수에는 더하거나 빼지 않아요. <b>가성비 좋음</b>은 12만 원 이하 모델 중 성능 상위 4분의 1이면서 같은 종류 전체에서 중간보다 높은 모델에 붙고, 티어와는 따로 계산해요. 리뷰를 남길 때 <b>접지력</b>도 선택으로 매길 수 있어요. 데이터가 충분히 쌓이면 평가 항목에 넣을 예정이에요.</p>
 <h2>유저 리뷰는 이렇게 반영돼요</h2><p>로그인 없이 브라우저마다 모델당 1개씩 항목별 점수를 남길 수 있어요. 운영자 평가는 유저 10명분의 무게로 시작하고, 유저 리뷰가 쌓일수록 유저 평균 쪽으로 옮겨가요(10명이 모이면 반반). 카드에는 자료 종합 점수와 유저 평균 점수를 따로 보여줘요. 같은 곳에서 짧은 시간에 리뷰를 몰아서 남기는 것은 막고 있어요.</p>
@@ -209,7 +210,7 @@ page("/privacy/", head(`개인정보처리방침 | ${NAME}`, "풋픽이 수집�
 <h2>외부 서비스</h2><p>사이트는 Cloudflare에서 운영되고, 구매처 링크를 누르면 쿠팡 등 판매처 사이트로 이동해요. 이동한 사이트의 개인정보 처리는 그 사이트의 방침을 따라요.</p>
 <h2>문의</h2><p>개인정보 관련 문의: <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p>
 <p class="k">시행일: ${UPDATED}</p>${foot}</main></body></html>`);
-const urls = ["/", "/about/", "/futsal/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
+const urls = ["/", "/about/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
