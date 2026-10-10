@@ -144,6 +144,7 @@ input[type=range]:focus-visible{outline:2px solid var(--turf);outline-offset:4px
 .src a{color:var(--turf)}
 .crit{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:14px}
 .crit summary{cursor:pointer;font-weight:700}
+.flash{outline:3px solid var(--turf);outline-offset:2px;transition:outline-color .4s}
 .critbody{display:grid;gap:8px;margin-top:8px;font-size:.88rem}
 .critbody p{margin:0}
 .wt{border-collapse:collapse;width:100%;font-size:.84rem}
@@ -189,7 +190,7 @@ footer{margin-top:32px;color:var(--muted);font-size:.78rem;border-top:1px solid 
     <h2 id="tierTitle">풋살화 티어리스트</h2>
     <p class="sub"><span id="tierCount"></span> 같은 공식으로 점수 매겨 나눴어요. 모델을 누르면 특징을 볼 수 있어요.</p>
     <p class="live"><b>이 티어는 고정이 아니에요.</b> 유저 리뷰가 쌓일 때마다 점수와 티어가 실시간으로 다시 매겨져요. 신어 본 모델이 있다면 카드의 <b>리뷰 남기기</b>로 순위에 참여해 주세요.</p>
-    <details class="crit" open><summary>티어 나누는 기준</summary>
+    <details class="crit"><summary>티어 나누는 기준</summary>
       <div class="critbody">
         <p>각 항목 1~5점에 비중을 곱해 더한 뒤 <b>100점 만점</b>으로 바꿔요(5점 만점 × 20). 티어는 <b>성능만</b>으로 매기고, 가격은 넣지 않아요.</p>
         <table class="wt"><thead><tr><th>항목</th><th>비중</th><th>보는 것</th></tr></thead><tbody id="wtBody"></tbody></table>
@@ -1668,10 +1669,13 @@ try{vid=localStorage.getItem("vid");if(!vid){vid=(crypto.randomUUID?crypto.rando
 async function loadReviews(){try{const r=await fetch(API+"?vid="+encodeURIComponent(vid||""));if(!r.ok)return;const j=await r.json();
  for(const k in UR)delete UR[k];Object.assign(UR,j.agg||{});for(const k in MY)delete MY[k];Object.assign(MY,j.mine||{});
  rateOK=!!vid;rerender()}catch(e){}}
+// 리뷰 저장 뒤 점수가 바뀌면 목록이 다시 정렬돼 다른 카드가 화면에 오므로, 리뷰한 카드를 다시 보여 줌
+function keepInView(id){const b=[...document.querySelectorAll(`.rvbtn[data-id="${id}"]`)].find(x=>x.offsetParent);if(!b)return;
+ const el=b.closest("article")||b;el.scrollIntoView({block:"center"});el.classList.add("flash");setTimeout(()=>el.classList.remove("flash"),2200)}
 async function save(next,msg){const id=cur,m=M.find(x=>x.id===id),before=m.pt;dlg.close();
  try{const r=await fetch(API,{method:next?"POST":"DELETE",headers:{"content-type":"application/json"},body:JSON.stringify({vid,model:id,...(next||{})})});
   const j=await r.json().catch(()=>({}));if(!r.ok){toast(j.error||"저장하지 못했어요. 잠시 후 다시 시도해 주세요");return}
-  await loadReviews();toast(msg(before,m))}catch(e){toast("저장하지 못했어요. 잠시 후 다시 시도해 주세요")}}
+  await loadReviews();keepInView(id);toast(msg(before,m))}catch(e){toast("저장하지 못했어요. 잠시 후 다시 시도해 주세요")}}
 document.getElementById("rvs").onclick=()=>{if(!RK.every(k=>draft[k]))return;const c=document.getElementById("rvc").value.trim().slice(0,60);
  save({...draft,c},(b,m)=>`리뷰를 저장했어요 · ${m.n} 점수 ${b}점 → ${m.pt}점`)};
 document.getElementById("rvdel").onclick=()=>save(null,()=>"리뷰를 삭제했어요");
