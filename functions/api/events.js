@@ -1,6 +1,6 @@
 // POST /api/events {type, model?, page?, q?}  익명 사용 기록: 구매 링크 클릭(buy), 추천 사용(quiz), 결과 공유(share)
 // 통계는 Cloudflare D1 콘솔에서: SELECT type, model, COUNT(*) FROM events GROUP BY 1,2 ORDER BY 3 DESC;
-const TYPES = new Set(["buy", "quiz", "share"]);
+const TYPES = new Set(["buy", "quiz", "share", "sheet"]);
 let ready = false;
 
 export async function onRequestPost({ request, env }) {
