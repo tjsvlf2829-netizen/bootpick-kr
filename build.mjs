@@ -33,7 +33,7 @@ ${style}
 .hero{display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
 .pg table{border-collapse:collapse;width:100%;font-size:.9rem}.pg td,.pg th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .cta{display:flex;gap:8px;flex-wrap:wrap}.cta a{font-weight:700;text-decoration:none;border:1px solid var(--turf);border-radius:8px;padding:8px 14px}
-.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.best{padding-left:20px}.best li{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}.best h2{font-size:1.05rem;margin:0 0 4px}.guide h2{margin-top:22px}.pg td .bar{min-width:90px}.pg th{white-space:nowrap}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
+.cdisc{font-size:.78rem;color:var(--muted);margin:8px 0 0}.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.best{padding-left:20px}.best li{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}.best h2{font-size:1.05rem;margin:0 0 4px}.guide h2{margin-top:22px}.pg td .bar{min-width:90px}.pg th{white-space:nowrap}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
 body{background:var(--bg);color:var(--ink);font-family:var(--body)}</style></head><body>`;
 
 fs.rmSync("dist", { recursive: true, force: true });
@@ -101,7 +101,7 @@ for (const m of M) {
 <p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${m.cat === "fg" ? "축구화" : "풋살화"} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""}${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외)</span></p>
 <p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 쌓이면 메인 페이지 점수에 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
-<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
+<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div><p class="cdisc">${DISCLOSURE}</p></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("")}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
