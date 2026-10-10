@@ -269,7 +269,6 @@ section{scroll-margin-top:var(--toph)}
       <button type="button" data-go="db"><b>라인업</b><span>세대별 변화 · 검색</span></button>
     </div>
     <div class="hot"><span>많이 찾는 모델</span><span id="hotList"></span></div>
-    <p class="k" style="margin:0;font-size:.76rem">이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
   </section>
 
   <section id="tier" class="hidden-tab">
@@ -340,7 +339,7 @@ section{scroll-margin-top:var(--toph)}
     <div class="res" id="vsRes" aria-live="polite"></div>
   </section>
 
-  <footer>제휴 링크가 붙으면 이 사이트는 쿠팡 파트너스 활동의 일환으로 일정액의 수수료를 받을 수 있다는 고지가 모든 페이지에 들어갑니다. 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></footer>
+  <footer>문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></footer>
 </div>
 <nav class="tabbar" role="tablist" aria-label="메뉴">
   <button role="tab" id="t-home" aria-selected="true" data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>홈</button>
@@ -1647,7 +1646,7 @@ document.getElementById("jump").addEventListener("click",e=>{const b=e.target.cl
 let shId=null;const sheetEl=document.getElementById("sheet"),scrim=document.getElementById("scrim");
 function paintSheet(){if(!shId)return;const m=M.find(x=>x.id===shId);if(!m)return;
  const rank=M.filter(x=>x.cat===m.cat).sort((a,b)=>b.sc-a.sc).findIndex(x=>x.id===m.id)+1;
- document.getElementById("shBody").innerHTML=`<p class="k" style="margin:0 40px 6px 0">${CN[m.cat]} ${rank}위 · ${m.pt}점</p>`+card(m).replace(` id="m-${m.id}"`,"")}
+ document.getElementById("shBody").innerHTML=`<p class="k" style="margin:0 40px 6px 0">${CN[m.cat]} ${rank}위 · ${m.pt}점</p>`+card(m).replace(` id="m-${m.id}"`,"")+`<p class="k" style="margin:10px 0 0;font-size:.74rem">이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>`}
 function openSheetUI(id){shId=id;paintSheet();sheetEl.scrollTop=0;sheetEl.classList.add("on");scrim.classList.add("on")}
 function closeSheetUI(){shId=null;sheetEl.classList.remove("on");scrim.classList.remove("on")}
 function openSheet(id){const had=shId;openSheetUI(id);if(booted&&!restoring){if(had)history.replaceState(hs(),"");else history.pushState(hs(),"")}if(!restoring)try{track("sheet",{model:id})}catch(e){}}
