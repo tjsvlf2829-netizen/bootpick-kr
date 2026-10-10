@@ -52,6 +52,8 @@ const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</
 const links = ["tf", "ic", "fg"].map((c) => `<h3>${CNM[c]} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
 const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
 for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/" + f);
+// 인스타 예약 게시(메트리쿨)가 가져갈 릴스 영상
+if (fs.existsSync("src/media")) fs.cpSync("src/media", "dist/media", { recursive: true });
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
   body.replace(/<script>/, `<footer class="pg"><details><summary>전체 모델 목록 (${M.length}개)</summary><nav aria-label="전체 모델">${links}</nav></details>${foot}</footer>\n<script>`) + "</body></html>");
@@ -215,5 +217,5 @@ const urls = ["/", "/about/", "/futsal/", "/indoor/", "/football/", "/brands/", 
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
-fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`built ${M.length} model pages -> dist/`);
