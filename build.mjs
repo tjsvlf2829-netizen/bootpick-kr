@@ -15,8 +15,8 @@ const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 // 데이터 부분만 실행해서 모델 목록을 얻음 (DOM 코드 이전까지)
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED};", ctx);
-const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED } = ctx.D;
+vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop};", ctx);
+const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
@@ -24,7 +24,6 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const wtxt = (w) => (w <= 2 ? "좁은 편" : w >= 4 ? "넓은 편" : "보통");
 const catName = (m) => (m.cat === "fg" ? "축구화" : "풋살화");
 const bar = (v) => `<div class="bar">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= Math.round(v) ? "on" : ""}"></i>`).join("")}</div>`;
-const shop = (m) => `https://www.coupang.com/np/search?q=${encodeURIComponent(m.b + " " + m.n)}`;
 const head = (title, desc, path) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${SITE}${path}">
 <meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${SITE}${path}"><meta property="og:locale" content="ko_KR">

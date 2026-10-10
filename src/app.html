@@ -1385,7 +1385,9 @@ const wcls=w=>w<=2?"n":w>=4?"w":"r", wtxt=w=>({n:"좁은 편",r:"보통",w:"넓�
 const tc=t=>`var(--${t.toLowerCase()})`;
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
 const bar=v=>`<div class="bar">${[1,2,3,4,5].map(i=>`<i class="${i<=Math.round(v)?"on":""}"></i>`).join("")}</div>`;
-const shop=m=>`https://www.coupang.com/np/search?q=${encodeURIComponent(m.b+" "+m.n)}`;
+// 쿠팡 파트너스 링크(모델 id → link.coupang.com 주소). 없는 모델은 쿠팡 검색으로 연결
+const PL={};
+const shop=m=>PL[m.id]||`https://www.coupang.com/np/search?q=${encodeURIComponent(m.b+" "+m.n)}`;
 function card(m,extra=""){return `<article class="card" id="m-${m.id}">
  <div class="shot">${shoe(m.id)}</div>
  <div class="meta"><span class="tb" style="background:${tc(m.tier)}">${m.tier}</span><span class="pill">${esc(m.b)}</span><span class="pill">${esc(m.up)}</span><span class="pill">약 ${m.won.toLocaleString("ko-KR")}원</span>${m.vgood?'<span class="pill vg">가성비 좋음</span>':""}</div>
