@@ -27,7 +27,7 @@ const catName = (m) => CNM[m.cat];
 const bar = (v) => `<div class="bar">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= Math.round(v) ? "on" : ""}"></i>`).join("")}</div>`;
 const head = (title, desc, path) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title><meta name="description" content="${esc(desc)}"><link rel="canonical" href="${SITE}${path}">
-<meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${SITE}${path}"><meta property="og:locale" content="ko_KR">
+<meta property="og:type" content="website"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${SITE}${path}"><meta property="og:locale" content="ko_KR"><meta property="og:site_name" content="FootPick 풋픽"><meta property="og:image" content="${SITE}/og.png?v=1"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><link rel="apple-touch-icon" href="/og-square.png">
 ${fonts}
 ${style}
 <style>.pg{max-width:760px;margin:0 auto;padding:16px}.crumb{font-size:.82rem;color:var(--muted)}.crumb a,.pg a{color:var(--turf)}
@@ -51,6 +51,7 @@ const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</
 // 메인 페이지: 앱 + 검색엔진용 전체 모델 링크 + 제휴 고지
 const links = ["tf", "ic", "fg"].map((c) => `<h3>${CNM[c]} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
 const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
+for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/" + f);
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
   body.replace(/<script>/, `<footer class="pg"><nav aria-label="전체 모델">${links}</nav>${foot}</footer>\n<script>`) + "</body></html>");
