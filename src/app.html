@@ -1812,8 +1812,7 @@ document.getElementById("rvs").onclick=()=>{if(!RK.every(k=>draft[k]))return;con
 document.getElementById("rvdel").onclick=()=>save(null,()=>"리뷰를 삭제했어요");
 loadReviews();renderCrit(CAT);
 try{const sc=localStorage.getItem("cat");if(sc==="fg"||sc==="ic")setCat(sc)}catch(e){}
-let saved=null;try{saved=localStorage.getItem("tab")}catch(e){}
-if(["home","tier","db","quiz","size","vs"].includes(saved))show(saved);renderHome();
+show("home");renderHome();/* 처음 열면 항상 홈에서 시작 (예전에 보던 탭을 복원하지 않음) */
 if(location.hash.startsWith("#m-")){const id=location.hash.slice(3),m=M.find(x=>x.id===id);if(m){setCat(m.cat);show("tier");openSheet(id)}}
 const HOT=["salajp","morelia","g_ph6e","g_vap17e","predator","tiempo","monarcida","c3ff"];
 document.getElementById("hotList").innerHTML=HOT.map(id=>M.find(m=>m.id===id)).filter(Boolean).map(m=>`<a href="/products/${SLUG[m.id]}/">${esc(m.n.replace(/ (TF|FG|AS|MG|TT)$/,""))}</a>`).join("");
