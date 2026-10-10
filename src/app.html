@@ -1620,9 +1620,13 @@ function otherHint1(l,oc){const O=lineModels(l,oc);if(!O.length)return"";
  return `<p class="k" style="margin:0">${CN[oc]} 탭에 ${top.length?esc(top.slice(0,2).join(", "))+(top.length>2?" 등 ":" 포함 "):""}${O.length}개 모델이 더 있어요${CAT!=="fg"&&oc==="fg"&&top.length?" (엘리트 등급은 주로 FG·AG로만 나와요)":""}. <button type="button" class="rvbtn" data-cat-go="${oc}" style="margin-left:0">${CN[oc]}로 보기</button></p>`}
 
 // tabs
-function show(tab){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
+// 뒤로가기: 탭 이동·요약 창 열기를 브라우저 기록에 남겨서, 뒤로가기를 누르면 사이트를 나가지 않고 이전 화면으로 돌아감
+const H0=typeof history!=="undefined"?history.state:null;let booted=false,restoring=false,curTab="home";
+const hs=()=>({tab:curTab,sheet:typeof shId!=="undefined"?shId:null,cat:CAT});
+function show(tab){if(booted&&!restoring&&tab!==curTab){if(shId)closeSheetUI();history.replaceState(hs(),"");curTab=tab;history.pushState(hs(),"")}curTab=tab;
+ document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
  ["home","tier","db","quiz","size","vs"].forEach(id=>document.getElementById(id).classList.toggle("hidden-tab",id!==tab));
- if(typeof closeSheet==="function")closeSheet();window.scrollTo(0,0);
+ if(typeof closeSheetUI==="function"&&shId)closeSheetUI();window.scrollTo(0,0);
  try{localStorage.setItem("tab",tab)}catch(e){}}
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.tab)));
 
@@ -1644,8 +1648,14 @@ let shId=null;const sheetEl=document.getElementById("sheet"),scrim=document.getE
 function paintSheet(){if(!shId)return;const m=M.find(x=>x.id===shId);if(!m)return;
  const rank=M.filter(x=>x.cat===m.cat).sort((a,b)=>b.sc-a.sc).findIndex(x=>x.id===m.id)+1;
  document.getElementById("shBody").innerHTML=`<p class="k" style="margin:0 40px 6px 0">${CN[m.cat]} ${rank}위 · ${m.pt}점</p>`+card(m).replace(` id="m-${m.id}"`,"")}
-function openSheet(id){shId=id;paintSheet();sheetEl.scrollTop=0;sheetEl.classList.add("on");scrim.classList.add("on");try{track("sheet",{model:id})}catch(e){}}
-function closeSheet(){shId=null;sheetEl.classList.remove("on");scrim.classList.remove("on")}
+function openSheetUI(id){shId=id;paintSheet();sheetEl.scrollTop=0;sheetEl.classList.add("on");scrim.classList.add("on")}
+function closeSheetUI(){shId=null;sheetEl.classList.remove("on");scrim.classList.remove("on")}
+function openSheet(id){const had=shId;openSheetUI(id);if(booted&&!restoring){if(had)history.replaceState(hs(),"");else history.pushState(hs(),"")}if(!restoring)try{track("sheet",{model:id})}catch(e){}}
+function closeSheet(){if(!shId)return;if(booted&&!restoring&&history.state&&history.state.sheet){history.back();return}closeSheetUI()}
+function restoreNav(st){restoring=true;try{if(st.cat&&st.cat!==CAT&&["tf","ic","fg"].includes(st.cat))setCat(st.cat);
+ if(st.tab&&st.tab!==curTab&&document.getElementById(st.tab))show(st.tab);
+ if(st.sheet&&M.some(m=>m.id===st.sheet)){if(st.sheet!==shId)openSheetUI(st.sheet)}else if(shId)closeSheetUI()}finally{restoring=false}}
+addEventListener("popstate",e=>restoreNav(e.state||{tab:"home"}));
 scrim.addEventListener("click",closeSheet);document.getElementById("shx").addEventListener("click",closeSheet);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&shId&&!document.getElementById("rvd")?.open)closeSheet()});
 {let sy=null;sheetEl.addEventListener("touchstart",e=>{sy=sheetEl.scrollTop<=0?e.touches[0].clientY:null},{passive:true});
@@ -1772,7 +1782,7 @@ buildQuiz();recommend();
 const NAMEC=CN;
 function setCat(c){CAT=c;document.querySelectorAll(".cat button").forEach(b=>b.setAttribute("aria-checked",b.dataset.cat===c));
  document.getElementById("tierTitle").textContent=`${NAMEC[c]} 티어리스트`;renderCrit(c);document.getElementById("dbTitle").textContent=`주요 ${NAMEC[c]} 상세`;document.getElementById("quizTitle").textContent=`나에게 맞는 ${NAMEC[c]}`;
- renderTier();renderHome();dbSearch();buildQuiz();recommend();try{initVS()}catch(e){}/* 첫 로드 때는 VS 코드가 아직 준비 전이라 건너뛰고, 아래에서 다시 초기화함 */try{localStorage.setItem("cat",c)}catch(e){}}
+ renderTier();renderHome();dbSearch();buildQuiz();recommend();try{initVS()}catch(e){}/* 첫 로드 때는 VS 코드가 아직 준비 전이라 건너뛰고, 아래에서 다시 초기화함 */try{localStorage.setItem("cat",c)}catch(e){}if(booted)history.replaceState(hs(),"")}
 document.querySelectorAll(".cat button").forEach(b=>b.addEventListener("click",()=>setCat(b.dataset.cat)));
 function toast(t){let e=document.getElementById("toast");if(!e){e=document.createElement("div");e.id="toast";e.setAttribute("role","status");document.body.appendChild(e)}
  e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),3500)}
@@ -1902,4 +1912,7 @@ document.addEventListener("click",e=>{const a=e.target.closest("a[data-vs]");if(
 {const P=new URLSearchParams(location.search);if(P.get("v")){if(CATS.includes(P.get("c")))setCat(P.get("c"));
  for(const [k,key] of [["v","venue"],["w","width"],["s","style"],["p","pref"]])if(P.get(k))ans[key]=P.get(k);
  const bd=+P.get("b");if(bd>0)ans.budget=bd;buildQuiz();recommend();show("quiz");qGo(Q.length+1)}}
+
+/* 쿠팡 등에서 뒤로 돌아와 페이지가 다시 열리면, 보던 탭과 요약 창을 그대로 복원 */
+if(H0&&H0.tab)restoreNav(H0);booted=true;history.replaceState(hs(),"");
 </script>
