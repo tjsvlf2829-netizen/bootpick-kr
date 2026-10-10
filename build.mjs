@@ -16,7 +16,7 @@ const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 const ctx = {};
 vm.createContext(ctx);
 vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop};", ctx);
-const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop } = ctx.D;
+const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
@@ -108,8 +108,8 @@ for (const m of M) {
 <h2>특징 한눈에 보기</h2>
 <table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원 <span class="k">(정가 기준 참고값, 실제 판매가는 판매처에서 확인)</span></td></tr>${gen}
 <tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")} · <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산</a></td></tr></tbody></table>
-<div class="bars" style="margin-top:12px"><span>발볼</span>${bar(m.width)}<span>가벼움</span>${bar(m.light)}<span>쿠션</span>${bar(m.cushion)}<span>터치</span>${bar(m.touch)}<span>내구성</span>${bar(m.dur)}</div>
-<p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
+<div class="bars" style="margin-top:12px"><span>터치</span>${bar(m.touch)}<span>발 편안함</span>${bar(comfortOf(m))}<span>가벼움</span>${bar(m.light)}<span>내구성</span>${bar(m.dur)}<span>접지력</span>${m.grip != null ? bar(m.grip) : '<span class="k">근거 부족</span>'}<span>발볼</span>${bar(m.width)}<span>쿠션</span>${bar(m.cushion)}</div>
+<p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 위 다섯 항목(터치·발 편안함·가벼움·내구성·접지력)이 티어 점수에 들어가고, 발 편안함은 아래 발볼·쿠션으로 계산해요. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
 ${src}
 ${cmpOf(m).length ? `<h2>비교해 보기</h2><ul>${cmpOf(m).map((c) => `<li><a href="/compare/${c[2]}/">${esc(byId(c[0]).n)} vs ${esc(byId(c[1]).n)}</a></li>`).join("")}</ul>` : ""}
 <h2>발볼이 비슷한 ${catName(m)}</h2><ul class="rel-list">${similar.map((x) => li(x, ` (${x.tier})`)).join("")}</ul>
