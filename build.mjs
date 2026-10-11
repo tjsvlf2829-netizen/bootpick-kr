@@ -60,7 +60,9 @@ for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/"
 if (fs.existsSync("src/media")) fs.cpSync("src/media", "dist/media", { recursive: true });
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
-  body.replace(/<script>/, `<footer class="pg"><details><summary>전체 모델 목록 (${M.length}개)</summary><nav aria-label="전체 모델">${links}</nav></details>${foot}</footer>\n<script>`) + "</body></html>");
+    // 구글이 검색 결과에 사이트 이름을 "풋픽"으로 보여 주도록 알려 주는 정보(WebSite·Organization)
+  `<script type="application/ld+json">${JSON.stringify([{ "@context": "https://schema.org", "@type": "WebSite", name: "풋픽", alternateName: ["FootPick", "footpick", "풋픽 FootPick"], url: SITE + "/" }, { "@context": "https://schema.org", "@type": "Organization", name: "풋픽", alternateName: "FootPick", url: SITE + "/", logo: SITE + "/og-square.png", email: "contact@footpick.kr", sameAs: ["https://www.instagram.com/footpick.kr/"] }])}</script>` +
+body.replace(/<script>/, `<footer class="pg"><details><summary>전체 모델 목록 (${M.length}개)</summary><nav aria-label="전체 모델">${links}</nav></details>${foot}</footer>\n<script>`) + "</body></html>");
 
 // 이런 사람 추천 / 비추천: 항목 점수를 같은 종류 평균과 비교해 규칙으로 뽑음. 비추천은 모델마다 최소 2개
 const AVG = {};
