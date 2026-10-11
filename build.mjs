@@ -15,8 +15,8 @@ const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 // 데이터 부분만 실행해서 모델 목록을 얻음 (DOM 코드 이전까지)
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop};", ctx);
-const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf } = ctx.D;
+vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop,GRIP,WC,CUT,SEED_W,VMAX};", ctx);
+const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf, GRIP, WC, CUT, SEED_W, VMAX } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
@@ -85,6 +85,27 @@ function fitFor(m) {
   return { yes: yes.slice(0, 4), no: no.slice(0, 3) };
 }
 
+// 상품 페이지 실시간 점수: 메인(app.html rescore)과 같은 공식으로 /api/ratings 유저 리뷰를 섞어 티어·순위·막대를 다시 그림
+const LIVE = Object.fromEntries(M.map((m) => { const g = GRIP[m.id] || [3, 0]; return [m.id, [m.cat, m.base.width, m.base.light, m.base.cushion, m.base.touch, m.base.dur, g[1] ? g[0] : null, m.won]]; }));
+fs.writeFileSync("dist/live.js", `(function(){var D=${JSON.stringify(LIVE)},WC=${JSON.stringify(WC)},CUT=${JSON.stringify(CUT)},SW=${SEED_W},VMAX=${VMAX},RK=["width","light","cushion","touch","dur"];
+var el=document.getElementById("lv"),id=el&&el.dataset.id;if(!id||!D[id])return;
+var cl=function(v){return Math.max(1,Math.min(5,v))},comfort=function(o){return cl((o.cushion+Math.min(o.width,5))/2+.5)};
+var sc=function(o,c){var W=WC[c],b=o.touch*W.touch+comfort(o)*W.comfort+o.light*W.light+o.dur*W.dur;return o.grip==null?b/(1-W.grip):b+o.grip*W.grip};
+var tierOf=function(p,c){var t=CUT[c];return p>=t[0]?"S":p>=t[1]?"A":p>=t[2]?"B":"C"};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+var bar=function(v){var h='<div class="bar">';for(var i=1;i<=5;i++)h+='<i class="'+(i<=Math.round(v)?"on":"")+'"></i>';return h+"</div>"};
+fetch("/api/ratings").then(function(r){return r.ok?r.json():null}).then(function(j){if(!j)return;var A=j.agg||{},S={};
+ for(var k in D){var d=D[k],u=A[k]||{n:0,sum:{},grip:[0,0]},ug=u.grip||[0,0],o={cat:d[0],won:d[7],n:u.n,cm:u.cm||[]};
+  RK.forEach(function(x,i){o[x]=(d[i+1]*SW+((u.sum||{})[x]||0))/(SW+u.n)});
+  o.grip=d[6]!=null?(d[6]*SW+ug[0])/(SW+ug[1]):ug[1]>=3?ug[0]/ug[1]:null;o.sc=sc(o,o.cat);o.pt=Math.round(o.sc*20);o.tier=tierOf(o.pt,o.cat);S[k]=o}
+ var m=S[id],L=Object.keys(S).map(function(k){return S[k]}).filter(function(x){return x.cat===m.cat}),rank=L.slice().sort(function(a,b){return b.sc-a.sc}).indexOf(m)+1;
+ var pts=L.map(function(x){return x.pt}).sort(function(a,b){return a-b}),med=pts[L.length>>1],P=L.filter(function(x){return x.won<=VMAX});
+ var vg=m.won<=VMAX&&m.pt>med&&P.filter(function(x){return x.pt>m.pt}).length<Math.max(1,Math.round(P.length/4));
+ document.getElementById("lv-sum").innerHTML='<span class="tb" style="background:var(--'+m.tier.toLowerCase()+')">'+m.tier+'</span> 현재 '+m.tier+'티어 · 성능 '+m.pt+'점 · '+el.dataset.cn+' '+L.length+'개 중 '+rank+'위'+(vg?" · <b>가성비 좋음</b>":"")+' <span class="k">(100점 만점, 가격 제외)</span>';
+ document.getElementById("lv-bars").innerHTML="<span>터치</span>"+bar(m.touch)+"<span>발 편안함</span>"+bar(comfort(m))+"<span>가벼움</span>"+bar(m.light)+"<span>내구성</span>"+bar(m.dur)+"<span>접지력</span>"+(m.grip!=null?bar(m.grip):'<span class="k">근거 부족</span>')+"<span>발볼</span>"+bar(m.width)+"<span>쿠션</span>"+bar(m.cushion);
+ var ue=document.getElementById("lv-users");if(m.n)ue.innerHTML='<h2>유저 리뷰 '+m.n+'개</h2><p class="k">아래 점수에 실시간으로 반영됐어요.</p>'+(m.cm.length?"<ul>"+m.cm.slice(0,5).map(function(c){return"<li>“"+esc(c.c)+"”</li>"}).join("")+"</ul>":"");
+}).catch(function(){})})();`);
+
 // 모델 페이지 + 옛 주소(/m/<id>/) 넘김
 const redirects = [];
 for (const m of M) {
@@ -102,8 +123,8 @@ for (const m of M) {
 <p class="crumb"><a href="/">${NAME}</a> › <a href="/${CPATH[m.cat]}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
 <h1>${esc(m.b)} ${esc(m.n)}</h1>
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
-<p><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""}${m.vgood ? " · 가성비 좋음" : ""} <span class="k">(100점 만점, 가격 제외)</span></p>
-<p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 쌓이면 메인 페이지 점수에 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
+<p id="lv" data-id="${m.id}" data-cn="${catName(m)}"><span id="lv-sum"><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""} <span class="k">(100점 만점, 가격 제외)</span></span></p>
+<p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 달리면 이 페이지 점수에도 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div><p class="cdisc">${DISCLOSURE}</p></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
@@ -111,14 +132,15 @@ for (const m of M) {
 <h2>특징 한눈에 보기</h2>
 <table><tbody><tr><th>종류</th><td>${catName(m)}</td></tr><tr><th>어퍼</th><td>${esc(m.up)}</td></tr><tr><th>가격</th><td>약 ${m.won.toLocaleString("ko-KR")}원 <span class="k">(정가 기준 참고값, 실제 판매가는 판매처에서 확인)</span></td></tr>${gen}
 <tr><th>사이즈</th><td>${esc(SIZE[m.id] || "정보 없음")} · <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산</a></td></tr></tbody></table>
-<div class="bars" style="margin-top:12px"><span>터치</span>${bar(m.touch)}<span>발 편안함</span>${bar(comfortOf(m))}<span>가벼움</span>${bar(m.light)}<span>내구성</span>${bar(m.dur)}<span>접지력</span>${m.grip != null ? bar(m.grip) : '<span class="k">근거 부족</span>'}<span>발볼</span>${bar(m.width)}<span>쿠션</span>${bar(m.cushion)}</div>
+<div id="lv-users"></div>
+<div class="bars" id="lv-bars" style="margin-top:12px"><span>터치</span>${bar(m.touch)}<span>발 편안함</span>${bar(comfortOf(m))}<span>가벼움</span>${bar(m.light)}<span>내구성</span>${bar(m.dur)}<span>접지력</span>${m.grip != null ? bar(m.grip) : '<span class="k">근거 부족</span>'}<span>발볼</span>${bar(m.width)}<span>쿠션</span>${bar(m.cushion)}</div>
 <p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 위 다섯 항목(터치·발 편안함·가벼움·내구성·접지력)이 티어 점수에 들어가고, 발 편안함은 아래 발볼·쿠션으로 계산해요. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
 ${src}
 ${cmpOf(m).length ? `<h2>비교해 보기</h2><ul>${cmpOf(m).map((c) => `<li><a href="/compare/${c[2]}/">${esc(byId(c[0]).n)} vs ${esc(byId(c[1]).n)}</a></li>`).join("")}</ul>` : ""}
 <h2>발볼이 비슷한 ${catName(m)}</h2><ul class="rel-list">${similar.map((x) => li(x, ` (${x.tier})`)).join("")}</ul>
 <h2><a href="${burl(m.b)}">${esc(m.b)}</a> 다른 모델</h2><ul class="rel-list">${same.map((x) => li(x)).join("")}</ul>
 ${foot}</main>
-<script type="application/ld+json">${JSON.stringify(ld)}</script></body></html>`);
+<script type="application/ld+json">${JSON.stringify(ld)}</script><script src="/live.js" defer></script></body></html>`);
 }
 
 // 풋살화 / 축구화 티어리스트 페이지 (정적)
