@@ -18,6 +18,8 @@ vm.createContext(ctx);
 vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop,GRIP,WC,CUT,SEED_W,VMAX};", ctx);
 const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf, GRIP, WC, CUT, SEED_W, VMAX } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
+// 신상 소식: 매일 아침 자동 작업(루틴)이 공식 발표·전문 매체를 확인해 src/releases.json에 추가함. 유출·루머는 넣지 않음
+const REL_NEW = fs.existsSync("src/releases.json") ? JSON.parse(fs.readFileSync("src/releases.json", "utf8")).sort((a, b) => b.date.localeCompare(a.date)) : [];
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -42,7 +44,7 @@ fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
 const foot = `<p class="disc">${DISCLOSURE}</p><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a> · 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
-const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a></p>`;
+const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a> · <a href="/new/">신상 소식</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
 const cmpOf = (m) => COMPARE.filter((c) => c[0] === m.id || c[1] === m.id);
@@ -50,7 +52,9 @@ const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</
 
 // 메인 페이지: 앱 + 검색엔진용 전체 모델 링크 + 제휴 고지
 const links = ["tf", "ic", "fg"].map((c) => `<h3>${CNM[c]} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
-const body = app.replace(/<title>[\s\S]*?<\/style>/, "");
+const NEWCAT = { fg: "축구화", tf: "풋살화", ic: "인도어화" };
+const relHome = REL_NEW.length ? `<div class="hot newrel"><span>신상 소식</span>${REL_NEW.slice(0, 3).map((r) => `<a href="/new/#${r.id}">${esc(r.brand + " " + r.model)}</a>`).join("")}<a href="/new/">전체 ›</a></div>` : "";
+const body = app.replace(/<title>[\s\S]*?<\/style>/, "").replace('<div class="hot"><span>많이 찾는 모델</span>', relHome + '<div class="hot"><span>많이 찾는 모델</span>');
 for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/" + f);
 // 인스타 예약 게시(메트리쿨)가 가져갈 릴스 영상
 if (fs.existsSync("src/media")) fs.cpSync("src/media", "dist/media", { recursive: true });
@@ -235,7 +239,20 @@ page("/privacy/", head(`개인정보처리방침 | ${NAME}`, "풋픽이 수집�
 <h2>외부 서비스</h2><p>사이트는 Cloudflare에서 운영되고, 구매처 링크를 누르면 쿠팡 등 판매처 사이트로 이동해요. 이동한 사이트의 개인정보 처리는 그 사이트의 방침을 따라요.</p>
 <h2>문의</h2><p>개인정보 관련 문의: <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p>
 <p class="k">시행일: ${UPDATED}</p>${foot}</main></body></html>`);
-const urls = ["/", "/about/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
+// 신상 소식 페이지
+const fmtD = (d) => { const [y, m, dd] = d.split("-"); return `${y}년 ${+m}월 ${+dd}일`; };
+const relItem = (r) => { const m = r.modelId && byId(r.modelId);
+  return `<article class="hero" id="${esc(r.id)}"><p class="k">${fmtD(r.date)} · ${r.status === "released" ? "출시" : "출시 예정 발표"} · ${{ "new-model": "신규 모델", "new-generation": "새 세대", colorway: "새 컬러" }[r.kind] || ""}</p>
+<h2 style="margin:0">${esc(r.brand)} ${esc(r.model)}</h2><p class="k">${esc(r.model_en || "")}</p>
+<p>${(r.cats || []).map((c) => NEWCAT[c]).filter(Boolean).join(" · ")}${r.grades && r.grades.length ? " · " + r.grades.map(esc).join("·") : ""}${r.price ? " · 최상위 정가 " + esc(r.price) : ""}</p>
+<ul>${(r.points || []).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+<p class="k">${m ? `풋픽 평가: <a href="${url(m)}">${esc(m.n)} ${m.tier}티어 · ${m.pt}점</a>` : "풋픽 평가: 리뷰 자료가 3곳 이상 모이면 티어에 추가돼요."}</p>
+<p class="k">출처: ${(r.sources || []).map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener nofollow">${esc(x.name)}</a>`).join(" · ")}</p></article>`; };
+page("/new/", head(`신상 축구화·풋살화 출시 소식 | ${NAME}`, "나이키, 아디다스, 미즈노, 아식스, 푸마 등 새로 나온 축구화와 풋살화 출시 정보를 매일 업데이트해요.", "/new/") +
+  `<main class="pg">${nav}<h1>신상 축구화·풋살화 소식</h1><p>브랜드 공식 발표와 축구화 전문 매체를 매일 확인해서 새 모델과 새 세대 출시 소식을 정리해요. 유출·루머는 다루지 않아요. 점수는 리뷰 자료가 모이면 매겨요.</p>
+${REL_NEW.length ? REL_NEW.map(relItem).join("") : "<p>아직 정리된 소식이 없어요.</p>"}${foot}</main></body></html>`);
+
+const urls = ["/", "/about/", "/new/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");

@@ -1,0 +1,111 @@
+[
+ {
+  "id": "asics-ds-light-acros-4",
+  "date": "2026-10-15",
+  "status": "announced",
+  "brand": "아식스",
+  "model": "DS 라이트 아크로스 4",
+  "model_en": "ASICS DS LIGHT ACROS 4",
+  "kind": "new-generation",
+  "cats": [
+   "fg"
+  ],
+  "price": "1만9,800엔",
+  "points": [
+   "X자로 교차 직조한 2겹 자카드 메쉬 어퍼",
+   "3D 프린팅 아크로스 핏으로 측면 안정성 강화",
+   "힐카운터 일체형 스태빌리티 솔"
+  ],
+  "like": "g_dsx3",
+  "sources": [
+   {
+    "name": "ASICS Japan (official)",
+    "url": "https://www.asics.com/jp/ja-jp/ds-light-acros-4/p/1103A131-102.html"
+   },
+   {
+    "name": "Sports WS (retailer pre-order)",
+    "url": "https://www.sports-ws.com/commodity/SKOB1347D/AS605BU027548/"
+   },
+   {
+    "name": "Sports Sakurai",
+    "url": "https://www.sposaku.jp/i/1103a131-102"
+   }
+  ]
+ },
+ {
+  "id": "under-armour-magnetico-elite-6",
+  "date": "2026-08-20",
+  "status": "released",
+  "brand": "언더아머",
+  "model": "마그네티코 엘리트 6",
+  "model_en": "Under Armour Magnetico Elite 6",
+  "kind": "new-generation",
+  "cats": [
+   "fg"
+  ],
+  "grades": [
+   "엘리트"
+  ],
+  "price": "€270",
+  "points": [
+   "발 모양에 맞춰지는 리퀴드 클론 어퍼",
+   "스터드 압력 줄인 리플렉스 쿠션 아웃솔",
+   "비대칭 끈 배치, 레이스리스 버전 별도"
+  ],
+  "like": "g_ph6e",
+  "sources": [
+   {
+    "name": "Under Armour (official)",
+    "url": "https://about.underarmour.com/en/stories/2026/08/under-armour-launches-its-latest-football-boot-innovation--the-m.html"
+   },
+   {
+    "name": "SoccerBible",
+    "url": "https://www.soccerbible.com/performance/football-boots/2026/08/under-armours-magnetico-elite-6-offers-control-comfort-and-a-statement-of-intent/"
+   },
+   {
+    "name": "Pro:Direct Soccer",
+    "url": "https://www.prodirectsport.com/blogs/football/under-armour-magnetico-6-elite"
+   }
+  ]
+ },
+ {
+  "id": "puma-ultra-nitro-7",
+  "date": "2026-07-16",
+  "status": "released",
+  "brand": "푸마",
+  "model": "울트라 나이트로 7",
+  "model_en": "PUMA Ultra Nitro 7",
+  "kind": "new-generation",
+  "cats": [
+   "fg",
+   "tf"
+  ],
+  "grades": [
+   "얼티메이트",
+   "프로",
+   "매치"
+  ],
+  "price": "$240",
+  "points": [
+   "축구화 최초 니트로폼 엘리트 인솔·풋베드",
+   "전작보다 가벼워진 울트라위브 어퍼",
+   "스피드시스템 2.0 솔, 레이스리스 버전"
+  ],
+  "like": "g_ult6u",
+  "modelId": "n_puma_ultra_nitro_7_match_tt",
+  "sources": [
+   {
+    "name": "Footy Headlines",
+    "url": "https://www.footyheadlines.com/8556727717/puma-26-27-arrival-pack-released-next-gen-ultra-7.html"
+   },
+   {
+    "name": "SoccerBible",
+    "url": "https://www.soccerbible.com/performance/football-boots/2026/07/puma-kicks-off-the-new-season-with-the-arrival-pack/"
+   },
+   {
+    "name": "House of Heat",
+    "url": "https://houseofheat.co/puma/puma-arrivals-pack-ultra-nitro-7-football-boots-release-date"
+   }
+  ]
+ }
+]
