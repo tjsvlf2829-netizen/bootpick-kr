@@ -261,7 +261,7 @@ section{scroll-margin-top:var(--toph)}
 </style>
 
 <header class="top">
-  <div class="brandrow"><a class="logo" href="/"><img src="/og-square.png" alt="" width="34" height="34"><h1>Foot<span>Pick</span></h1></a><div class="sitemenu" aria-label="사이트 메뉴"><a href="/futsal/">풋살화</a><a href="/football/">축구화</a><a href="/best/">추천</a><a href="/compare/">비교</a><a href="/guides/">가이드</a></div></div>
+  <div class="brandrow"><a class="logo" href="/"><img src="/og-square.png" alt="" width="34" height="34"><h1>Foot<span>Pick</span></h1></a><div class="sitemenu" aria-label="사이트 메뉴"><a href="/futsal/">풋살화</a><a href="/football/">축구화</a><a href="/best/">추천</a><a href="/compare/">비교</a><a href="/guides/">가이드</a><a href="/new/">신상 소식</a></div></div>
   <div><div class="cat" role="radiogroup" aria-label="신발 종류"><button role="radio" aria-checked="true" data-cat="tf">풋살화 <small>TF</small></button><button role="radio" aria-checked="false" data-cat="ic">인도어화 <small>IC · IN</small></button><button role="radio" aria-checked="false" data-cat="fg">축구화 <small>FG · AG · MG</small></button></div></div>
 </header>
 <div class="wrap">
@@ -1676,6 +1676,8 @@ function restoreNav(st){restoring=true;try{if(st.cat&&st.cat!==CAT&&["tf","ic","
  if(st.tab&&st.tab!==curTab&&document.getElementById(st.tab))show(st.tab);
  if(st.sheet&&M.some(m=>m.id===st.sheet)){if(st.sheet!==shId)openSheetUI(st.sheet)}else if(shId)closeSheetUI()}finally{restoring=false}}
 addEventListener("popstate",e=>restoreNav(e.state||{tab:"home"}));
+// 왼쪽 위 로고: 새로고침하면 보던 탭이 복원되므로, 같은 페이지 안에서는 직접 홈으로 이동
+document.querySelector("header.top .logo").addEventListener("click",e=>{if(e.ctrlKey||e.metaKey||e.shiftKey)return;e.preventDefault();if(shId)closeSheetUI();show("home");scrollTo(0,0)});
 scrim.addEventListener("click",closeSheet);document.getElementById("shx").addEventListener("click",closeSheet);
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&shId&&!document.getElementById("rvd")?.open)closeSheet()});
 {let sy=null;sheetEl.addEventListener("touchstart",e=>{sy=sheetEl.scrollTop<=0?e.touches[0].clientY:null},{passive:true});
