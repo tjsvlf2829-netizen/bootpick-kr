@@ -25,16 +25,18 @@
    ```
    - `status`: 출시됐으면 `released`, 공개만 됐으면 `announced`
    - `like`/`modelId`는 `src/app.html`의 `M` 목록 id에서 골라요(같은 라인의 직전 세대가 좋아요).
-5. `node build.mjs`가 오류 없이 끝나는지 확인하고, `Add release news: <모델>` 메시지로 커밋·푸시해요. 푸시하면 사이트(footpick.kr/new/)에 바로 반영돼요.
-6. 새 항목이 하나도 없으면 여기서 끝내요.
-7. 새 항목이 있으면 카드뉴스를 만들어요(한 번에 최대 4개, 컬러웨이보다 새 모델 우선).
+5. 라인업에도 반영해요. `src/app.html`의 `LINES`에서 같은 라인을 찾아 `g` 맨 끝에 `["모델명","YYYY-MM",1]`을 더해요(날짜를 공식 출처로 확인했으면 1, 아니면 0). 기존 라인의 후속이 아닌 새 라인이면 `LINES`에 새 줄을 추가해요. 라인업 화면은 점수가 있는 모델이 생긴 라인만 보여 줘요.
+6. 리뷰 자료(공개 리뷰·구매평)가 3곳 이상 모인 새 모델은 기존 모델과 같은 방식으로 `M`에 항목을 추가해 티어에 넣고, `releases.json`에 `modelId`를 적어요. 자료가 부족하면 넣지 않아요.
+7. `node build.mjs`가 오류 없이 끝나는지 확인하고, `Add release news: <모델>` 메시지로 커밋·푸시해요. 푸시하면 사이트(footpick.kr/new/)에 바로 반영돼요.
+8. 새 항목이 하나도 없으면 여기서 끝내요.
+9. 새 항목이 있으면 카드뉴스를 만들어요(한 번에 최대 4개, 컬러웨이보다 새 모델 우선).
    `node tools/newcard.mjs new-YYYYMMDD <id> [<id> ...]` → `src/media/new-YYYYMMDD/`에 피드 사진, story.jpg, reel.mp4, caption.txt가 생겨요. 커밋·푸시하고 배포가 끝날 때까지 기다려요
    (`gh api repos/tjsvlf2829-netizen/bootpick-kr/commits/<커밋>/check-runs`가 completed/success).
-8. Metricool(brandId 7352735, Asia/Seoul)에 인스타 게시를 넣어요. 같은 날 21:00에 피드(캐러셀, caption.txt), 21:30에 스토리(story.jpg, 글 없음), 22:00에 릴스(reel.mp4, showReelOnFeed false, 캡션 짧게)를 넣어요.
+10. Metricool(brandId 7352735, Asia/Seoul)에 인스타 게시를 넣어요. 같은 날 21:00에 피드(캐러셀, caption.txt), 21:30에 스토리(story.jpg, 글 없음), 22:00에 릴스(reel.mp4, showReelOnFeed false, 캡션 짧게)를 넣어요.
    - 미디어 주소: `https://footpick.kr/media/new-YYYYMMDD/1.jpg` 등
    - 그 시간이 이미 지났거나 다른 예약과 겹치면 다음 날 같은 시간으로 옮겨요.
    - **게시 방식: auto** (2026-10-11 선팔님 결정: 확인 없이 바로 게시) (아래 "게시 방식" 참고)
-9. 마지막에 무엇을 추가했고 무엇을 예약했는지 짧게 요약해요.
+11. 마지막에 무엇을 추가했고 무엇을 예약했는지 짧게 요약해요.
 
 ## 게시 방식
 - `review`: `createScheduledPost`에 `"draft": true`로 넣어요. 임시 저장 상태라 선팔님이 Metricool 앱에서 내용을 보고 예약을 눌러야 게시돼요.
