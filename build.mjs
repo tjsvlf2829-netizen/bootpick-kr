@@ -15,8 +15,8 @@ const script = app.match(/<script>([\s\S]*)<\/script>/)[1];
 // 데이터 부분만 실행해서 모델 목록을 얻음 (DOM 코드 이전까지)
 const ctx = {};
 vm.createContext(ctx);
-vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop,GRIP,WC,CUT,SEED_W,VMAX};", ctx);
-const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf, GRIP, WC, CUT, SEED_W, VMAX } = ctx.D;
+vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop,GRIP,WC,CUT,SEED_W,VMAX,cpw};", ctx);
+const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf, GRIP, WC, CUT, SEED_W, VMAX, cpw } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
 // 신상 소식: 매일 아침 자동 작업(루틴)이 공식 발표·전문 매체를 확인해 src/releases.json에 추가함. 유출·루머는 넣지 않음
 const REL_NEW = fs.existsSync("src/releases.json") ? JSON.parse(fs.readFileSync("src/releases.json", "utf8")).sort((a, b) => b.date.localeCompare(a.date)) : [];
@@ -126,7 +126,7 @@ for (const m of M) {
   page(url(m), head(title, desc, url(m)) + `<main class="pg">
 <p class="crumb"><a href="/">${NAME}</a> › <a href="/${CPATH[m.cat]}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
 <h1>${esc(m.b)} ${esc(m.n)}</h1>
-<div class="hero"><div class="shot">${shoe(m.id)}</div>
+<div class="hero">${cpw(m) ? `<div class="cprow"><div class="shot">${shoe(m.id)}</div>${cpw(m)}</div>` : `<div class="shot">${shoe(m.id)}</div>`}
 <p id="lv" data-id="${m.id}" data-cn="${catName(m)}"><span id="lv-sum"><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""} <span class="k">(100점 만점, 가격 제외)</span></span></p>
 <p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 달리면 이 페이지 점수에도 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
