@@ -200,10 +200,11 @@ section{scroll-margin-top:var(--toph)}
 .hot{margin-bottom:12px}
 .hot a{background:var(--raise)!important}
 /* 하단 탭바 */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(6,1fr);max-width:none;margin:0;background:rgba(6,17,13,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px max(4px,calc((100% - 720px)/2)) calc(6px + env(safe-area-inset-bottom,0px))}
-.tabbar button{font:inherit;display:grid;justify-items:center;gap:2px;font-size:.68rem;font-weight:700;color:var(--muted);background:none;border:0;padding:4px 0;cursor:pointer}
-.tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tabbar button[aria-selected="true"]{color:var(--turf)}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(6,1fr);max-width:none;margin:0;background:rgba(10,24,19,.98);box-shadow:0 -6px 20px rgba(0,0,0,.35);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px max(4px,calc((100% - 720px)/2)) calc(6px + env(safe-area-inset-bottom,0px))}
+.tabbar button{font:inherit;display:grid;justify-items:center;gap:3px;font-size:.78rem;font-weight:700;letter-spacing:-.02em;color:#c3d5cd;background:none;border:0;padding:4px 0 2px;cursor:pointer}
+.tabbar svg{width:42px;height:28px;padding:3px 10px;border-radius:99px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;box-sizing:border-box}
+.tabbar button[aria-selected="true"]{color:var(--turf);font-weight:800}
+.tabbar button[aria-selected="true"] svg{background:var(--turf-soft);stroke-width:2.2}
 /* 티어 */
 .jump{display:flex;gap:6px;position:sticky;top:var(--toph);z-index:5;background:var(--bg);padding:8px 0;margin-bottom:6px}
 .jump button{font:inherit;flex:1;border-radius:10px;padding:7px 0;font-weight:900;background:var(--surface);border:1px solid var(--line);cursor:pointer}
@@ -214,6 +215,9 @@ section{scroll-margin-top:var(--toph)}
 .tlist{display:grid;gap:8px}
 .trow{font:inherit;color:var(--ink);display:grid;grid-template-columns:84px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px 10px 8px;text-align:left;width:100%;cursor:pointer}
 .trow .shot{background:var(--raise);border-radius:10px;padding:4px 2px 0}
+.trow.fresh{border-color:rgba(78,240,192,.55);box-shadow:inset 3px 0 0 var(--turf)}
+.mvtag{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.mvtag i{font-style:normal;font-size:.68rem;font-weight:800;border-radius:6px;padding:1px 6px;background:var(--raise);color:var(--ink)}
+.mvtag i.up{color:var(--turf)}.mvtag i.dn{color:#ff8a8a}.mvtag i.nw{background:var(--turf-soft);color:var(--turf)}
 .trow .nm{font-weight:700;font-size:.93rem;line-height:1.3}
 .trow .mt{font-size:.76rem;color:var(--muted);margin-top:2px}
 .trow .vgb{display:inline-block;font-size:.66rem;font-weight:700;color:var(--turf);border:1px solid rgba(78,240,192,.45);border-radius:6px;padding:0 5px;margin-left:4px;vertical-align:1px}
@@ -284,6 +288,8 @@ section{scroll-margin-top:var(--toph)}
     <h2 id="tierTitle">풋살화 티어리스트</h2>
     <p class="sub"><span id="tierCount"></span> 같은 공식으로 점수 매겼어요. 유저 리뷰가 쌓이면 점수와 티어가 바로 바뀌어요. 모델을 누르면 요약과 <b>리뷰 남기기</b>가 열려요.</p>
     <div class="jump" id="jump"></div>
+    <div class="hrow"><h2 style="font-size:1.05rem">이번 주 티어 변동</h2></div>
+    <div id="tmoves" class="moves"></div>
     <details class="crit"><summary>티어 나누는 기준</summary>
       <div class="critbody">
         <p>각 항목 1~5점에 비중을 곱해 더한 뒤 <b>100점 만점</b>으로 바꿔요(5점 만점 × 20). 티어는 <b>성능만</b>으로 매기고, 가격은 넣지 않아요.</p>
@@ -1641,14 +1647,17 @@ document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()
 
 // tier list
 // 풋살화는 인조잔디(TF)와 실내 코트(IC/IN) 밑창이 달라서 구장별로 나눠 볼 수 있게 함
-function renderTier(){
+function renderTier(){try{renderMoves()}catch(e){}
  const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc);document.getElementById("tierCount").textContent=`${L.length}개 모델을`;
  document.getElementById("jump").innerHTML=TIERS.map(t=>`<button type="button" data-jump="${t}" style="color:${tc(t)}">${t}<i>${L.filter(m=>m.tier===t).length}</i></button>`).join("");
  document.getElementById("tierList").innerHTML=TIERS.map(t=>{const g=L.filter(m=>m.tier===t);if(!g.length)return"";
   return `<div class="tierhead" id="tier-${t}"><span class="tbadge" style="background:${tc(t)}">${t}</span><h3>${t}티어</h3><span class="k">${g.length}개</span></div><div class="tlist">${g.map(trow).join("")}</div>`}).join("")}
 const won1=w=>(w/10000).toFixed(1).replace(".0","")+"만원";
-function trow(m){return `<button type="button" class="trow" data-sheet="${m.id}"><span class="shot">${shoe(m.id)}</span>
- <span style="min-width:0"><span class="nm">${esc(m.n)}</span>${m.vgood?'<span class="vgb">가성비</span>':""}<span class="mt" style="display:block">${esc(m.b)} · 발볼 ${wtxt(m.width)} · 약 ${won1(m.won)}</span></span>
+// 리뷰로 점수가 바뀐 모델은 목록에서도 ▲▼와 티어 변화, 이번 주 리뷰 표시
+function mvTag(m){const d=m.pt-m.seedPt,st=tierOf(m.seedPt,m.cat),n7=UR[m.id]?.n7||0;if(!d&&!n7)return"";
+ return `<span class="mvtag">${st!==m.tier?`<i>${st}→${m.tier}</i>`:""}${d?`<i class="${d>0?"up":"dn"}">${d>0?"▲"+d:"▼"+(-d)}</i>`:""}${n7?`<i class="nw">이번 주 리뷰 ${n7}</i>`:""}</span>`}
+function trow(m){return `<button type="button" class="trow${(UR[m.id]?.n7||0)>0?" fresh":""}" data-sheet="${m.id}"><span class="shot">${shoe(m.id)}</span>
+ <span style="min-width:0"><span class="nm">${esc(m.n)}</span>${m.vgood?'<span class="vgb">가성비</span>':""}${mvTag(m)}<span class="mt" style="display:block">${esc(m.b)} · 발볼 ${wtxt(m.width)} · 약 ${won1(m.won)}</span></span>
  <span class="tsc"><span class="tbadge" style="background:${tc(m.tier)}">${m.tier}</span><b>${m.pt}</b><span class="meter"><i style="width:${m.pt}%"></i></span></span></button>`}
 renderTier();
 document.getElementById("jump").addEventListener("click",e=>{const b=e.target.closest("[data-jump]");if(b)document.getElementById("tier-"+b.dataset.jump)?.scrollIntoView({behavior:"smooth"})});
@@ -1678,16 +1687,17 @@ function renderHome(){const L=M.filter(m=>m.cat===CAT).sort((a,b)=>b.sc-a.sc).sl
  document.getElementById("rail").innerHTML=L.map((m,i)=>`<button type="button" class="topcard" data-sheet="${m.id}"><span class="rk">${i+1}</span><span class="shot">${shoe(m.id)}</span><b>${esc(m.n)}</b><span class="k">${esc(m.b)} · ${m.tier}티어 ${m.pt}점 · 약 ${won1(m.won)}</span></button>`).join("");renderMoves()}
 // 홈: 이번 주(최근 7일) 리뷰가 달린 모델의 점수·티어 변동(자료 종합 점수 대비)과 최신 한줄평
 function ago(t){const m=Math.max(1,Math.round((Date.now()-t)/60000));return m<60?m+"분 전":m<1440?Math.round(m/60)+"시간 전":Math.round(m/1440)+"일 전"}
-function renderMoves(){const el=document.getElementById("moves");if(!el)return;
+function renderMoves(){
  const L=M.filter(m=>m.cat===CAT&&(UR[m.id]?.n7||0)>0).sort((a,b)=>Math.abs(b.pt-b.seedPt)-Math.abs(a.pt-a.seedPt)||UR[b.id].n7-UR[a.id].n7).slice(0,5);
  const rows=L.map(m=>{const d=m.pt-m.seedPt,st=tierOf(m.seedPt,m.cat);
   return `<button type="button" class="mv" data-sheet="${m.id}"><span class="nm"><b>${esc(m.n)}</b><span>이번 주 리뷰 ${UR[m.id].n7}개 · 누적 ${m.un}명</span></span>
   <span class="tt">${st!==m.tier?`<span class="tbadge" style="background:${tc(st)}">${st}</span>→`:""}<span class="tbadge" style="background:${tc(m.tier)}">${m.tier}</span></span>
   <span class="dl ${d>0?"up":d<0?"dn":""}">${d>0?"▲"+d:d<0?"▼"+(-d):"–"}</span></button>`}).join("");
  const rc=RECENT.map(r=>({r,m:M.find(x=>x.id===r.model)})).filter(x=>x.m&&x.m.cat===CAT).slice(0,3);
- el.innerHTML=(rows||`<div class="mvempty">아직 이번 주 ${CN[CAT]} 리뷰가 없어요. 신어 본 신발에 첫 리뷰를 남기면 여기에 점수 변동이 올라와요. <button type="button" class="rvbtn" data-go="tier" style="margin-left:0">리뷰 남길 모델 찾기</button></div>`)
+ const html=(rows||`<div class="mvempty">아직 이번 주 ${CN[CAT]} 리뷰가 없어요. 신어 본 신발에 첫 리뷰를 남기면 여기에 점수 변동이 올라와요. <button type="button" class="rvbtn" data-go="tier" style="margin-left:0">리뷰 남길 모델 찾기</button></div>`)
   +(rows?`<p class="k" style="margin:0;font-size:.74rem">▲▼는 자료 종합 점수 대비 유저 리뷰로 바뀐 점수예요.</p>`:"")
-  +(rc.length?`<ul class="rc">${rc.map(({r,m})=>`<li><b>${esc(m.n)}</b> “${esc(r.c)}” · ${ago(r.t)}</li>`).join("")}</ul>`:"")}
+  +(rc.length?`<ul class="rc">${rc.map(({r,m})=>`<li><b>${esc(m.n)}</b> “${esc(r.c)}” · ${ago(r.t)}</li>`).join("")}</ul>`:"");
+ for(const id of ["moves","tmoves"]){const el=document.getElementById(id);if(el)el.innerHTML=html}}
 
 // db
 const fb=document.getElementById("f-brand");[...new Set(M.map(m=>m.b))].forEach(b=>fb.insertAdjacentHTML("beforeend",`<option>${b}</option>`));
