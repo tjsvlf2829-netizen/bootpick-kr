@@ -37,5 +37,5 @@
 9. 마지막에 무엇을 추가했고 무엇을 예약했는지 짧게 요약해요.
 
 ## 게시 방식
-- `review`: `createScheduledPostForReview`로 넣어서 선팔님이 Metricool에서 승인해야 게시돼요.
+- `review`: `createScheduledPost`에 `"draft": true`로 넣어요. 임시 저장 상태라 선팔님이 Metricool 앱에서 내용을 보고 예약을 눌러야 게시돼요.
 - `auto`: `createScheduledPost`로 바로 예약해요.
