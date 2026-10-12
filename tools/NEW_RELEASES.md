@@ -1,6 +1,6 @@
 # 신상 소식 루틴 작업 순서
 
-매일 아침 자동 작업(루틴)이 이 순서대로 실행해요. 사람이 직접 돌릴 때도 같아요.
+매일 아침 06:52 자동 작업(루틴)이 이 순서대로 실행해요. 사람이 직접 돌릴 때도 같아요.
 
 ## 원칙
 - **공식 발표된 것만** 다뤄요. 브랜드 뉴스룸·공식 몰, 구단 스폰서 발표, 축구화 전문 매체(Footy Headlines, SoccerBible, Soccer.com, Unisport 등)에서 출시나 공식 공개가 확인된 것만 넣어요. 유출·루머(leak, rumor, expected)만 있으면 넣지 않아요.
@@ -32,9 +32,9 @@
 9. 새 항목이 있으면 카드뉴스를 만들어요(한 번에 최대 4개, 컬러웨이보다 새 모델 우선).
    `node tools/newcard.mjs new-YYYYMMDD <id> [<id> ...]` → `src/media/new-YYYYMMDD/`에 피드 사진, story.jpg, reel.mp4, caption.txt가 생겨요. 커밋·푸시하고 배포가 끝날 때까지 기다려요
    (`gh api repos/tjsvlf2829-netizen/bootpick-kr/commits/<커밋>/check-runs`가 completed/success).
-10. Metricool(brandId 7352735, Asia/Seoul)에 인스타 게시를 넣어요. 같은 날 21:00에 피드(캐러셀, caption.txt), 21:30에 스토리(story.jpg, 글 없음), 22:00에 릴스(reel.mp4, showReelOnFeed false, 캡션 짧게)를 넣어요.
+10. Metricool(brandId 7352735, Asia/Seoul)에 인스타 게시를 넣어요. **같은 날 아침** 08:00에 피드(캐러셀, caption.txt), 08:15에 스토리(story.jpg, 글 없음), 08:30에 릴스(reel.mp4, showReelOnFeed false, 캡션 짧게)를 넣어요. (2026-10-12 선팔님 요청: 신상은 아침에 빠르게)
    - 미디어 주소: `https://footpick.kr/media/new-YYYYMMDD/1.jpg` 등
-   - 그 시간이 이미 지났거나 다른 예약과 겹치면 다음 날 같은 시간으로 옮겨요.
+   - 그 시간이 이미 지났으면 다음 날로 미루지 말고, 작업이 끝난 시각 +15분에 피드, 그 뒤 15분 간격으로 스토리·릴스를 넣어요. 다른 예약과 같은 시각이면 10분 뒤로 옮겨요.
    - **게시 방식: auto** (2026-10-11 선팔님 결정: 확인 없이 바로 게시) (아래 "게시 방식" 참고)
 11. 마지막에 무엇을 추가했고 무엇을 예약했는지 짧게 요약해요.
 
