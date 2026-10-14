@@ -18,7 +18,7 @@ vm.createContext(ctx);
 vm.runInContext(script.slice(0, script.indexOf('document.querySelectorAll("nav button").forEach(b=>b.addEventListener')) + ";this.D={M,REL,SIZE,SRC,STUD,shoe,comfortOf,SLUG,BRAND_EN,UPDATED,shop,GRIP,WC,CUT,SEED_W,VMAX};", ctx);
 const { M, REL, SIZE, SRC, STUD, shoe, SLUG, BRAND_EN, UPDATED, shop, comfortOf, GRIP, WC, CUT, SEED_W, VMAX } = ctx.D;
 const url = (m) => `/products/${SLUG[m.id]}/`;
-// 신상 소식: 매일 아침 자동 작업(루틴)이 공식 발표·전문 매체를 확인해 src/releases.json에 추가함. 유출·루머는 넣지 않음
+// 신상 소식: 매일 아침 자동 작업(루틴)이 공식 발표·전문 매체를 확인해 src/releases.json에 추가함. 유출은 status "leak"으로 따로 표시(2026-10-14 선팔 요청)
 const REL_NEW = fs.existsSync("src/releases.json") ? JSON.parse(fs.readFileSync("src/releases.json", "utf8")).sort((a, b) => b.date.localeCompare(a.date)) : [];
 const burl = (b) => `/brands/${BRAND_EN[b]}/`;
 
@@ -244,14 +244,14 @@ page("/privacy/", head(`개인정보처리방침 | ${NAME}`, "풋픽이 수집�
 // 신상 소식 페이지
 const fmtD = (d) => { const [y, m, dd] = d.split("-"); return `${y}년 ${+m}월 ${+dd}일`; };
 const relItem = (r) => { const m = r.modelId && byId(r.modelId);
-  return `<article class="hero" id="${esc(r.id)}"><p class="k">${fmtD(r.date)} · ${r.status === "released" ? "출시" : "출시 예정 발표"} · ${{ "new-model": "신규 모델", "new-generation": "새 세대", colorway: "새 컬러" }[r.kind] || ""}</p>
+  return `<article class="hero" id="${esc(r.id)}"><p class="k">${r.status === "leak" ? `🚨 유출 · 공식 발표 전 · ${fmtD(r.date)} 보도${r.expected ? " · " + esc(r.expected) + " 출시 예상" : ""}` : fmtD(r.date) + " · " + (r.status === "released" ? "출시" : "출시 예정 발표")} · ${{ "new-model": "신규 모델", "new-generation": "새 세대", colorway: "새 컬러" }[r.kind] || ""}</p>
 <h2 style="margin:0">${esc(r.brand)} ${esc(r.model)}</h2><p class="k">${esc(r.model_en || "")}</p>
-<p>${(r.cats || []).map((c) => NEWCAT[c]).filter(Boolean).join(" · ")}${r.grades && r.grades.length ? " · " + r.grades.map(esc).join("·") : ""}${r.price ? " · 최상위 정가 " + esc(r.price) : ""}</p>
+<p>${(r.cats || []).map((c) => NEWCAT[c]).filter(Boolean).join(" · ")}${r.grades && r.grades.length ? " · " + r.grades.map(esc).join("·") : ""}${r.price ? (r.status === "leak" ? " · 예상가 " : " · 최상위 정가 ") + esc(r.price) : ""}</p>${r.status === "leak" ? `<p class="k">유출 정보라 실제 출시와 다를 수 있어요. 공식 발표가 나오면 고쳐요.</p>` : ""}
 <ul>${(r.points || []).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
 <p class="k">${m ? `풋픽 평가: <a href="${url(m)}">${esc(m.n)} ${m.tier}티어 · ${m.pt}점</a>` : "풋픽 평가: 리뷰 자료가 3곳 이상 모이면 티어에 추가돼요."}</p>
 <p class="k">출처: ${(r.sources || []).map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener nofollow">${esc(x.name)}</a>`).join(" · ")}</p></article>`; };
 page("/new/", head(`신상 축구화·풋살화 출시 소식 | ${NAME}`, "나이키, 아디다스, 미즈노, 아식스, 푸마 등 새로 나온 축구화와 풋살화 출시 정보를 매일 업데이트해요.", "/new/") +
-  `<main class="pg">${nav}<h1>신상 축구화·풋살화 소식</h1><p>브랜드 공식 발표와 축구화 전문 매체를 매일 확인해서 새 모델과 새 세대 출시 소식을 정리해요. 유출·루머는 다루지 않아요. 점수는 리뷰 자료가 모이면 매겨요.</p>
+  `<main class="pg">${nav}<h1>신상 축구화·풋살화 소식</h1><p>브랜드 공식 발표와 축구화 전문 매체를 매일 확인해서 새 모델과 새 세대 출시 소식을 정리해요. 공식 발표 전 유출은 여러 매체가 보도한 것만 "유출"로 따로 표시해요. 점수는 리뷰 자료가 모이면 매겨요.</p>
 ${REL_NEW.length ? REL_NEW.map(relItem).join("") : "<p>아직 정리된 소식이 없어요.</p>"}${foot}</main></body></html>`);
 
 const urls = ["/", "/about/", "/new/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];

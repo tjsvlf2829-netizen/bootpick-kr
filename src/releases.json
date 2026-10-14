@@ -1,5 +1,51 @@
 [
  {
+  "id": "leak-nike-mercurial-mamba-2026",
+  "date": "2026-10-14",
+  "status": "leak",
+  "brand": "나이키",
+  "model": "머큐리얼 코비 '맘바' 팩",
+  "model_en": "Nike Mercurial Superfly 11 / Vapor 17 Kobe \"Mamba\"",
+  "kind": "colorway",
+  "cats": [
+   "fg"
+  ],
+  "grades": [
+   "엘리트"
+  ],
+  "price": "$345",
+  "expected": "2026 연말",
+  "hook": "코비 머큐리얼<br>유출컷 떴다",
+  "points": [
+   "슈퍼플라이 11·베이퍼 17 코비 브라이언트 에디션",
+   "핑크에서 보라로 번지는 그라데이션 어퍼",
+   "텅·뒤꿈치에 맘바 로고, 안쪽 뒤꿈치에 코비 이름"
+  ],
+  "colors": [
+   "#ff4fa3",
+   "#8ef542",
+   "#6b2a8f"
+  ],
+  "sources": [
+   {
+    "name": "Footy Headlines",
+    "url": "https://www.footyheadlines.com/8982000439/insane-nike-mercurial-superfly-11-vapor-17-kobe-mamba-boots-leaked.html"
+   },
+   {
+    "name": "House of Heat",
+    "url": "https://houseofheat.co/nike/kobe-bryant-mercurial-superfly-11-vapor-17-football-pack"
+   },
+   {
+    "name": "Sneaker Bar Detroit",
+    "url": "https://sneakerbardetroit.com/nike-kobe-mercurial-superfly-11-elite-mambacurial/"
+   }
+  ],
+  "grad": [
+   "#ff4fa3",
+   "#8a3ad6"
+  ]
+ },
+ {
   "id": "asics-ds-light-acros-4",
   "date": "2026-10-15",
   "status": "announced",
