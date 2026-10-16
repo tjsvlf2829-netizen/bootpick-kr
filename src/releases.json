@@ -1,5 +1,41 @@
 [
  {
+  "id": "asics-jetray-pro",
+  "date": "2026-10-15",
+  "status": "released",
+  "brand": "아식스",
+  "model": "제트레이 프로",
+  "model_en": "ASICS JETRAY PRO",
+  "kind": "new-model",
+  "cats": [
+   "fg"
+  ],
+  "grades": [
+   "프로"
+  ],
+  "price": "2만4,200엔",
+  "points": [
+   "6월 나온 제트레이 엘리트의 아래 등급, 스피드형",
+   "앞은 부드럽고 뒤는 단단한 제트프레임 밑창",
+   "실키랩 인공피혁 어퍼, 엘리트보다 3,300엔 저렴"
+  ],
+  "like": "g_dsx3",
+  "sources": [
+   {
+    "name": "ASICS Japan 보도자료(PR TIMES)",
+    "url": "https://prtimes.jp/main/html/rd/p/000000335.000020802.html"
+   },
+   {
+    "name": "Soccer King",
+    "url": "https://www.soccer-king.jp/news/youthstudent/football-kit/20261008/2214056.html"
+   },
+   {
+    "name": "Footy Headlines",
+    "url": "https://www.footyheadlines.com/6189881396/asics-2026-autumn-winter-jetray-ds-light-boots-pack-released.html"
+   }
+  ]
+ },
+ {
   "id": "leak-nike-mercurial-mamba-2026",
   "date": "2026-10-14",
   "status": "leak",
@@ -48,7 +84,7 @@
  {
   "id": "asics-ds-light-acros-4",
   "date": "2026-10-15",
-  "status": "announced",
+  "status": "released",
   "brand": "아식스",
   "model": "DS 라이트 아크로스 4",
   "model_en": "ASICS DS LIGHT ACROS 4",
