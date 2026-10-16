@@ -58,6 +58,11 @@ const body = app.replace(/<title>[\s\S]*?<\/style>/, "").replace('<div class="ho
 for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/" + f);
 // 인스타 예약 게시(메트리쿨)가 가져갈 릴스 영상
 if (fs.existsSync("src/media")) fs.cpSync("src/media", "dist/media", { recursive: true });
+// 휴대폰에서 영상이 재생만 되고 저장이 안 돼서, 같은 영상을 /dl/ 아래에 다운로드용으로 둠
+if (fs.existsSync("src/media")) {
+  fs.cpSync("src/media", "dist/dl", { recursive: true, filter: (f) => fs.statSync(f).isDirectory() || f.endsWith(".mp4") });
+  fs.writeFileSync("dist/_headers", "/dl/*\n  Content-Disposition: attachment\n  X-Robots-Tag: noindex\n");
+}
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
     // 구글이 검색 결과에 사이트 이름을 "풋픽"으로 보여 주도록 알려 주는 정보(WebSite·Organization)
@@ -258,5 +263,5 @@ const urls = ["/", "/about/", "/new/", "/futsal/", "/indoor/", "/football/", "/b
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
-fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\nDisallow: /dl/\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`built ${M.length} model pages -> dist/`);
