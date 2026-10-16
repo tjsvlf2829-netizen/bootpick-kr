@@ -105,7 +105,7 @@ for (let i = 0; i < slides.length; i++) {
   await shot(`<div class="st"><div style="position:absolute;top:150px;left:40px;right:40px;text-align:center"><span class="q">${esc(Q)}</span></div>
 <img src="${img}" style="position:absolute;left:0;top:300px;width:1080px">
 <div style="position:absolute;left:0;right:0;top:1700px;text-align:center;font-weight:700;font-size:36px;color:#333"><div style="display:flex;gap:10px;justify-content:center;margin-bottom:18px">${slides.map((_, j) => `<i style="width:14px;height:14px;border-radius:50%;background:${j === i ? "#111" : "#bbb"}"></i>`).join("")}</div>저장해 두고 친구에게 공유 · footpick.kr</div></div>`, ".st", `${TMP}/r${i}.png`);
-  scenes.push([`${TMP}/r${i}.png`, i === 0 ? 1.0 : i === slides.length - 1 ? 3.0 : 3.6]);
+  scenes.push([`${TMP}/r${i}.png`, i === 0 ? 2.0 : i === slides.length - 1 ? 2.0 : 3.6]);
 }
 await br.close();
 const X = 0.3, args = ["-y", "-loglevel", "error"];

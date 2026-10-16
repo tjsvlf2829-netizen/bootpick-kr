@@ -63,6 +63,32 @@ if (fs.existsSync("src/media")) {
   fs.cpSync("src/media", "dist/dl", { recursive: true, filter: (f) => fs.statSync(f).isDirectory() || f.endsWith(".mp4") });
   fs.writeFileSync("dist/_headers", "/dl/*\n  Content-Disposition: attachment\n  X-Robots-Tag: noindex\n");
 }
+// 인스타 직접 게시용 페이지(/kit/날짜-am|pm/): 사진·영상을 사진첩에 한 번에 저장하고 캡션을 복사함. 검색 노출 안 함
+if (fs.existsSync("src/kit.json")) {
+  const KIT = JSON.parse(fs.readFileSync("src/kit.json", "utf8"));
+  const kcss = `body{margin:0;background:#0b130e;color:#eef5f1;font:16px/1.5 -apple-system,"Apple SD Gothic Neo",sans-serif}main{max-width:560px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:1.3rem;margin:4px 0}.k{color:#9fb5aa;font-size:.9rem}button,.b{display:block;width:100%;box-sizing:border-box;margin:12px 0;padding:15px;border:0;border-radius:12px;font-weight:700;font-size:1.05rem;line-height:1.2;font-family:inherit;text-align:center;text-decoration:none;cursor:pointer}
+.p{background:#3ef0b0;color:#06110b}.s{background:#1c3a2c;color:#eef5f1}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.g img{width:100%;border-radius:8px}video{width:100%;border-radius:12px;background:#000}
+pre{white-space:pre-wrap;background:#122219;border:1px solid #1f3a2c;border-radius:12px;padding:14px;font-size:15px;line-height:1.55;font-family:inherit}.list a{display:block;padding:12px 4px;border-bottom:1px solid #1f3a2c;color:#eef5f1;text-decoration:none}.list a.today{color:#3ef0b0;font-weight:700}#msg{color:#3ef0b0;min-height:1.4em}`;
+  const kh = (t) => `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>${esc(t)}</title><style>${kcss}</style></head><body><main>`;
+  fs.mkdirSync("dist/kit", { recursive: true });
+  for (const it of KIT) {
+    const urls = it.files.map((f) => "/media/" + f), reel = it.kind === "reel";
+    const media = reel ? `<video src="${urls[0]}" controls playsinline preload="metadata"></video><a class="b s" href="/dl/${it.files[0]}">영상 파일 받기</a>`
+      : `<div class="g">${urls.map((u, i) => `<a href="${u}"><img src="${u}" alt="${i + 1}번 사진" loading="lazy"></a>`).join("")}</div>`;
+    fs.mkdirSync(`dist/kit/${it.key}`, { recursive: true });
+    fs.writeFileSync(`dist/kit/${it.key}/index.html`, kh(`${it.date.slice(5)} ${it.time} ${it.title}`) +
+      `<p class="k">${it.date} ${it.time} 게시 · ${reel ? "릴스로 올리기 (음악은 인스타에서 추가)" : `사진 ${urls.length}장, 순서대로`}</p><h1>${esc(it.title)}</h1>
+<button class="p" id="save">📥 ${reel ? "영상" : `사진 ${urls.length}장`} 사진첩에 저장</button><p id="msg"></p>${media}
+<button class="p" id="copy">📋 캡션 복사</button><pre id="cap">${esc(it.caption)}</pre><a class="b s" href="/kit/">전체 일정 보기</a>
+<script>const U=${JSON.stringify(urls)},msg=document.getElementById("msg");
+document.getElementById("save").onclick=async()=>{msg.textContent="불러오는 중…";try{const fs=await Promise.all(U.map(async(u,i)=>{const b=await (await fetch(u)).blob();return new File([b],(i+1)+"."+u.split(".").pop(),{type:b.type})}));
+if(navigator.canShare&&navigator.canShare({files:fs})){await navigator.share({files:fs});msg.textContent="공유 창에서 '이미지 저장' 또는 '비디오 저장'을 누르세요"}else{fs.forEach(f=>{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;a.click()});msg.textContent="다운로드했어요"}}catch(e){msg.textContent=e.name==="AbortError"?"":"저장이 안 되면 사진을 길게 눌러 저장하세요"}};
+document.getElementById("copy").onclick=async()=>{const t=document.getElementById("cap").textContent;try{await navigator.clipboard.writeText(t);msg.textContent="캡션을 복사했어요"}catch(e){const r=document.createRange();r.selectNodeContents(document.getElementById("cap"));getSelection().removeAllRanges();getSelection().addRange(r);msg.textContent="선택된 캡션을 복사하세요"}};</script></main></body></html>`);
+  }
+  fs.writeFileSync("dist/kit/index.html", kh("풋픽 인스타 게시 일정") + `<h1>인스타 게시 일정</h1><p class="k">누르면 사진·영상 저장과 캡션 복사 화면이 열려요.</p><div class="list">${KIT.map((it) => `<a href="/kit/${it.key}/" data-d="${it.date}">${it.date.slice(5).replace("-", "/")} ${it.time} · ${it.kind === "reel" ? "🎬" : "🖼️"} ${esc(it.title)}</a>`).join("")}</div>
+<script>const t=new Date(Date.now()+9*36e5).toISOString().slice(0,10);document.querySelectorAll(".list a").forEach(a=>{if(a.dataset.d===t)a.classList.add("today")})</script></main></body></html>`);
+}
 fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
     // 구글이 검색 결과에 사이트 이름을 "풋픽"으로 보여 주도록 알려 주는 정보(WebSite·Organization)
@@ -263,5 +289,5 @@ const urls = ["/", "/about/", "/new/", "/futsal/", "/indoor/", "/football/", "/b
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
-fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\nDisallow: /dl/\nSitemap: ${SITE}/sitemap.xml\n`);
+fs.writeFileSync("dist/robots.txt", `User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /media/\nDisallow: /dl/\nDisallow: /kit/\nSitemap: ${SITE}/sitemap.xml\n`);
 console.log(`built ${M.length} model pages -> dist/`);
