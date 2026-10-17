@@ -1,5 +1,44 @@
 [
  {
+  "id": "leak-nike-hypervenom-2027",
+  "date": "2026-10-18",
+  "status": "leak",
+  "brand": "나이키",
+  "model": "하이퍼베놈 부활",
+  "model_en": "Nike Hypervenom (2027 return)",
+  "kind": "new-model",
+  "cats": [
+   "fg"
+  ],
+  "grades": [],
+  "expected": "2027 여름",
+  "hook": "팬텀 끝<br>하이퍼베놈 온다",
+  "points": [
+   "팬텀 6을 끝으로 팬텀 라인 종료 보도",
+   "2027년 하이퍼베놈이 골잡이용 라인으로 복귀",
+   "얼굴은 홀란·올리세·푸테야스"
+  ],
+  "colors": [
+   "#1b1d21",
+   "#3b3f46",
+   "#101114"
+  ],
+  "sources": [
+   {
+    "name": "Footy Headlines",
+    "url": "https://www.footyheadlines.com/3138759837/erling-haaland-to-headline-returning-nike-hypervenom-boots-in-2027.html"
+   },
+   {
+    "name": "House of Heat",
+    "url": "https://houseofheat.co/nike/football-hypervenom-relaunch"
+   },
+   {
+    "name": "Sneaker Freaker",
+    "url": "https://www.sneakerfreaker.com/performance/features/nike-michael-olise-hypervenom"
+   }
+  ]
+ },
+ {
   "id": "asics-jetray-pro",
   "date": "2026-10-15",
   "status": "released",
