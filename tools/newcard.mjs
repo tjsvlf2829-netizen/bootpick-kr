@@ -117,7 +117,8 @@ fc += "[v]format=yuv420p[vo]";
 args.push("-filter_complex", fc, "-map", "[vo]", "-map", `${scenes.length}:a`, "-shortest", "-c:v", "libx264", "-r", "30", "-preset", "medium", "-crf", "20", "-c:a", "aac", "-movflags", "+faststart", `${OUT}/reel.mp4`);
 execFileSync("ffmpeg", args);
 // 캡션 초안
-const tags = [...(LEAK ? ["#축구화유출"] : []), "#신상축구화", "#축구화", "#풋살화", "#축구화추천", "#풋살화추천", ...new Set(R.map((r) => "#" + r.brand + "축구화")), "#풋픽"];
+// 2026-10-17 선팔 요청: 해시태그는 5개만
+const tags = [...new Set([...R.map((r) => "#" + r.brand + "축구화"), ...(LEAK ? ["#축구화유출"] : []), "#신상축구화", "#축구화", "#풋살화"])].slice(0, 4).concat("#풋픽");
 fs.writeFileSync(`${OUT}/caption.txt`, `${R.length === 1 ? (R[0].status === "leak" ? `🚨 ${R[0].brand} ${R[0].model} 유출` : `${R[0].brand} ${R[0].model} ${ST(R[0])} 🆕`) : `최근 새로 나온 축구화 ${R.length}켤레 🆕`}
 
 ${R.map((r) => `${r.status === "leak" ? (r.expected ? r.expected + " 예상" : "출시일 미정") : md(r.date)}  ${r.brand} ${r.model}${r.price ? ` (${r.price}${r.status === "leak" ? " 예상" : ""})` : ""}\n${(r.points || []).slice(0, 2).map((t) => "· " + t).join("\n")}`).join("\n\n")}
