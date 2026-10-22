@@ -44,7 +44,7 @@ fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
 const foot = `<p class="disc">${DISCLOSURE}</p><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a> · 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
-const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a> · <a href="/new/">신상 소식</a></p>`;
+const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a> · <a href="/new/">신상 소식</a> · <a href="/updates/">업데이트</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
 const cmpOf = (m) => COMPARE.filter((c) => c[0] === m.id || c[1] === m.id);
@@ -54,7 +54,16 @@ const li = (x, extra = "") => `<li><a href="${url(x)}">${esc(x.b + " " + x.n)}</
 const links = ["tf", "ic", "fg"].map((c) => `<h3>${CNM[c]} 모델</h3><ul class="rel-list">${M.filter((m) => m.cat === c).map((m) => li(m)).join("")}</ul>`).join("");
 const NEWCAT = { fg: "축구화", tf: "풋살화", ic: "인도어화" };
 const relHome = REL_NEW.length ? `<div class="hot newrel"><span>신상 소식</span>${REL_NEW.slice(0, 3).map((r) => `<a href="/new/#${r.id}">${esc(r.brand + " " + r.model)}</a>`).join("")}<a href="/new/">전체 ›</a></div>` : "";
-const body = app.replace(/<title>[\s\S]*?<\/style>/, "").replace('<div class="hot"><span>많이 찾는 모델</span>', relHome + '<div class="hot"><span>많이 찾는 모델</span>');
+// 업데이트 소식: 사이트에 기능·모델을 더하면 src/updates.json 맨 위에 한 줄 추가(2026-10-22 선팔 요청). 상단 종 아이콘(새 소식이면 빨간 점) + 홈 배너 + /updates/ 페이지
+const UPD = fs.existsSync("src/updates.json") ? JSON.parse(fs.readFileSync("src/updates.json", "utf8")).sort((a, b) => b.date.localeCompare(a.date)) : [];
+const md = (d) => { const [, m, dd] = d.split("-"); return `${+m}.${+dd}`; };
+const updBell = UPD.length ? `<a class="upd" href="/updates/" aria-label="업데이트 소식"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3a6 6 0 0 0-6 6v3.6L4.3 15.4A1 1 0 0 0 5.2 17h13.6a1 1 0 0 0 .9-1.6L18 12.6V9a6 6 0 0 0-6-6zm-2.5 15a2.5 2.5 0 0 0 5 0z" fill="currentColor"/></svg><i class="dot" hidden></i></a>` : "";
+const updBar = UPD.length ? `<a class="updbar" href="/updates/"><b>업데이트</b><span>${md(UPD[0].date)} · ${esc(UPD[0].title)}</span><em>›</em></a>` : "";
+const updJs = UPD.length ? `<script>(function(){try{var L="${UPD[0].date}";if((localStorage.getItem("updSeen")||"")<L)document.querySelectorAll(".upd .dot").forEach(function(d){d.hidden=false})}catch(e){}})()</script>` : "";
+const body = app.replace(/<title>[\s\S]*?<\/style>/, "").replace('<div class="hot"><span>많이 찾는 모델</span>', relHome + '<div class="hot"><span>많이 찾는 모델</span>')
+  .replace('<a href="/new/">신상 소식</a></div></div>', '<a href="/new/">신상 소식</a><a href="/updates/">업데이트</a></div>' + updBell + "</div>")
+  .replace('<div class="hrow"><h2 id="topTitle">', updBar + '<div class="hrow"><h2 id="topTitle">')
+;
 for (const f of ["og.png", "og-square.png"]) fs.copyFileSync("src/" + f, "dist/" + f);
 // 인스타 예약 게시(메트리쿨)가 가져갈 릴스 영상
 if (fs.existsSync("src/media")) fs.cpSync("src/media", "dist/media", { recursive: true });
@@ -93,7 +102,7 @@ fs.writeFileSync("dist/index.html",
   head(`${NAME} 풋픽 | 축구화·풋살화 비교는 ㅍㅍ! 2026 티어리스트·추천`, `구장·발볼·플레이 스타일·예산으로 나에게 맞는 축구화와 풋살화를 30초 만에 찾아요. ${M.length}개 모델 티어리스트, 사이즈 환승, VS 비교.`, "/") +
     // 구글이 검색 결과에 사이트 이름을 "풋픽"으로 보여 주도록 알려 주는 정보(WebSite·Organization)
   `<script type="application/ld+json">${JSON.stringify([{ "@context": "https://schema.org", "@type": "WebSite", name: "풋픽", alternateName: ["FootPick", "footpick", "풋픽 FootPick"], url: SITE + "/" }, { "@context": "https://schema.org", "@type": "Organization", name: "풋픽", alternateName: "FootPick", url: SITE + "/", logo: SITE + "/og-square.png", email: "contact@footpick.kr", sameAs: ["https://www.instagram.com/footpick.kr/"] }])}</script>` +
-body.replace(/<script>/, `<footer class="pg"><details><summary>전체 모델 목록 (${M.length}개)</summary><nav aria-label="전체 모델">${links}</nav></details>${foot}</footer>\n<script>`) + "</body></html>");
+body.replace(/<script>/, `<footer class="pg"><details><summary>전체 모델 목록 (${M.length}개)</summary><nav aria-label="전체 모델">${links}</nav></details>${foot}</footer>\n${updJs}<script>`) + "</body></html>");
 
 // 이런 사람 추천 / 비추천: 항목 점수를 같은 종류 평균과 비교해 규칙으로 뽑음. 비추천은 모델마다 최소 2개
 const AVG = {};
@@ -285,7 +294,12 @@ page("/new/", head(`신상 축구화·풋살화 출시 소식 | ${NAME}`, "나�
   `<main class="pg">${nav}<h1>신상 축구화·풋살화 소식</h1><p>브랜드 공식 발표와 축구화 전문 매체를 매일 확인해서 새 모델과 새 세대 출시 소식을 정리해요. 공식 발표 전 유출은 여러 매체가 보도한 것만 "유출"로 따로 표시해요. 점수는 리뷰 자료가 모이면 매겨요.</p>
 ${REL_NEW.length ? REL_NEW.map(relItem).join("") : "<p>아직 정리된 소식이 없어요.</p>"}${foot}</main></body></html>`);
 
-const urls = ["/", "/about/", "/new/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
+page("/updates/", head(`업데이트 소식 | ${NAME}`, "풋픽에 새로 추가된 모델과 기능을 날짜순으로 정리해요.", "/updates/") +
+  `<main class="pg">${nav}<h1>업데이트 소식</h1><p>풋픽에 새로 들어온 모델과 바뀐 기능을 정리해요. 새 신발 출시 소식은 <a href="/new/">신상 소식</a>에 있어요.</p>
+${UPD.map((u) => `<article class="hero"><p class="k">${fmtD(u.date)}</p><h2 style="margin:0">${esc(u.title)}</h2><ul>${(u.points || []).map((t) => `<li>${esc(t)}</li>`).join("")}</ul>${u.link ? `<p><a href="${esc(u.link)}">보러 가기 ›</a></p>` : ""}</article>`).join("")}
+<script>try{localStorage.setItem("updSeen","${UPD.length ? UPD[0].date : ""}")}catch(e){}</script>${foot}</main></body></html>`);
+
+const urls = ["/", "/about/", "/new/", "/updates/", "/futsal/", "/indoor/", "/football/", "/brands/", "/compare/", "/best/", "/guides/", ...BEST.map((B) => `/best/${B.slug}/`), ...COMPARE.map((c) => `/compare/${c[2]}/`), ...GUIDES.map((G) => `/guides/${G.slug}/`), ...brands.map(burl), ...M.map(url)];
 const today = new Date().toISOString().slice(0, 10);
 fs.writeFileSync("dist/sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((p) => `<url><loc>${SITE}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>\n");
