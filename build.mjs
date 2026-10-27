@@ -6,7 +6,9 @@ import { COMPARE, BEST, GUIDES } from "./content.mjs";
 
 const SITE = (process.env.SITE_URL || "https://footpick.kr").replace(/\/$/, "");
 const NAME = "FootPick";
-const DISCLOSURE = "이 사이트의 일부 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
+const DISCLOSURE = "이 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.";
+// 쿠팡 파트너스 가이드: 대가성 문구는 모든 페이지 첫 부분에 본문과 구별되게(태그·링크·이미지보다 먼저)
+const ADBAR = `<p class="adbar" role="note"><b>광고</b>${DISCLOSURE}</p>`;
 const app = fs.readFileSync("src/app.html", "utf8");
 const style = app.match(/<style>[\s\S]*?<\/style>/)[0];
 const fonts = app.match(/<link rel="stylesheet" href="https:\/\/cdn\.jsdelivr\.net\/gh\/orioncactus\/pretendard[^>]*>/)[0];
@@ -37,7 +39,8 @@ ${style}
 .pg table{border-collapse:collapse;width:100%;font-size:.9rem}.pg td,.pg th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .cta{display:flex;gap:8px;flex-wrap:wrap}.cta a{font-weight:700;text-decoration:none;border:1px solid var(--turf);border-radius:8px;padding:8px 14px}
 .cdisc{font-size:.78rem;color:var(--muted);margin:8px 0 0}.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.best{padding-left:20px}.best li{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}.best h2{font-size:1.05rem;margin:0 0 4px}.guide h2{margin-top:22px}.pg td .bar{min-width:90px}.pg th{white-space:nowrap}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
-body{background:var(--bg);color:var(--ink);font-family:var(--body)}</style></head><body>`;
+body{background:var(--bg);color:var(--ink);font-family:var(--body)}
+.adbar{margin:0;padding:9px 16px;background:#f3c65a;color:#1d1400;font-size:.88rem;font-weight:700;line-height:1.45;text-align:center;word-break:keep-all}.adbar b{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:5px;background:#1d1400;color:#f3c65a;font-size:.78rem}</style></head><body>${ADBAR}`;
 
 fs.rmSync("dist", { recursive: true, force: true });
 fs.mkdirSync("dist", { recursive: true });
