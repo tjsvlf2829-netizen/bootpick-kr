@@ -48,13 +48,21 @@ async function refreshOne(env, origin) {
   const m = due[0];
   const { status, body } = await coupang(env, SEARCH, `keyword=${encodeURIComponent(m.q)}&limit=10`);
   if (status !== 200 || !body || body.rCode !== "0") {
-    console.log("coupang search failed", m.id, status, body && body.rMessage);
+    await log(env, m.id, `실패 ${status} ${(body && (body.rMessage || body.message)) || ""}`.slice(0, 200));
     return;
   }
   const hit = (body.data?.productData || []).filter((p) => matches(m, p.productName || "")).sort((a, b) => a.productPrice - b.productPrice)[0];
   await env.DB.prepare("INSERT OR REPLACE INTO cp (id, n, p, i, u, r, t) VALUES (?,?,?,?,?,?,?)")
     .bind(m.id, hit ? hit.productName : "", hit ? hit.productPrice : 0, hit ? hit.productImage : "", hit ? hit.productUrl : "", hit && hit.isRocket ? 1 : 0, now).run();
+  await log(env, m.id, hit ? `찾음 ${hit.productPrice}원` : `못 찾음(결과 ${(body.data?.productData || []).length}개)`);
   await env.DB.prepare("DELETE FROM cp_calls WHERE t < ?").bind(now - 2 * 3600e3).run();
+}
+// 최근 검색 결과 기록(/api/cp?all=1 에서 보임). 최근 50개만 남김
+async function log(env, id, s) {
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO cp_log (t, id, s) VALUES (?,?,?)").bind(Date.now(), id, s),
+    env.DB.prepare("DELETE FROM cp_log WHERE t < (SELECT MIN(t) FROM (SELECT t FROM cp_log ORDER BY t DESC LIMIT 50))"),
+  ]);
 }
 
 export async function onRequestGet({ request, env, waitUntil }) {
@@ -62,12 +70,18 @@ export async function onRequestGet({ request, env, waitUntil }) {
     await env.DB.batch([
       env.DB.prepare("CREATE TABLE IF NOT EXISTS cp (id TEXT PRIMARY KEY, n TEXT NOT NULL, p INTEGER NOT NULL, i TEXT NOT NULL, u TEXT NOT NULL, r INTEGER NOT NULL, t INTEGER NOT NULL)"),
       env.DB.prepare("CREATE TABLE IF NOT EXISTS cp_calls (t INTEGER NOT NULL)"),
+      env.DB.prepare("CREATE TABLE IF NOT EXISTS cp_log (t INTEGER NOT NULL, id TEXT NOT NULL, s TEXT NOT NULL)"),
     ]);
     ready = true;
   }
-  if (env.COUPANG_ACCESS_KEY && env.COUPANG_SECRET_KEY) waitUntil(refreshOne(env, request.url).catch((e) => console.log("cp refresh", e)));
+  const keys = !!(env.COUPANG_ACCESS_KEY && env.COUPANG_SECRET_KEY);
+  if (keys) waitUntil(refreshOne(env, request.url).catch((e) => log(env, "-", ("오류 " + e).slice(0, 200))));
   // ?all=1 이면 못 찾은 모델(p=0)까지: 매칭 확인용
   const all = new URL(request.url).searchParams.get("all") === "1";
   const rows = (await env.DB.prepare(`SELECT id, n, p, i, u, r, t FROM cp${all ? "" : " WHERE p > 0"}`).all()).results;
-  return Response.json({ now: Date.now(), d: Object.fromEntries(rows.map(({ id, ...x }) => [id, x])) }, { headers: { "cache-control": "public, max-age=300" } });
+  const d = Object.fromEntries(rows.map(({ id, ...x }) => [id, x]));
+  if (!all) return Response.json({ now: Date.now(), d }, { headers: { "cache-control": "public, max-age=300" } });
+  const calls = (await env.DB.prepare("SELECT COUNT(*) AS c FROM cp_calls WHERE t > ?").bind(Date.now() - 3600e3).first()).c;
+  const logs = (await env.DB.prepare("SELECT t, id, s FROM cp_log ORDER BY t DESC LIMIT 50").all()).results;
+  return Response.json({ now: Date.now(), keys, calls, logs, d }, { headers: { "cache-control": "no-store" } });
 }
