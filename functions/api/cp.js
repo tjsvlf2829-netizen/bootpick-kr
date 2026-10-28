@@ -6,6 +6,8 @@
 const HOST = "https://api-gateway.coupang.com";
 const SEARCH = "/v2/providers/affiliate_open_api/apis/openapi/products/search";
 const HOURLY = 8; // 알려진 한도(시간당 10회)보다 여유 있게
+// 시험 기간: 이 모델만 검색(선팔 확인 후 빈 배열로 바꾸면 전체 진행)
+const ONLY = ["salajp"];
 const FRESH = 24 * 3600e3, MISS_RETRY = 7 * 24 * 3600e3;
 let ready = false;
 // 대시보드에서 이름을 소문자 등으로 넣어도 찾도록(coupang_access_key 등) 이름에 coupang + access/secret 이 들어간 변수를 씀
@@ -46,7 +48,7 @@ async function refreshOne(env, origin) {
   const now = Date.now();
   const ok = await env.DB.prepare("INSERT INTO cp_calls (t) SELECT ?1 WHERE (SELECT COUNT(*) FROM cp_calls WHERE t > ?2) < ?3").bind(now, now - 3600e3, HOURLY).run();
   if (!ok.meta.changes) return;
-  const models = await (await env.ASSETS.fetch(new URL("/cp-models.json", origin))).json();
+  const models = (await (await env.ASSETS.fetch(new URL("/cp-models.json", origin))).json()).filter((m) => !ONLY.length || ONLY.includes(m.id));
   const seen = Object.fromEntries((await env.DB.prepare("SELECT id, t, p FROM cp").all()).results.map((r) => [r.id, r]));
   const due = models.filter((m) => { const s = seen[m.id]; return !s || now - s.t > (s.p ? FRESH : MISS_RETRY); })
     .sort((a, b) => (seen[a.id]?.t || 0) - (seen[b.id]?.t || 0));
