@@ -57,7 +57,7 @@ patch();new MutationObserver(patch).observe(document.body,{childList:true,subtre
 var lv=document.getElementById("lv"),x=lv&&D[lv.dataset.id],h=x&&document.querySelector(".hero .shot");if(!h)return;
 var f=document.createElement("a");f.className="cpimg";f.href=x.u;f.target="_blank";f.rel="noopener sponsored";f.dataset.m=f.dataset.cp=lv.dataset.id;
 var im=new Image();im.src=x.i;im.alt="쿠팡 판매 상품 사진";im.loading="lazy";f.appendChild(im);f.insertAdjacentHTML("beforeend","<span>쿠팡 판매 상품 사진</span>");h.after(f);
-var hr=Math.max(1,Math.round((j.now-x.t)/36e5)),c=document.querySelector(".hero .cdisc");if(c)c.insertAdjacentHTML("beforebegin",'<p class="cdisc">쿠팡 가격·사진은 '+hr+'시간 전에 확인한 거예요. 사이즈·색상마다 다르고 바뀔 수 있어요.</p>')}).catch(function(){})})();`);
+var hr=Math.max(1,Math.round((j.now-x.t)/36e5)),c=document.querySelector(".hero .cta");if(c)c.insertAdjacentHTML("afterend",'<p class="cdisc">쿠팡 가격·사진은 '+hr+'시간 전에 확인한 거예요. 사이즈·색상마다 다르고 바뀔 수 있어요.</p>')}).catch(function(){})})();`);
 const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a> · <a href="/new/">신상 소식</a> · <a href="/updates/">업데이트</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
@@ -186,7 +186,7 @@ for (const m of M) {
 <p id="lv" data-id="${m.id}" data-cn="${catName(m)}"><span id="lv-sum"><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""} <span class="k">(100점 만점, 가격 제외)</span></span></p>
 <p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 달리면 이 페이지 점수에도 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
-<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div><p class="cdisc">${DISCLOSURE}</p></div>
+<div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("")}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
