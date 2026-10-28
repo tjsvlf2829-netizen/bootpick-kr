@@ -10,7 +10,7 @@ const FRESH = 24 * 3600e3, MISS_RETRY = 7 * 24 * 3600e3;
 let ready = false;
 // 대시보드에서 이름을 소문자 등으로 넣어도 찾도록(coupang_access_key 등) 이름에 coupang + access/secret 이 들어간 변수를 씀
 function keysOf(env) {
-  const k = Object.keys(env), pick = (w) => env[k.find((n) => /coupang/i.test(n) && new RegExp(w, "i").test(n))];
+  const k = Object.keys(env), pick = (w) => (env[k.find((n) => /coupang/i.test(n) && new RegExp(w, "i").test(n))] || "").trim();
   return { ak: pick("access"), sk: pick("secret") };
 }
 
@@ -54,6 +54,8 @@ async function refreshOne(env, origin) {
   const m = due[0];
   const { status, body } = await coupang(env, SEARCH, `keyword=${encodeURIComponent(m.q)}&limit=10`);
   if (status !== 200 || !body || body.rCode !== "0") {
+    // 키 문제(401·403)면 이번 한 시간은 더 부르지 않음: 한도만큼 호출을 채워 둠
+    if (status === 401 || status === 403) await env.DB.batch(Array.from({ length: HOURLY }, () => env.DB.prepare("INSERT INTO cp_calls (t) VALUES (?)").bind(now)));
     await log(env, m.id, `실패 ${status} ${(body && (body.rMessage || body.message)) || ""}`.slice(0, 200));
     return;
   }
