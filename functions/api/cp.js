@@ -8,6 +8,11 @@ const SEARCH = "/v2/providers/affiliate_open_api/apis/openapi/products/search";
 const HOURLY = 8; // 알려진 한도(시간당 10회)보다 여유 있게
 const FRESH = 24 * 3600e3, MISS_RETRY = 7 * 24 * 3600e3;
 let ready = false;
+// 대시보드에서 이름을 소문자 등으로 넣어도 찾도록(coupang_access_key 등) 이름에 coupang + access/secret 이 들어간 변수를 씀
+function keysOf(env) {
+  const k = Object.keys(env), pick = (w) => env[k.find((n) => /coupang/i.test(n) && new RegExp(w, "i").test(n))];
+  return { ak: pick("access"), sk: pick("secret") };
+}
 
 const enc = new TextEncoder();
 async function sign(secret, msg) {
@@ -17,9 +22,10 @@ async function sign(secret, msg) {
 async function coupang(env, path, query) {
   const d = new Date().toISOString(); // yyMMddTHHmmssZ (GMT)
   const dt = d.slice(2, 4) + d.slice(5, 7) + d.slice(8, 10) + "T" + d.slice(11, 13) + d.slice(14, 16) + d.slice(17, 19) + "Z";
-  const sig = await sign(env.COUPANG_SECRET_KEY, dt + "GET" + path + query);
+  const { ak, sk } = keysOf(env);
+  const sig = await sign(sk, dt + "GET" + path + query);
   const r = await fetch(HOST + path + "?" + query, {
-    headers: { Authorization: `CEA algorithm=HmacSHA256, access-key=${env.COUPANG_ACCESS_KEY}, signed-date=${dt}, signature=${sig}` },
+    headers: { Authorization: `CEA algorithm=HmacSHA256, access-key=${ak}, signed-date=${dt}, signature=${sig}` },
   });
   return { status: r.status, body: await r.json().catch(() => null) };
 }
@@ -74,7 +80,7 @@ export async function onRequestGet({ request, env, waitUntil }) {
     ]);
     ready = true;
   }
-  const keys = !!(env.COUPANG_ACCESS_KEY && env.COUPANG_SECRET_KEY);
+  const { ak, sk } = keysOf(env), keys = !!(ak && sk);
   if (keys) waitUntil(refreshOne(env, request.url).catch((e) => log(env, "-", ("오류 " + e).slice(0, 200))));
   // ?all=1 이면 못 찾은 모델(p=0)까지: 매칭 확인용
   const all = new URL(request.url).searchParams.get("all") === "1";
