@@ -40,13 +40,24 @@ ${style}
 .cta{display:flex;gap:8px;flex-wrap:wrap}.cta a{font-weight:700;text-decoration:none;border:1px solid var(--turf);border-radius:8px;padding:8px 14px}
 .cdisc{font-size:.78rem;color:var(--muted);margin:8px 0 0}.cta a.pri{background:var(--turf);color:var(--chalk)}.rel-list{columns:2;font-size:.88rem;padding-left:18px}.best{padding-left:20px}.best li{margin:18px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}.best h2{font-size:1.05rem;margin:0 0 4px}.guide h2{margin-top:22px}.pg td .bar{min-width:90px}.pg th{white-space:nowrap}.fit{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fit ul{list-style:none;padding:0;margin:0;font-size:.9rem;display:grid;gap:4px}@media(max-width:560px){.fit{grid-template-columns:1fr}.rel-list{columns:1}}.disc{font-size:.75rem;color:var(--muted);margin-top:24px}
 body{background:var(--bg);color:var(--ink);font-family:var(--body)}
+.cpimg{display:grid;justify-items:center;gap:4px;text-decoration:none}.cpimg img{width:100%;max-width:240px;aspect-ratio:1;object-fit:contain;background:#fff;border-radius:10px}.cpimg span{font-size:.74rem;color:var(--muted)}
 .adbar{margin:0;padding:6px 16px;background:#0b1813;border-bottom:1px solid var(--line);color:var(--muted);font-size:.74rem;font-weight:500;line-height:1.5;text-align:center;word-break:keep-all}.adbar b{display:inline-block;margin-right:6px;padding:0 6px;border:1px solid var(--turf);border-radius:4px;color:var(--turf);font-size:.7rem;font-weight:700;line-height:1.5}</style></head><body>${ADBAR}`;
 
 fs.rmSync("dist", { recursive: true, force: true });
 fs.mkdirSync("dist", { recursive: true });
 
 const page = (path, html) => { fs.mkdirSync("dist" + path, { recursive: true }); fs.writeFileSync("dist" + path + "index.html", html); };
-const foot = `<p class="disc">${DISCLOSURE}</p><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a> · 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
+const foot = `<p class="disc">${DISCLOSURE}</p><script src="/cp.js" defer></script><p class="disc"><a href="/about/">평가 방법·운영 정보</a> · <a href="/privacy/">개인정보처리방침</a> · 문의 <a href="mailto:contact@footpick.kr">contact@footpick.kr</a></p><script>document.addEventListener("click",function(e){var a=e.target.closest("a[data-m]");if(a)try{navigator.sendBeacon("/api/events",new Blob([JSON.stringify({type:"buy",model:a.dataset.m,page:location.pathname})],{type:"application/json"}))}catch(x){}})</script>`;
+// 쿠팡 파트너스 API(functions/api/cp.js)가 모은 가격·사진·링크로 "가격 보기" 버튼을 바꿈. 없는 모델은 기존 링크 그대로
+fs.writeFileSync("dist/cp-models.json", JSON.stringify(M.map((m) => ({ id: m.id, b: m.b, n: m.n, q: `${m.b} ${m.n}` }))));
+fs.writeFileSync("dist/cp.js", `(function(){fetch("/api/cp").then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.d)return;var D=j.d;
+function won(p){return p.toLocaleString("ko-KR")+"원"}
+function patch(){document.querySelectorAll("a[data-m]:not([data-cp])").forEach(function(a){var x=D[a.dataset.m];if(!x)return;a.dataset.cp=1;a.href=x.u;a.textContent=a.textContent.replace(/가격 (보기|확인)/,"쿠팡 "+won(x.p));a.title="쿠팡 가격은 확인 시점 기준이라 바뀔 수 있어요"})}
+patch();new MutationObserver(patch).observe(document.body,{childList:true,subtree:true});
+var lv=document.getElementById("lv"),x=lv&&D[lv.dataset.id],h=x&&document.querySelector(".hero .shot");if(!h)return;
+var f=document.createElement("a");f.className="cpimg";f.href=x.u;f.target="_blank";f.rel="noopener sponsored";f.dataset.m=f.dataset.cp=lv.dataset.id;
+var im=new Image();im.src=x.i;im.alt="쿠팡 판매 상품 사진";im.loading="lazy";f.appendChild(im);f.insertAdjacentHTML("beforeend","<span>쿠팡 판매 상품 사진</span>");h.after(f);
+var hr=Math.max(1,Math.round((j.now-x.t)/36e5)),c=document.querySelector(".hero .cdisc");if(c)c.insertAdjacentHTML("beforebegin",'<p class="cdisc">쿠팡 가격·사진은 '+hr+'시간 전에 확인한 거예요. 사이즈·색상마다 다르고 바뀔 수 있어요.</p>')}).catch(function(){})})();`);
 const nav = `<p class="crumb"><a href="/">${NAME}</a> · <a href="/futsal/">풋살화</a> · <a href="/indoor/">인도어화</a> · <a href="/football/">축구화</a> · <a href="/best/">추천</a> · <a href="/compare/">비교</a> · <a href="/guides/">가이드</a> · <a href="/brands/">브랜드</a> · <a href="/new/">신상 소식</a> · <a href="/updates/">업데이트</a></p>`;
 const byId = (id) => M.find((m) => m.id === id);
 const RL = { width: "발볼", light: "가벼움", cushion: "쿠션", touch: "터치", dur: "내구성" };
