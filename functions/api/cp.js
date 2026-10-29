@@ -50,6 +50,9 @@ async function refreshOne(env, origin) {
   if (!ok.meta.changes) return;
   const models = (await (await env.ASSETS.fetch(new URL("/cp-models.json", origin))).json()).filter((m) => !ONLY.length || ONLY.includes(m.id));
   const seen = Object.fromEntries((await env.DB.prepare("SELECT id, t, p FROM cp").all()).results.map((r) => [r.id, r]));
+  // 예전 규칙으로 저장된, 참고가 40% 미만 결과는 다시 찾게 함
+  const cheap = models.filter((m) => seen[m.id]?.p && m.won && seen[m.id].p < m.won * 0.4);
+  for (const m of cheap) { delete seen[m.id]; await env.DB.prepare("DELETE FROM cp WHERE id = ?").bind(m.id).run(); }
   const due = models.filter((m) => { const s = seen[m.id]; return !s || now - s.t > (s.p ? FRESH : MISS_RETRY); })
     .sort((a, b) => (seen[a.id]?.t || 0) - (seen[b.id]?.t || 0));
   if (!due.length) return;
@@ -61,7 +64,8 @@ async function refreshOne(env, origin) {
     await log(env, m.id, `실패 ${status} ${(body && (body.rMessage || body.message)) || ""}`.slice(0, 200));
     return;
   }
-  const hit = (body.data?.productData || []).filter((p) => matches(m, p.productName || "")).sort((a, b) => a.productPrice - b.productPrice)[0];
+  // 참고가의 40% 미만은 부품·중고·엉뚱한 상품일 가능성이 커서 뺌
+  const hit = (body.data?.productData || []).filter((p) => matches(m, p.productName || "") && (!m.won || p.productPrice >= m.won * 0.4)).sort((a, b) => a.productPrice - b.productPrice)[0];
   await env.DB.prepare("INSERT OR REPLACE INTO cp (id, n, p, i, u, r, t) VALUES (?,?,?,?,?,?,?)")
     .bind(m.id, hit ? hit.productName : "", hit ? hit.productPrice : 0, hit ? hit.productImage : "", hit ? hit.productUrl : "", hit && hit.isRocket ? 1 : 0, now).run();
   await log(env, m.id, hit ? `찾음 ${hit.productPrice}원` : `못 찾음(결과 ${(body.data?.productData || []).length}개)`);
