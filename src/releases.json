@@ -1,5 +1,39 @@
 [
  {
+  "id": "puma-future-10",
+  "date": "2026-10-29",
+  "status": "announced",
+  "brand": "푸마",
+  "model": "퓨처 10",
+  "model_en": "PUMA FUTURE 10",
+  "kind": "new-generation",
+  "cats": [
+   "fg"
+  ],
+  "grades": [],
+  "points": [
+   "퓨처 9 후속, 드리블·컨트롤형 다음 세대",
+   "첫 판은 세계 500켤레 번호 매긴 티저 에디션",
+   "벌집무늬 어퍼로 넷핏 개념을 이어감"
+  ],
+  "like": "g_fut9u",
+  "colors": [
+   "#f4f4f2",
+   "#ff6a1a",
+   "#e9e9e6"
+  ],
+  "sources": [
+   {
+    "name": "Footy Headlines",
+    "url": "https://www.footyheadlines.com/2837332502/next-gen-puma-future-10-teaser-boots-released.html"
+   },
+   {
+    "name": "dein-fussballschuh",
+    "url": "https://dein-fussballschuh.de/puma-future-10-teaser/"
+   }
+  ]
+ },
+ {
   "id": "leak-nike-hypervenom-2027",
   "date": "2026-10-18",
   "status": "leak",
