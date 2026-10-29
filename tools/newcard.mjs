@@ -124,7 +124,7 @@ fs.writeFileSync(`${OUT}/caption.txt`, `${R.length === 1 ? (R[0].status === "lea
 ${R.map((r) => `${r.status === "leak" ? (r.expected ? r.expected + " 예상" : "출시일 미정") : md(r.date)}  ${r.brand} ${r.model}${r.price ? ` (${r.price}${r.status === "leak" ? " 예상" : ""})` : ""}\n${(r.points || []).slice(0, 2).map((t) => "· " + t).join("\n")}`).join("\n\n")}
 
 📌 저장해 두고, 신발 바꿀 친구에게 보내 주세요.
-신상 소식·154개 모델 티어 👉 프로필 링크 (footpick.kr)
+신상 소식·${M.length}개 모델 티어 👉 프로필 링크 (footpick.kr)
 ${LEAK ? `※ 공식 발표 전 유출 정보예요(출처: ${[...new Set(R.flatMap((r) => (r.sources || []).map((x) => x.name.replace(/\s*\(.*?\)/g, ""))))].slice(0, 3).join(", ")}). 실제 출시와 다를 수 있어요.\n※ 사진 대신 보도된 색을 옮긴 일러스트예요.` : "※ 브랜드 공식 발표 기준이에요. 풋픽 점수는 리뷰 자료가 모이면 매겨요."}
 
 ${tags.join(" ")}\n`);
