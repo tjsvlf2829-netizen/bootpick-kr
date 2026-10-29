@@ -1,0 +1,12 @@
+# 쿠팡 가격·사진 갱신 깨우기: /api/cp 는 요청이 올 때마다 오래된 모델 1개를 쿠팡에서 다시 찾음(시간당 8회 한도는 함수가 지킴).
+# 방문이 적은 시간에도 하루 안에 전체가 돌도록 7분마다 한 번 불러 줌. 키는 Cloudflare에만 있고 여기엔 없음. (선팔 승인 2026-10-29)
+name: cp-refresh
+on:
+  schedule:
+    - cron: "*/7 * * * *"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS -o /dev/null "https://footpick.kr/api/cp?all=1"
