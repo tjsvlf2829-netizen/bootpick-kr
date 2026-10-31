@@ -33,14 +33,20 @@ async function coupang(env, path, query) {
 }
 
 // 상품명이 이 모델인지: 브랜드 + 모델명 낱말 전부. 영숫자 낱말은 앞뒤가 영숫자가 아니어야 함("6"이 "260"에 걸리지 않게)
-const SYN = { tf: ["tf", "터프"], ic: ["ic", "인도어"], in: ["in", "인도어"], tt: ["tt", "터프"] };
+// 표기 차이 흡수: 점·하이픈·슬래시는 띄어쓰기로, 로마숫자 II→2, 얼티밋=얼티메이트, 엑스=X, 바닥 표기(TF·TT·AS·IN·IC)는 같은 계열끼리 통함.
+// 모델명에 바닥이 둘 이상(FG/MG)이면 그중 하나만 있어도 됨
+const SYN = { tf: ["tf", "tt", "as", "터프"], tt: ["tt", "tf", "터프"], as: ["as", "tf", "터프"], ic: ["ic", "in", "인도어", "실내"], in: ["in", "ic", "인도어", "실내"],
+  fg: ["fg"], ag: ["ag"], mg: ["mg"], fxg: ["fxg", "fg"], 얼티밋: ["얼티밋", "얼티메이트", "ultimate"], 얼티메이트: ["얼티메이트", "얼티밋", "ultimate"], 엑스: ["엑스", "x"] };
+const SURF = new Set(["tf", "tt", "as", "ic", "in", "fg", "ag", "mg", "fxg"]);
 const KIDS = /주니어|키즈|아동|유아|\bjr\b|kids/i;
+const norm = (t) => t.toLowerCase().replace(/[.\-_/+()\[\],]/g, " ").replace(/(^|\s)ii(?=\s|$)/g, "$12").replace(/ⅱ/g, " 2 ").replace(/\s+/g, " ").trim();
+const has = (low, flat, t) => (SYN[t] || [t]).some((s) => /^[0-9a-z]+$/.test(s) ? new RegExp(`(^|[^0-9a-z])${s}([^0-9a-z]|$)`).test(low) : flat.includes(s));
 function matches(m, name) {
-  const low = name.toLowerCase(), flat = low.replace(/\s+/g, "");
+  const low = norm(name), flat = low.replace(/\s+/g, "");
   if (!flat.includes(m.b.replace(/\s+/g, "").toLowerCase())) return false;
-  if (KIDS.test(low) && !KIDS.test(m.n)) return false;
-  return m.n.toLowerCase().split(/\s+/).filter(Boolean).every((t) =>
-    (SYN[t] || [t]).some((s) => /^[0-9a-z]+$/.test(s) ? new RegExp(`(^|[^0-9a-z])${s}([^0-9a-z]|$)`).test(low) : flat.includes(s)));
+  if (KIDS.test(name) && !KIDS.test(m.n)) return false;
+  const toks = norm(m.n).split(" ").filter(Boolean), surf = toks.filter((t) => SURF.has(t));
+  return toks.filter((t) => !SURF.has(t)).every((t) => has(low, flat, t)) && (!surf.length || surf.some((t) => has(low, flat, t)));
 }
 
 async function refreshOne(env, origin) {
@@ -49,11 +55,11 @@ async function refreshOne(env, origin) {
   const ok = await env.DB.prepare("INSERT INTO cp_calls (t) SELECT ?1 WHERE (SELECT COUNT(*) FROM cp_calls WHERE t > ?2) < ?3").bind(now, now - 3600e3, HOURLY).run();
   if (!ok.meta.changes) return;
   const models = (await (await env.ASSETS.fetch(new URL("/cp-models.json", origin))).json()).filter((m) => !ONLY.length || ONLY.includes(m.id));
-  const seen = Object.fromEntries((await env.DB.prepare("SELECT id, t, p FROM cp").all()).results.map((r) => [r.id, r]));
+  const seen = Object.fromEntries((await env.DB.prepare("SELECT id, t, p, n FROM cp").all()).results.map((r) => [r.id, r]));
   // 예전 규칙으로 저장된, 참고가 40% 미만 결과는 다시 찾게 함
   const cheap = models.filter((m) => seen[m.id]?.p && m.won && seen[m.id].p < m.won * 0.4);
   for (const m of cheap) { delete seen[m.id]; await env.DB.prepare("DELETE FROM cp WHERE id = ?").bind(m.id).run(); }
-  const due = models.filter((m) => { const s = seen[m.id]; return !s || now - s.t > (s.p ? FRESH : MISS_RETRY); })
+  const due = models.filter((m) => { const s = seen[m.id]; return !s || (!s.p && !s.n) || now - s.t > (s.p ? FRESH : MISS_RETRY); })
     .sort((a, b) => (seen[a.id]?.t || 0) - (seen[b.id]?.t || 0));
   if (!due.length) return;
   const m = due[0];
@@ -67,7 +73,7 @@ async function refreshOne(env, origin) {
   // 참고가의 40% 미만은 부품·중고·엉뚱한 상품일 가능성이 커서 뺌
   const hit = (body.data?.productData || []).filter((p) => matches(m, p.productName || "") && (!m.won || p.productPrice >= m.won * 0.4)).sort((a, b) => a.productPrice - b.productPrice)[0];
   await env.DB.prepare("INSERT OR REPLACE INTO cp (id, n, p, i, u, r, t) VALUES (?,?,?,?,?,?,?)")
-    .bind(m.id, hit ? hit.productName : "", hit ? hit.productPrice : 0, hit ? hit.productImage : "", hit ? hit.productUrl : "", hit && hit.isRocket ? 1 : 0, now).run();
+    .bind(m.id, hit ? hit.productName : "후보: " + (body.data?.productData || []).slice(0, 5).map((p) => `${p.productName} (${p.productPrice})`).join(" / ").slice(0, 900), hit ? hit.productPrice : 0, hit ? hit.productImage : "", hit ? hit.productUrl : "", hit && hit.isRocket ? 1 : 0, now).run();
   await log(env, m.id, hit ? `찾음 ${hit.productPrice}원` : `못 찾음(결과 ${(body.data?.productData || []).length}개)`);
   await env.DB.prepare("DELETE FROM cp_calls WHERE t < ?").bind(now - 2 * 3600e3).run();
 }
