@@ -51,7 +51,7 @@ const foot = `<p class="disc">${DISCLOSURE}</p><script src="/cp.js" defer></scri
 // 쿠팡 파트너스 API(functions/api/cp.js)가 모은 가격·사진·링크로 "가격 보기" 버튼을 바꿈. 없는 모델은 기존 링크 그대로
 // 티어 높은 순(S→C, 같은 티어는 점수순)으로 쿠팡 검색. won은 참고가(이보다 너무 싼 결과는 엉뚱한 상품으로 보고 뺌)
 const TO = { S: 0, A: 1, B: 2, C: 3 };
-fs.writeFileSync("dist/cp-models.json", JSON.stringify([...M].sort((x, y) => (TO[x.tier] ?? 9) - (TO[y.tier] ?? 9) || y.pt - x.pt).map((m) => ({ id: m.id, b: m.b, n: m.n, q: `${m.b} ${m.n}`, won: m.won }))));
+fs.writeFileSync("dist/cp-models.json", JSON.stringify([...M].sort((x, y) => (TO[x.tier] ?? 9) - (TO[y.tier] ?? 9) || y.pt - x.pt).map((m) => ({ id: m.id, b: m.b, n: m.n, q: `${m.b} ${m.n.replace(/\/\S+/, "")}`, won: m.won }))));
 // 일러스트(svg.shoe[data-id])를 쿠팡 API 상품 사진으로 바꿈. 매칭 안 된 모델은 일러스트 그대로
 fs.writeFileSync("dist/cp.js", `(function(){fetch("/api/cp").then(function(r){return r.ok?r.json():null}).then(function(j){if(!j||!j.d)return;var D=j.d;
 function won(p){return p.toLocaleString("ko-KR")+"원"}
