@@ -8,6 +8,8 @@ const SEARCH = "/v2/providers/affiliate_open_api/apis/openapi/products/search";
 const HOURLY = 8; // 알려진 한도(시간당 10회)보다 여유 있게
 // 일부 모델만 시험할 때 id를 넣음. 비어 있으면 전체
 const ONLY = [];
+// 매칭 규칙·검색어를 바꾼 시각. 이보다 먼저 못 찾은 모델은 바로 다시 찾음
+const RULES_AT = Date.parse("2026-10-31T12:30:00Z");
 const FRESH = 24 * 3600e3, MISS_RETRY = 7 * 24 * 3600e3;
 let ready = false;
 // 대시보드에서 이름을 소문자 등으로 넣어도 찾도록(coupang_access_key 등) 이름에 coupang + access/secret 이 들어간 변수를 씀
@@ -59,7 +61,7 @@ async function refreshOne(env, origin) {
   // 예전 규칙으로 저장된, 참고가 40% 미만 결과는 다시 찾게 함
   const cheap = models.filter((m) => seen[m.id]?.p && m.won && seen[m.id].p < m.won * 0.4);
   for (const m of cheap) { delete seen[m.id]; await env.DB.prepare("DELETE FROM cp WHERE id = ?").bind(m.id).run(); }
-  const due = models.filter((m) => { const s = seen[m.id]; return !s || (!s.p && !s.n) || now - s.t > (s.p ? FRESH : MISS_RETRY); })
+  const due = models.filter((m) => { const s = seen[m.id]; return !s || (!s.p && (!s.n || s.t < RULES_AT)) || now - s.t > (s.p ? FRESH : MISS_RETRY); })
     .sort((a, b) => (seen[a.id]?.t || 0) - (seen[b.id]?.t || 0));
   if (!due.length) return;
   const m = due[0];
