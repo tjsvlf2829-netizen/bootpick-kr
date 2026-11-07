@@ -1,5 +1,45 @@
 [
  {
+  "id": "adidas-predator-touch-96-remake",
+  "date": "2026-11-05",
+  "status": "released",
+  "brand": "아디다스",
+  "model": "프레데터 터치 96 (30주년 복각)",
+  "model_en": "adidas Predator Touch 96 Remake",
+  "kind": "new-model",
+  "cats": [
+   "fg"
+  ],
+  "grades": [
+   "한정판"
+  ],
+  "points": [
+   "1996년 프레데터 터치 30주년 복각",
+   "블랙·화이트·레드에 큰 빨간 접이식 혀",
+   "밑창은 현재 세대 프레데터 플레이트"
+  ],
+  "like": "g_pred25e",
+  "sources": [
+   {
+    "name": "SoccerBible",
+    "url": "https://www.soccerbible.com/performance/football-boots/2026/11/the-adidas-predator-touch-is-back-and-just-as-beautiful/"
+   },
+   {
+    "name": "Pro:Direct Soccer",
+    "url": "https://www.prodirectsport.com/blogs/football/adidas-predator-touch-96-remake-first-look"
+   },
+   {
+    "name": "FootballBoots.co.uk",
+    "url": "https://www.footballboots.co.uk/?p=57232"
+   }
+  ],
+  "colors": [
+   "#141414",
+   "#f4f4f4",
+   "#c8102e"
+  ]
+ },
+ {
   "id": "puma-future-10",
   "date": "2026-10-29",
   "status": "released",
@@ -226,7 +266,8 @@
     "name": "Pro:Direct Soccer",
     "url": "https://www.prodirectsport.com/blogs/football/under-armour-magnetico-6-elite"
    }
-  ]
+  ],
+  "modelId": "n_ua_magnetico_elite_6_fg"
  },
  {
   "id": "puma-ultra-nitro-7",
