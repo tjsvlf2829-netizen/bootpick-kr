@@ -148,6 +148,48 @@ function fitFor(m) {
   return { yes: yes.slice(0, 4), no: no.slice(0, 3) };
 }
 
+
+// 상품 페이지 고유 내용: 사이즈 팁 · 비슷한 모델과 차이 · 자주 묻는 질문 (모델 데이터로 문장 생성, 2026-11-10)
+const cut = (t, n) => (t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, "") + "…" : t);
+const firstSentence = (t) => { const x = String(t).split(/(?<=[.요다])\s/)[0]; return /[.]$/.test(x) ? x : x + "."; };
+const LEATHER = /천연 ?가죽|캥거루|소가죽|풀그레인|K-?레더/;
+function sizeTips(m) {
+  const t = [];
+  if (m.width >= 4) t.push("발볼이 넓은 편이라 평소 사이즈로 신어도 옆이 편한 편이에요. 발볼이 좁다면 끈을 단단히 묶어 발이 놀지 않게 하세요.");
+  else if (m.width <= 2) t.push("발볼이 좁게 나와서, 발볼이 넓다면 반 치수 크게 신거나 매장에서 신어 보는 게 좋아요.");
+  else t.push("발볼은 보통이라 평소 신는 운동화 사이즈를 기준으로 고르면 돼요.");
+  if (LEATHER.test(m.up)) t.push("천연가죽은 신을수록 늘어나니 처음엔 딱 맞게 신는 걸 권해요.");
+  else if (/니트|메시|메쉬/.test(m.up)) t.push("니트·메시 갑피는 거의 늘어나지 않아서 처음 신었을 때 편한 사이즈가 맞아요.");
+  t.push("엄지 앞에 5~10mm 여유가 있는지, 발이 부은 저녁에 경기용 양말을 신고 확인하세요.");
+  return t;
+}
+const DL = { touch: "터치", light: "가벼움", cushion: "쿠션", dur: "내구성", width: "발볼" };
+function diffsOf(m) {
+  // 같은 종류에서 가격·점수가 가까운 모델 3개
+  const L = M.filter((x) => x.cat === m.cat && x.id !== m.id && !(x.b === m.b && x.n.split(" ")[0] === m.n.split(" ")[0] && Math.abs(x.won - m.won) < 1))
+    .map((x) => [x, Math.abs(Math.log(x.won / m.won)) * 2 + Math.abs(x.pt - m.pt) / 10]).sort((a, b) => a[1] - b[1]).slice(0, 3).map((a) => a[0]);
+  return L.map((x) => {
+    const up = [], dn = [];
+    for (const k of ["touch", "light", "cushion", "dur", "width"]) { const d = m[k] - x[k]; if (d >= 1) up.push(DL[k]); else if (d <= -1) dn.push(DL[k]); }
+    const won = Math.round((m.won - x.won) / 10000);
+    const parts = [];
+    if (up.length) parts.push(`${up.join("·")} 점수는 이 모델이 앞서요`);
+    if (dn.length) parts.push(`${dn.join("·")} 점수는 ${x.n} 쪽이 나아요`);
+    if (!parts.length) parts.push("항목별 점수는 거의 비슷해요");
+    parts.push(won > 0 ? `가격은 이 모델이 약 ${won}만원 비싸요` : won < 0 ? `가격은 이 모델이 약 ${-won}만원 싸요` : "가격대도 비슷해요");
+    return { x, t: parts.join(". ") + "." };
+  });
+}
+function faqOf(m, tips) {
+  const full = `${m.b} ${m.n}`, sz = SIZE[m.id];
+  const q = [[`${full} 사이즈는 어떻게 골라요?`, `${sz ? sz + ". " : ""}${tips[0]}`]];
+  q.push([`발볼 넓은 사람도 ${m.n} 신을 수 있나요?`, m.width >= 4 ? "네, 발볼이 넓은 편으로 나와서 발볼 넓은 분들이 편하다는 후기가 많아요." : m.width <= 2 ? "발볼이 좁은 편이라 발볼이 넓다면 꼭 신어 보고 고르세요. 반 치수 크게 신는 분도 있지만 앞코가 남을 수 있어요." : "발볼은 보통이라 아주 넓은 발이 아니면 무난해요. 발볼이 많이 넓다면 신어 보고 고르세요."]);
+  if (m.cat === "tf") q.push([`${m.n}, 실내 코트에서 신어도 되나요?`, "TF는 인조잔디 풋살장용 짧은 고무 돌기 밑창이에요. 마루·우레탄 실내 코트에서는 미끄러지기 쉬워 IC(인도어화)를 권해요."]);
+  else if (m.cat === "ic") q.push([`${m.n}, 인조잔디 풋살장에서 신어도 되나요?`, "IC·IN은 실내 코트용 평평한 밑창이라 인조잔디에서는 잘 미끄러지고 밑창도 빨리 닳아요. 인조잔디 풋살장은 TF를 권해요."]);
+  else q.push([`${m.n}, 풋살장에서 신어도 되나요?`, "스터드가 긴 축구화는 털이 짧은 풋살장 인조잔디에 박혀 무릎·발목에 무리가 갈 수 있고, 금지하는 구장도 있어요. 풋살장은 TF를 권해요."]);
+  q.push([`${full} 가격은 얼마예요?`, `정가 기준 약 ${m.won.toLocaleString("ko-KR")}원이에요. 실제 판매가는 사이즈·색상·판매처마다 달라서 페이지 위 가격 버튼에서 확인하세요.`]);
+  return q;
+}
 // 상품 페이지 실시간 점수: 메인(app.html rescore)과 같은 공식으로 /api/ratings 유저 리뷰를 섞어 티어·순위·막대를 다시 그림
 const LIVE = Object.fromEntries(M.map((m) => { const g = GRIP[m.id] || [3, 0]; return [m.id, [m.cat, m.base.width, m.base.light, m.base.cushion, m.base.touch, m.base.dur, g[1] ? g[0] : null, m.won]]; }));
 fs.writeFileSync("dist/live.js", `(function(){var D=${JSON.stringify(LIVE)},WC=${JSON.stringify(WC)},CUT=${JSON.stringify(CUT)},SW=${SEED_W},VMAX=${VMAX},RK=["width","light","cushion","touch","dur"];
@@ -175,21 +217,24 @@ for (const m of M) {
   redirects.push(`/m/${m.id}/ ${url(m)} 301`, `/m/${m.id} ${url(m)} 301`);
   const r = REL[m.id];
   const gen = r ? `<tr><th>세대</th><td>${esc(r[0])} · ${r[1] ? esc(r[1]) + " 출시" : "출시 연도 확인 중"} · ${esc(STUD[r[2]]?.[r[3]]?.[0] || "")} 등급</td></tr>` : "";
-  const src = m.rev ? `${m.rsum ? `<h2>리뷰 요약</h2><p>${esc(m.rsum)}</p>` : ""}` : "";
+  const full = `${m.b} ${m.n}`, sz = SIZE[m.id] || "", tips = sizeTips(m), diffs = diffsOf(m), faq = faqOf(m, tips);
   const same = M.filter((x) => x.b === m.b && x.id !== m.id).slice(0, 8);
   const similar = M.filter((x) => x.cat === m.cat && x.id !== m.id && Math.abs(x.width - m.width) <= 0.5).sort((a, b) => b.sc - a.sc).slice(0, 6);
   const f = fitFor(m);
-  const title = `${m.b} ${m.n} 리뷰 · 발볼 ${wtxt(m.width)} · ${m.tier}티어 | ${NAME}`;
-  const desc = `${m.b} ${m.n}: ${m.note} 발볼 ${wtxt(m.width)}, 약 ${m.won.toLocaleString("ko-KR")}원. 사이즈 팁과 유저 리뷰 점수.`;
+  // 검색어("모델명 후기", "모델명 사이즈")에 맞춘 제목·설명 (2026-11-10 서치콘솔 클릭 검색어 분석)
+  const title = `${full} 후기 · 사이즈 · 발볼 ${wtxt(m.width)} | 풋픽`;
+  const desc = cut(`${full} 후기 요약: ${firstSentence(m.rsum || m.note)} 사이즈는 ${sz || "정보 확인 중"}, 발볼 ${wtxt(m.width)}, 정가 약 ${m.won.toLocaleString("ko-KR")}원.`, 155);
   const ld = { "@context": "https://schema.org", "@type": "Product", name: `${m.b} ${m.n}`, brand: { "@type": "Brand", name: m.b }, category: catName(m), description: m.note };
   page(url(m), head(title, desc, url(m)) + `<main class="pg">
 <p class="crumb"><a href="/">${NAME}</a> › <a href="/${CPATH[m.cat]}/">${catName(m)}</a> › <a href="${burl(m.b)}">${esc(m.b)}</a></p>
-<h1>${esc(m.b)} ${esc(m.n)}</h1>
+<h1>${esc(full)} <span class="k" style="font-size:.6em;font-weight:600">후기 · 사이즈</span></h1>
 <div class="hero"><div class="shot">${shoe(m.id)}</div>
 <p id="lv" data-id="${m.id}" data-cn="${catName(m)}"><span id="lv-sum"><span class="tb" style="background:var(--${m.tier.toLowerCase()})">${m.tier}</span> 현재 ${m.tier}티어 · 성능 ${m.pt}점 · ${catName(m)} ${m.of}개 중 ${m.rank}위${m.vgood ? " · <b>가성비 좋음</b>" : ""} <span class="k">(100점 만점, 가격 제외)</span></span></p>
 <p class="k">평가 근거: 공개 리뷰·판매처 구매평·제조사 핏 안내 ${m.rev ? m.rev.length : 0}곳을 종합한 운영자 평가예요. 평가 신뢰도는 <b>${(m.rev ? m.rev.length : 0) >= 7 ? "높음" : (m.rev ? m.rev.length : 0) >= 4 ? "보통" : "낮음"}</b>이에요(점수에는 영향 없음). ${UPDATED} 기준이고, 유저 리뷰가 달리면 이 페이지 점수에도 실시간으로 반영돼요. <a href="/about/">평가 방법 보기</a></p>
 <p><b>${esc(m.note)}</b></p>
 <div class="cta"><a class="pri" href="${shop(m)}" target="_blank" rel="noopener sponsored" data-m="${m.id}">가격 확인</a><a href="/#m-${m.id}">리뷰 남기기</a><a href="/#vs-${m.id}">다른 모델과 VS 비교</a><a href="/#size-${m.id}">내 사이즈 찾기</a></div></div>
+${m.rsum ? `<h2>${esc(m.n)} 후기 요약</h2><p>${esc(m.rsum)}</p>` : ""}
+<h2>${esc(m.n)} 사이즈 고르기</h2><p>${sz ? `<b>${esc(sz)}</b>. ` : ""}${tips.map(esc).join(" ")} <a href="/#size-${m.id}">지금 신는 신발로 사이즈 계산 →</a></p>
 <div class="fit"><div><h2>이런 사람에게 추천</h2><ul>${f.yes.map((t) => `<li>✔ ${t}</li>`).join("") || "<li>무난한 올라운드형</li>"}</ul></div>
 <div><h2>이런 사람에겐 비추천</h2><ul>${f.no.map((t) => `<li>✕ ${t}</li>`).join("")}</ul></div></div>
 <h2>특징 한눈에 보기</h2>
@@ -198,12 +243,13 @@ for (const m of M) {
 <div id="lv-users"></div>
 <div class="bars" id="lv-bars" style="margin-top:12px"><span>터치</span>${bar(m.touch)}<span>발 편안함</span>${bar(comfortOf(m))}<span>가벼움</span>${bar(m.light)}<span>내구성</span>${bar(m.dur)}<span>접지력</span>${m.grip != null ? bar(m.grip) : '<span class="k">근거 부족</span>'}<span>발볼</span>${bar(m.width)}<span>쿠션</span>${bar(m.cushion)}</div>
 <p class="k">발볼 ${wtxt(m.width)} · 막대는 1~5점. 위 다섯 항목(터치·발 편안함·가벼움·내구성·접지력)이 티어 점수에 들어가고, 발 편안함은 아래 발볼·쿠션으로 계산해요. 공개 리뷰를 종합한 시작 점수에 유저 리뷰가 더해져요.</p>
-${src}
+${diffs.length ? `<h2>비슷한 모델과 차이</h2><ul>${diffs.map((d) => `<li><a href="${url(d.x)}">${esc(d.x.b + " " + d.x.n)}</a> (${d.x.tier}티어 · 약 ${(d.x.won / 10000).toFixed(1)}만원): ${esc(d.t)}</li>`).join("")}</ul>` : ""}
+<h2>자주 묻는 질문</h2>${faq.map(([q, a]) => `<h3>${esc(q)}</h3><p>${esc(a)}</p>`).join("")}
 ${cmpOf(m).length ? `<h2>비교해 보기</h2><ul>${cmpOf(m).map((c) => `<li><a href="/compare/${c[2]}/">${esc(byId(c[0]).n)} vs ${esc(byId(c[1]).n)}</a></li>`).join("")}</ul>` : ""}
 <h2>발볼이 비슷한 ${catName(m)}</h2><ul class="rel-list">${similar.map((x) => li(x, ` (${x.tier})`)).join("")}</ul>
 <h2><a href="${burl(m.b)}">${esc(m.b)}</a> 다른 모델</h2><ul class="rel-list">${same.map((x) => li(x)).join("")}</ul>
 ${foot}</main>
-<script type="application/ld+json">${JSON.stringify(ld)}</script><script src="/live.js" defer></script></body></html>`);
+<script type="application/ld+json">${JSON.stringify([ld, { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }])}</script><script src="/live.js" defer></script></body></html>`);
 }
 
 // 풋살화 / 축구화 티어리스트 페이지 (정적)
